@@ -5,8 +5,8 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'pgdice/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'pgdice'
-  spec.version       = Pgdice::VERSION
+  spec.name          = 'pgice'
+  spec.version       = PgDice::VERSION
   spec.authors       = ['Andrew Newell']
   spec.email         = ['andrew@andrewcn.com illuminuslimited@gmail.com']
 

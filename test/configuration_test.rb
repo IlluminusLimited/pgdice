@@ -9,4 +9,8 @@ class ConfigurationTest < Minitest::Test
     end
     assert_equal 'this_is_a_url', PgDice.configuration.database_url
   end
+
+  def test_logger_has_default_value
+    assert PgDice.configuration.logger
+  end
 end

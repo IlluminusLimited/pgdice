@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
+# Entry point for PartitionManager
 module PgDice
+  #  PartitionManager is a class used to fulfill high-level tasks for partitioning
   class PartitionManager
     attr_reader :logger
     APPROVED_TABLES ||= ENV['PG_DICE_PARTITIONED_TABLES']&.slice(',')
 
-    def initialize(opts = {})
-      @logger = opts[:logger] ||= Logger.new(STDOUT)
-      @pg_slice_manager = opts[:pg_slice_manager] ||= PgSliceManager.new(logger: logger)
+    def initialize(configuration = Configuration.new)
+      @logger = configuration.logger
+      @pg_slice_manager = configuration.pg_slice_manager
     end
 
     def prepare_database!(table_name, opts = {})

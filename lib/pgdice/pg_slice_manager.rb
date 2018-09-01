@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
+# PgSliceManager is a wrapper around PgSlice
 class PgSliceManager
   attr_reader :logger
 
-  def initialize(opts = {})
-    @logger = opts[:logger] ||= Logger.new(STDOUT)
-    @url = opts[:url] ||= build_postgres_url
+  def initialize(configuration = Configuration.new)
+    @logger = configuration.logger
+    @url = configuration.database_url
   end
 
   def prep(params = {})
@@ -98,18 +99,8 @@ class PgSliceManager
 
     if status.exitstatus.to_i.positive?
       raise PgSliceError, "pgslice with arguments: '#{argument_string}' failed with status: '#{status.exitstatus}' "\
-    "STDOUT: '#{stdout}' STDERR: '#{stderr}'"
+  "STDOUT: '#{stdout}' STDERR: '#{stderr}'"
     end
     true
   end
-
-  def build_postgres_url
-    config = Rails.configuration.database_configuration
-    host = config[Rails.env]['host']
-    database = config[Rails.env]['database']
-    username = config[Rails.env]['username']
-    password = config[Rails.env]['password']
-
-    "postgres://#{username}:#{password}@#{host}/#{database}"
-  end
-  end
+end
