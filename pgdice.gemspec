@@ -6,8 +6,8 @@ require "pgdice/version"
 Gem::Specification.new do |spec|
   spec.name          = "pgdice"
   spec.version       = Pgdice::VERSION
-  spec.authors       = ["scytherswings"]
-  spec.email         = ["scytherswings@gmail.com"]
+  spec.authors       = ["Andrew Newell"]
+  spec.email         = ["andrew@andrewcn.com"]
 
   spec.summary       = %q{TODO: Write a short summary, because RubyGems requires one.}
   spec.description   = %q{TODO: Write a longer description or delete this line.}
