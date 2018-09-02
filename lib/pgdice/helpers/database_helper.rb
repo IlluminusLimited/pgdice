@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Collection of utilities that are necessary to achieve compliance with pg_slice
 class DatabaseHelper
   # Grabs only tables that start with the base_table_name and end in numbers
   def fetch_partition_tables(base_table_name, opts = {})

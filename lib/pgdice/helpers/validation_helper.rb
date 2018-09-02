@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module PgDice
+  # Collection of utilities that provide ways for users to ensure things are working properly
   module ValidationHelper
     def self.assert_future_tables(table_name, future_tables, interval = 'days')
       sql = <<~SQL
