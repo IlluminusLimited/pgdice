@@ -84,23 +84,29 @@ class PgSliceManager
   private
 
   def run_pgslice(argument_string)
-    argument_string = argument_string.strip
-    logger.info { "Running pgslice command: '#{argument_string}'" }
-    parameters = "pgslice #{argument_string} --url #{@url}"
-
-    $stdout.flush
-    $stderr.flush
+    parameters = build_pg_slice_command(argument_string)
 
     stdout, stderr, status = Open3.capture3(parameters)
-
-    logger.debug { "pgslice STDERR: #{stderr}" } if stderr.present?
-    logger.debug { "pgslice STDOUT: #{stdout}" } if stdout.present?
-    logger.debug { "pgslice exit status: #{status.exitstatus}" } if status.present?
+    log_result(stdout, stderr, status)
 
     if status.exitstatus.to_i.positive?
       raise PgSliceError, "pgslice with arguments: '#{argument_string}' failed with status: '#{status.exitstatus}' "\
-  "STDOUT: '#{stdout}' STDERR: '#{stderr}'"
+"STDOUT: '#{stdout}' STDERR: '#{stderr}'"
     end
     true
+  end
+
+  def build_pg_slice_command(argument_string)
+    argument_string = argument_string.strip
+    logger.info { "Running pgslice command: '#{argument_string}'" }
+    $stdout.flush
+    $stderr.flush
+    "pgslice #{argument_string} --url #{@url}"
+  end
+
+  def log_result(stdout, stderr, status)
+    logger.debug { "pgslice STDERR: #{stderr}" } if stderr.present?
+    logger.debug { "pgslice STDOUT: #{stdout}" } if stdout.present?
+    logger.debug { "pgslice exit status: #{status.exitstatus}" } if status.present?
   end
 end
