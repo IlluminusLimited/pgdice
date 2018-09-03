@@ -14,17 +14,16 @@ module PgDice
       SQL
 
       response = ActiveRecord::Base.connection.execute(sql)
-      unless response.values.size == 1
-        raise InsufficientFutureTablesError, "Insufficient future tables exist for table: #{table_name}. "\
+
+      return if response.values.size == 1
+      raise InsufficientFutureTablesError, "Insufficient future tables exist for table: #{table_name}. "\
 "Expected: #{future_tables} having intervals of: #{interval}"
-      end
     end
 
     def validate_parameters(params)
       table_name = params.fetch(:table_name)
-      unless APPROVED_TABLES.include?(table_name)
-        raise IllegalTableError, "Table: #{table_name} is not in the list of approved tables!"
-      end
+      return if APPROVED_TABLES.include?(table_name)
+      raise IllegalTableError, "Table: #{table_name} is not in the list of approved tables!"
     end
   end
 end
