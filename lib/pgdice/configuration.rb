@@ -13,7 +13,7 @@ module PgDice
 
   # Configuration class which holds all configurable values
   class Configuration
-    attr_accessor :logger, :database_url, :database_connection, :pg_slice_manager, :partition_manager
+    attr_accessor :logger, :database_url, :pg_connection, :database_connection, :pg_slice_manager, :partition_manager
 
     def initialize
       @logger = Logger.new(STDOUT)

@@ -18,10 +18,10 @@ module PgDice
 
       @pg_slice_manager.prep(opts)
       @pg_slice_manager.add_partitions(*opts, intermediate: true)
-      @pg_slice_manager.fill(opts) if opts[:fill].present?
+      @pg_slice_manager.fill(opts) if opts[:fill]
       @pg_slice_manager.analyze(opts)
       @pg_slice_manager.swap(opts)
-      @pg_slice_manager.fill(*opts, swapped: true) if opts[:fill].present?
+      @pg_slice_manager.fill(*opts, swapped: true) if opts[:fill]
     end
 
     def cleanup_database!(table_name)

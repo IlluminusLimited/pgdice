@@ -2,6 +2,7 @@
 
 require 'pg'
 require 'open3'
+require 'logger'
 require 'pgslice'
 require 'pgdice/version'
 require 'pgdice/configuration'

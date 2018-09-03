@@ -13,9 +13,13 @@ module PgDice
 
     def execute(query, params = [])
       @pg_connection ||= PG::Connection.new(@configuration.database_url)
-      pg_connection.exec_params(query, params).to_a
+      pg_connection.exec_params(query, params)
     end
 
+    def exec(query)
+      @pg_connection ||= PG::Connection.new(@configuration.database_url)
+      pg_connection.exec(query)
+    end
     # private
 
     # def build_postgres_url

@@ -40,10 +40,10 @@ class PgSliceManager
   def add_partitions(params = {})
     table_name = params.fetch(:table_name)
     future_tables = params.fetch(:future, '')
-    future_tables = "--future #{Integer(future_tables)}" if future_tables.present?
+    future_tables = "--future #{Integer(future_tables)}" if future_tables
 
     past_tables = params.fetch(:past, '')
-    past_tables = "--past #{Integer(past_tables)}" if past_tables.present?
+    past_tables = "--past #{Integer(past_tables)}" if past_tables
 
     intermediate = params.fetch(:intermediate, '')
     intermediate = '--intermediate' if intermediate.to_s.casecmp('true').zero?
@@ -105,8 +105,8 @@ class PgSliceManager
   end
 
   def log_result(stdout, stderr, status)
-    logger.debug { "pgslice STDERR: #{stderr}" } if stderr.present?
-    logger.debug { "pgslice STDOUT: #{stdout}" } if stdout.present?
-    logger.debug { "pgslice exit status: #{status.exitstatus}" } if status.present?
+    logger.debug { "pgslice STDERR: #{stderr}" } if stderr
+    logger.debug { "pgslice STDOUT: #{stdout}" } if stdout
+    logger.debug { "pgslice exit status: #{status.exitstatus}" } if status
   end
 end
