@@ -7,15 +7,7 @@ class DatabaseHelper
     schema = opts[:schema] ||= 'public'
     limit = opts[:limit] || nil
 
-    sql = <<~SQL
-      SELECT tablename
-      FROM pg_tables
-      WHERE schemaname = '#{schema}'
-        AND tablename ~ '^#{base_table_name}_\d+$'
-      ORDER BY tablename
-    SQL
-
-    sql += " LIMIT #{limit}" if limit
+    sql = build_partition_table_fetch_sql(base_table_name, schema, limit)
 
     partition_tables = ActiveRecord::Base.connection.execute(sql).values.flatten
     logger.debug { "Table: #{schema}.#{base_table_name} has partition_tables: #{partition_tables}" }
@@ -24,9 +16,7 @@ class DatabaseHelper
 
   # Typical partition comments looks like: column:created_at,period:day,cast:date
   def extract_partition_template_from_comment(table_name, schema = 'public')
-    sql = <<~SQL
-      SELECT obj_description('#{schema}.#{table_name}'::REGCLASS) AS comment
-    SQL
+    sql = build_table_comment_sql(table_name, schema)
 
     comment = ActiveRecord::Base.connection.execute(sql).values.flatten.first
     logger.debug { "Table: #{schema}.#{table_name} has comment: #{comment}" }
@@ -39,5 +29,26 @@ class DatabaseHelper
     end
 
     partition_template
+  end
+
+  private
+
+  def build_table_comment_sql(table_name, schema)
+    <<~SQL
+      SELECT obj_description('#{schema}.#{table_name}'::REGCLASS) AS comment
+    SQL
+  end
+
+  def build_partition_table_fetch_sql(base_table_name, schema, limit)
+    sql = <<~SQL
+      SELECT tablename
+      FROM pg_tables
+      WHERE schemaname = '#{schema}'
+        AND tablename ~ '^#{base_table_name}_\d+$'
+      ORDER BY tablename
+    SQL
+
+    sql += " LIMIT #{limit}" if limit
+    sql
   end
 end

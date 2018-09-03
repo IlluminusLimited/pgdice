@@ -12,19 +12,16 @@ module PgDice
       @pg_slice_manager = configuration.pg_slice_manager
     end
 
-    def prepare_database!(table_name, opts = {})
-      column_name = opts[:column_name] ||= 'created_at'
-      period = opts[:period] ||= 'day'
-      future = opts[:future]
-      past = opts[:past]
-      fill = opts[:fill]
+    def prepare_database!(_table_name, opts = {})
+      opts[:column_name] ||= 'created_at'
+      opts[:period] ||= 'day'
 
-      @pg_slice_manager.prep(table_name: table_name, column_name: column_name, period: period)
-      @pg_slice_manager.add_partitions(table_name: table_name, future: future, past: past, intermediate: true)
-      @pg_slice_manager.fill(table_name: table_name) if fill.present?
-      @pg_slice_manager.analyze(table_name: table_name)
-      @pg_slice_manager.swap(table_name: table_name)
-      @pg_slice_manager.fill(table_name: table_name, swapped: true) if fill.present?
+      @pg_slice_manager.prep(opts)
+      @pg_slice_manager.add_partitions(*opts, intermediate: true)
+      @pg_slice_manager.fill(opts) if opts[:fill].present?
+      @pg_slice_manager.analyze(opts)
+      @pg_slice_manager.swap(opts)
+      @pg_slice_manager.fill(*opts, swapped: true) if opts[:fill].present?
     end
 
     def cleanup_database!(table_name)
