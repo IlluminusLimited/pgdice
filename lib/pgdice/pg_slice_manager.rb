@@ -2,11 +2,8 @@
 
 # PgSliceManager is a wrapper around PgSlice
 class PgSliceManager
-  attr_reader :logger
-
   def initialize(configuration = Configuration.new)
-    @logger = configuration.logger
-    @url = configuration.database_url
+    @configuration = configuration
   end
 
   def prep(params = {})
@@ -39,13 +36,13 @@ class PgSliceManager
 
   def add_partitions(params = {})
     table_name = params.fetch(:table_name)
-    future_tables = params.fetch(:future, '')
+    future_tables = params.fetch(:future, nil)
     future_tables = "--future #{Integer(future_tables)}" if future_tables
 
-    past_tables = params.fetch(:past, '')
+    past_tables = params.fetch(:past, nil)
     past_tables = "--past #{Integer(past_tables)}" if past_tables
 
-    intermediate = params.fetch(:intermediate, '')
+    intermediate = params.fetch(:intermediate, nil)
     intermediate = '--intermediate' if intermediate.to_s.casecmp('true').zero?
 
     run_pgslice("add_partitions #{table_name} #{intermediate} #{future_tables} #{past_tables}")
@@ -83,6 +80,10 @@ class PgSliceManager
 
   private
 
+  def logger
+    @configuration.logger
+  end
+
   def run_pgslice(argument_string)
     parameters = build_pg_slice_command(argument_string)
 
@@ -101,7 +102,7 @@ class PgSliceManager
     logger.info { "Running pgslice command: '#{argument_string}'" }
     $stdout.flush
     $stderr.flush
-    "pgslice #{argument_string} --url #{@url}"
+    "pgslice #{argument_string} --url #{@configuration.database_url}"
   end
 
   def log_result(stdout, stderr, status)

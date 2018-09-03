@@ -13,12 +13,21 @@ module PgDice
 
   # Configuration class which holds all configurable values
   class Configuration
-    attr_accessor :logger, :database_url, :pg_connection, :database_connection, :pg_slice_manager, :partition_manager
+    attr_accessor :logger,
+                  :database_url,
+                  :pg_connection,
+                  :database_connection,
+                  :pg_slice_manager,
+                  :partition_manager,
+                  :approved_tables,
+                  :validation_helper
 
     def initialize
-      @logger = Logger.new(STDOUT)
+      @logger = Logger.new('log/pgdice.log')
       @database_url = ''
+      @approved_tables = []
       @database_connection = DatabaseConnection.new(self)
+      @validation_helper = ValidationHelper.new(self)
       @pg_slice_manager = PgSliceManager.new(self)
       @partition_manager = PartitionManager.new(self)
     end
