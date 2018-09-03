@@ -6,7 +6,7 @@ class PartitionManagerTest < Minitest::Test
   def test_future_partitions_can_be_added
     table_name = 'comments'
     partition_manager = PgDice.configuration.partition_manager
-    partition_manager.prepare_database!(table_name: table_name)
+    PgDice.configuration.preparation_helper.prepare_database!(table_name: table_name)
 
     future_tables = 2
 
@@ -14,6 +14,16 @@ class PartitionManagerTest < Minitest::Test
 
     PgDice.configuration.validation_helper.assert_future_tables(table_name, future_tables)
   ensure
-    PgDice.configuration.partition_manager.cleanup_database(table_name)
+    PgDice.configuration.preparation_helper.cleanup_database(table_name)
+  end
+
+  def test_old_partitions_can_be_listed
+    table_name = 'comments'
+    partition_manager = PgDice.configuration.partition_manager
+    PgDice.configuration.preparation_helper.prepare_database!(table_name: table_name, past: 2, future: 1)
+
+    assert_equal 'bob', partition_manager.discover_old_partitions(table_name)
+  ensure
+    PgDice.configuration.preparation_helper.cleanup_database(table_name)
   end
 end

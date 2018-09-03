@@ -20,7 +20,9 @@ module PgDice
                   :pg_slice_manager,
                   :partition_manager,
                   :approved_tables,
-                  :validation_helper
+                  :validation_helper,
+                  :preparation_helper,
+                  :database_helper
 
     def initialize
       @logger = Logger.new('log/pgdice.log')
@@ -30,6 +32,8 @@ module PgDice
       @validation_helper = ValidationHelper.new(self)
       @pg_slice_manager = PgSliceManager.new(self)
       @partition_manager = PartitionManager.new(self)
+      @preparation_helper = PreparationHelper.new(self)
+      @database_helper = DatabaseHelper.new(self)
     end
   end
 end

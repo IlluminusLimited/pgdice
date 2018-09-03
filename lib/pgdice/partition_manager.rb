@@ -10,27 +10,6 @@ module PgDice
       @configuration = configuration
     end
 
-    def prepare_database!(opts = {})
-      opts[:column_name] ||= 'created_at'
-      opts[:period] ||= 'day'
-
-      prep_and_fill(opts)
-      swap_and_fill(opts)
-    end
-
-    def cleanup_database!(table_name)
-      pg_slice_manager.analyze(table_name: table_name, swapped: true)
-      pg_slice_manager.unswap!(table_name: table_name)
-      pg_slice_manager.unprep!(table_name: table_name)
-    end
-
-    def cleanup_database(table_name)
-      cleanup_database!(table_name)
-    rescue PgSliceError => error
-      logger.error { "Rescued PgSliceError: #{error}" }
-      false
-    end
-
     def add_new_partitions(params = {})
       validation_helper.validate_parameters(params)
       pg_slice_manager.add_partitions(params)
@@ -41,30 +20,17 @@ module PgDice
       # this wont use pg_slice
     end
 
-    def discover_old_partitions(table_name)
-      validation_helper.validate_parameters(table_name: table_name)
-      partition_tables = fetch_partition_tables(table_name)
-      current_date = Date.current
+    def discover_old_partitions(base_table_name, partitions_older_than_date = Time.now.to_date)
+      validation_helper.validate_parameters(table_name: base_table_name)
+      partition_tables = database_helper.fetch_partition_tables(base_table_name)
 
       partition_tables.select do |partition_name|
-        date = Date.parse(partition_name.gsub(/#{table_name}_/, ''))
-        date < current_date
+        partition_created_at_date = Date.parse(partition_name.gsub(/#{base_table_name}_/, ''))
+        partition_created_at_date < partitions_older_than_date
       end
     end
 
     private
-
-    def prep_and_fill(opts)
-      pg_slice_manager.prep(opts)
-      pg_slice_manager.add_partitions(opts.merge!(intermediate: true))
-      pg_slice_manager.fill(opts) if opts[:fill]
-    end
-
-    def swap_and_fill(opts)
-      pg_slice_manager.analyze(opts)
-      pg_slice_manager.swap(opts)
-      pg_slice_manager.fill(opts.merge!(swapped: true)) if opts[:fill]
-    end
 
     def logger
       @configuration.logger
@@ -76,6 +42,10 @@ module PgDice
 
     def validation_helper
       @configuration.validation_helper
+    end
+
+    def database_helper
+      @configuration.database_helper
     end
   end
 end
