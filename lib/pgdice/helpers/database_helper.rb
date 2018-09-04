@@ -12,6 +12,7 @@ module PgDice
     def fetch_partition_tables(base_table_name, opts = {})
       schema = opts[:schema] ||= 'public'
       limit = opts[:limit] || nil
+      logger.info {"Fetching partition tables with params: #{base_table_name}, #{opts}"}
 
       sql = build_partition_table_fetch_sql(base_table_name, schema, limit)
 
@@ -22,6 +23,7 @@ module PgDice
 
     # Typical partition comments looks like: column:created_at,period:day,cast:date
     def extract_partition_template_from_comment(table_name, schema = 'public')
+      logger.info {"Checking comments on table: #{schema}.#{table_name}"}
       sql = build_table_comment_sql(table_name, schema)
 
       comment = database_connection.execute(sql).values.flatten.first

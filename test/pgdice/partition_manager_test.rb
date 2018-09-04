@@ -24,7 +24,7 @@ class PartitionManagerTest < Minitest::Test
                                                               past: 2,
                                                               future: 1)
 
-    assert_equal 2, partition_manager.discover_old_partitions(table_name: table_name).size
+    assert_equal 2, partition_manager.list_old_partitions(table_name: table_name).size
   ensure
     PgDice.configuration.preparation_helper.cleanup_database(table_name)
   end
@@ -37,7 +37,7 @@ class PartitionManagerTest < Minitest::Test
                                                               future: 1)
 
     assert_equal 2, partition_manager.drop_old_partitions(table_name: table_name).size
-    assert_equal 0, partition_manager.discover_old_partitions(table_name: table_name).size
+    assert_equal 0, partition_manager.list_old_partitions(table_name: table_name).size
   ensure
     PgDice.configuration.preparation_helper.cleanup_database(table_name)
   end

@@ -13,12 +13,20 @@ module PgDice
 
     def execute(query, params = [])
       @pg_connection ||= PG::Connection.new(@configuration.database_url)
+      logger.debug { "DatabaseConnection to execute query: #{query} with params: #{params}" }
       pg_connection.exec_params(query, params)
     end
 
     def exec(query)
       @pg_connection ||= PG::Connection.new(@configuration.database_url)
+      logger.debug { "DatabaseConnection to execute query: #{query}" }
       pg_connection.exec(query)
+    end
+
+    private
+
+    def logger
+      @configuration.logger
     end
   end
 end

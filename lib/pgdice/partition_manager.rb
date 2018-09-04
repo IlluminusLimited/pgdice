@@ -11,25 +11,31 @@ module PgDice
     end
 
     def add_new_partitions(params = {})
+      logger.info {"add_new_partitions has been called with params: #{params}"}
+
       validation_helper.validate_parameters(params)
       pg_slice_manager.add_partitions(params)
     end
 
     def drop_old_partitions(params = {})
-      logger.warn { "delete_old_partitions has been called with params: #{params}" }
+      logger.info { "drop_old_partitions has been called with params: #{params}" }
+
       validation_helper.validate_parameters(params)
-      old_partitions = discover_old_partitions(params)
+      old_partitions = list_old_partitions(params)
       logger.warn { "Partitions to be deleted are: #{old_partitions}" }
 
       old_partitions.each do |old_partition|
-        @configuration.database_connection.exec(drop_partition(old_partition))
+        @configuration.table_dropper_helper.call(old_partition)
       end
       old_partitions
     end
 
-    def discover_old_partitions(params = {})
+    def list_old_partitions(params = {})
       partitions_older_than_utc_date = params[:partitions_older_than_utc_date] ||= Time.now.utc.to_date
+      logger.info {"Listing old partitions with params: #{params}"}
+
       validation_helper.validate_parameters(params)
+
       partition_tables = database_helper.fetch_partition_tables(params[:table_name])
       logger.debug("Filtering out partitions newer than #{partitions_older_than_utc_date}")
 
@@ -59,14 +65,6 @@ module PgDice
         partition_created_at_date = Date.parse(partition_name.gsub(/#{base_table_name}_/, ''))
         partition_created_at_date < partitions_older_than_date
       end
-    end
-
-    def drop_partition(table_name)
-      <<~SQL
-        BEGIN;
-          DROP TABLE IF EXISTS #{table_name} CASCADE;
-        COMMIT;
-      SQL
     end
   end
 end

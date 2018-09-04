@@ -22,7 +22,8 @@ module PgDice
                   :approved_tables,
                   :validation_helper,
                   :preparation_helper,
-                  :database_helper
+                  :database_helper,
+                  :table_dropper_helper
 
     def initialize
       @logger = Logger.new('log/pgdice.log')
@@ -34,6 +35,7 @@ module PgDice
       @partition_manager = PartitionManager.new(self)
       @preparation_helper = PreparationHelper.new(self)
       @database_helper = DatabaseHelper.new(self)
+      @table_dropper_helper = TableDropperHelper.new(self)
     end
   end
 end
