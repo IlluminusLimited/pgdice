@@ -6,12 +6,12 @@ require 'logger'
 require 'pgslice'
 require 'pgdice/version'
 require 'pgdice/validation'
+require 'pgdice/table_dropper'
 require 'pgdice/configuration'
 require 'pgdice/pg_slice_manager'
 require 'pgdice/partition_manager'
+require 'pgdice/partition_helper'
 require 'pgdice/database_connection'
-require 'pgdice/helpers/preparation_helper'
-require 'pgdice/helpers/table_dropper_helper'
 
 # This is a stupid comment
 module PgDice
@@ -42,13 +42,13 @@ module PgDice
       @partition_manager ||= PgDice::PartitionManager.new(configuration)
     end
 
-    def preparation_helper
+    def partition_helper
       unless configuration
-        raise PgDice::NotConfiguredError, 'Cannot use preparation_helper before PgDice has been configured! '\
+        raise PgDice::NotConfiguredError, 'Cannot use partition_helper before PgDice has been configured! '\
           'See README.md for configuration help.'
       end
 
-      @preparation_helper ||= PgDice::PreparationHelper.new(configuration)
+      @partition_helper ||= PgDice::PartitionHelper.new(configuration)
     end
 
     def validation

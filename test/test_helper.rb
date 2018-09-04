@@ -38,8 +38,8 @@ module Minitest
       @table_name ||= 'comments'
     end
 
-    def preparation_helper
-      @preparation_helper ||= PgDice.preparation_helper
+    def partition_helper
+      @partition_helper ||= PgDice.partition_helper
     end
   end
 end

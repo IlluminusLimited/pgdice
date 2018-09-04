@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# Entry point for PreparationHelper
+# Entry point for PartitionHelper
 module PgDice
   # Helps do high-level tasks like getting tables partitioned
-  class PreparationHelper
+  class PartitionHelper
     attr_reader :pg_slice_manager, :validation_helper
 
     def initialize(configuration = PgDice::Configuration.new)
@@ -12,7 +12,7 @@ module PgDice
       @validation_helper = PgDice::Validation.new(configuration)
     end
 
-    def prepare_database!(opts = {})
+    def partition_table!(opts = {})
       opts[:column_name] ||= 'created_at'
       opts[:period] ||= 'day'
       logger.info { "Preparing database with params: #{opts}" }
@@ -21,7 +21,8 @@ module PgDice
       swap_and_fill(opts)
     end
 
-    def cleanup_database!(table_name)
+    def undo_partitioning!(opts = {})
+      table_name = opts.fetch(:table_name)
       logger.info { "Cleaning up database with params: #{table_name}" }
 
       pg_slice_manager.analyze(table_name: table_name, swapped: true)
@@ -29,8 +30,8 @@ module PgDice
       pg_slice_manager.unprep!(table_name: table_name)
     end
 
-    def cleanup_database(table_name)
-      cleanup_database!(table_name)
+    def undo_partitioning(opts = {})
+      undo_partitioning!(opts)
     rescue PgSliceError => error
       logger.error { "Rescued PgSliceError: #{error}" }
       false

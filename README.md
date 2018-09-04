@@ -1,4 +1,4 @@
-# Pgdice
+# PgDice
 
 PgDice is a utility that builds on top of the excellent gem
  [https://github.com/ankane/pgslice](https://github.com/ankane/pgslice)
@@ -50,13 +50,74 @@ PgDice.configure do |config|
 end
 ```
 
+Here's a breakdown of all the configurable things.
+
+`logger` The logger to use.
+
+`database_url` The postgres database url to connect to. This is required since `pgslice` is used to accomplish some tasks
+and it only takes a `url` currently.
+
+`approved_tables` This one is important. If you want to manipulate database tables with this gem you're going to
+need to add the base table name to this string of comma-separated values.
+
+`additional_validators` This can accept an array of `Proc` or `lambda` type predicates. 
+Each predicate will be passed the `params` hash and a `logger`. These predicates are called before doing things like
+dropping tables and adding tables.
+
+#### Advanced Configurations
+
+`table_dropper` This defaults to [TableDropper](lib/pgdice/table_dropper.rb) which has a `lambda`-like interface. 
+If you would like to provide different behavior for dropping tables (like forcing a dry-run, for example).
+This mechanism will be passed the `table_to_drop` and a `logger`.
+
+`pg_connection` This is a `PG::Connection` object used for the database queries made from `pgdice`.
+ By default it will be initialized from the `database_url` if left `nil`. Keep in mind the dependency 
+ `pgslice` will still establish its own connection using the `database_url` so this feature may not be very
+ useful if you are trying to only use one connection for this utility.
+ 
+ `database_connection` You can supply your own [DatabaseConnection](lib/pgdice/database_connection.rb) if you like.
+ I'm not sure why you would do this.
+ 
+ `pg_slice_manager` This is an internal wrapper around `pgslice`. [PgSliceManager](lib/pgdice/pg_slice_manager.rb)
+  This configuration lets you provide your own if you wish. I'm not sure why you would do this.
+ 
+ `partition_manager` You can supply your own [PartitionManager](lib/pgdice/partition_manager.rb) if you like.
+  I'm not sure why you would do this.
+  
+ `partition_helper` You can supply your own [PartitionHelper](lib/pgdice/partition_helper.rb) if you like.
+  I'm not sure why you would do this.
+ 
 ### Converting existing tables to partitioned tables
 
-__This should only be used on small tables and ONLY after you have tested it on a non-production copy of your production database__
+__This should only be used on small tables and ONLY after you have tested it on a non-production copy of your production database.__
+In fact, you should just not do this in production. Schedule downtime or something and run it a few times on
+a copy of your database. Then practice restoring your database some more.
+
+
+This command will convert an existing table into 61 partitioned tables (30 past, 30 future, and one for today).
+
+For more information on what's going on in the background see 
+[https://github.com/ankane/pgslice](https://github.com/ankane/pgslice)
+
 
 ```ruby
-PgDice.
+PgDice.partition_helper.partition_table!(table_name: 'comments', 
+                                            past: 30, 
+                                            future: 30, 
+                                            column_name: 'created_at', 
+                                            period: 'day')
 ```
+
+If you mess up (again you shouldn't use this in production)
+
+```ruby
+PgDice.partition_helper.undo_partitioning!(table_name: 'comments', 
+                                            past: 30, 
+                                            future: 30, 
+                                            column_name: 'created_at', 
+                                            period: 'day')
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

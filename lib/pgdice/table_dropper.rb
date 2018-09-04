@@ -4,22 +4,16 @@
 module PgDice
   # Simple class used to provide a mechanism that users can hook into if they want to override this
   # default behavior for dropping a table.
-  class TableDropperHelper
+  class TableDropper
     def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
     end
 
-    def call(old_partition)
-      @configuration.database_connection.execute(drop_partition(old_partition))
+    def call(table_to_drop, _logger)
+      @configuration.database_connection.execute(drop_partition(table_to_drop))
     end
 
     private
-
-    def database_connection
-      return @configuration.database_connection if @configuration.database_connection
-      raise PgDice::InvalidConfigurationError,
-            'PgDice is not configured properly. database_connection must be present'
-    end
 
     def drop_partition(table_name)
       <<~SQL

@@ -28,7 +28,7 @@ module PgDice
       logger.warn { "Partitions to be deleted are: #{old_partitions}" }
 
       old_partitions.each do |old_partition|
-        @configuration.table_dropper_helper.call(old_partition)
+        @configuration.table_dropper.call(old_partition, logger)
       end
       old_partitions
     end

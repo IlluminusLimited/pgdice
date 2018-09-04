@@ -13,25 +13,24 @@ module PgDice
 
   # Configuration class which holds all configurable values
   class Configuration
-    attr_writer :logger, :database_url
+    attr_writer :logger, :database_url, :database_connection
 
-    attr_accessor :pg_connection,
-                  :database_connection,
+    attr_accessor :approved_tables,
+                  :additional_validators,
+                  :table_dropper,
+                  :pg_connection,
                   :pg_slice_manager,
                   :partition_manager,
-                  :approved_tables,
-                  :preparation_helper,
-                  :database_helper,
-                  :table_dropper_helper,
-                  :additional_validators
+                  :partition_helper
 
     def initialize
       @logger = Logger.new(STDOUT)
+      @database_url = nil
       @approved_tables = []
       @additional_validators = []
       @database_connection = PgDice::DatabaseConnection.new(self)
       @partition_manager = PgDice::PartitionManager.new(self)
-      @table_dropper_helper = PgDice::TableDropperHelper.new(self)
+      @table_dropper = PgDice::TableDropper.new(self)
     end
 
     def logger
@@ -42,6 +41,11 @@ module PgDice
     def database_url
       return @database_url unless @database_url.nil?
       raise PgDice::InvalidConfigurationError, 'database_url must be present!'
+    end
+
+    def database_connection
+      return @database_connection unless @database_connection.nil?
+      raise PgDice.InvalidConfigurationError, 'database_connection must be present!'
     end
   end
 end
