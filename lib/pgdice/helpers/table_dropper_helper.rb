@@ -10,7 +10,7 @@ module PgDice
     end
 
     def call(old_partition)
-      @configuration.database_connection.exec(drop_partition(old_partition))
+      @configuration.database_connection.execute(drop_partition(old_partition))
     end
 
     private

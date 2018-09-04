@@ -11,7 +11,7 @@ module PgDice
     end
 
     def add_new_partitions(params = {})
-      logger.info {"add_new_partitions has been called with params: #{params}"}
+      logger.info { "add_new_partitions has been called with params: #{params}" }
 
       validation_helper.validate_parameters(params)
       pg_slice_manager.add_partitions(params)
@@ -32,12 +32,11 @@ module PgDice
 
     def list_old_partitions(params = {})
       partitions_older_than_utc_date = params[:partitions_older_than_utc_date] ||= Time.now.utc.to_date
-      logger.info {"Listing old partitions with params: #{params}"}
+      logger.info { "Listing old partitions with params: #{params}" }
 
       validation_helper.validate_parameters(params)
 
       partition_tables = database_helper.fetch_partition_tables(params[:table_name])
-      logger.debug("Filtering out partitions newer than #{partitions_older_than_utc_date}")
 
       filter_partitions(partition_tables, params[:table_name], partitions_older_than_utc_date)
     end

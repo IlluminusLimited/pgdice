@@ -12,7 +12,7 @@ module PgDice
     def fetch_partition_tables(base_table_name, opts = {})
       schema = opts[:schema] ||= 'public'
       limit = opts[:limit] || nil
-      logger.info {"Fetching partition tables with params: #{base_table_name}, #{opts}"}
+      logger.info { "Fetching partition tables with params: #{base_table_name}, #{opts}" }
 
       sql = build_partition_table_fetch_sql(base_table_name, schema, limit)
 
@@ -23,20 +23,12 @@ module PgDice
 
     # Typical partition comments looks like: column:created_at,period:day,cast:date
     def extract_partition_template_from_comment(table_name, schema = 'public')
-      logger.info {"Checking comments on table: #{schema}.#{table_name}"}
+      logger.info { "Checking comments on table: #{schema}.#{table_name}" }
       sql = build_table_comment_sql(table_name, schema)
 
       comment = database_connection.execute(sql).values.flatten.first
       logger.debug { "Table: #{schema}.#{table_name} has comment: #{comment}" }
-
-      partition_template = {}
-
-      comment.split(',').each do |key_value_pair|
-        key, value = key_value_pair.split(':')
-        partition_template[key.to_sym] = value
-      end
-
-      partition_template
+      convert_comment_to_hash(comment)
     end
 
     private
@@ -47,6 +39,17 @@ module PgDice
 
     def database_connection
       @configuration.database_connection
+    end
+
+    def convert_comment_to_hash(comment)
+      partition_template = {}
+
+      comment.split(',').each do |key_value_pair|
+        key, value = key_value_pair.split(':')
+        partition_template[key.to_sym] = value
+      end
+
+      partition_template
     end
 
     def build_table_comment_sql(table_name, schema)

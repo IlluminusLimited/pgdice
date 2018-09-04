@@ -11,14 +11,14 @@ module PgDice
     def prepare_database!(opts = {})
       opts[:column_name] ||= 'created_at'
       opts[:period] ||= 'day'
-      logger.info {"Preparing database with params: #{opts}"}
+      logger.info { "Preparing database with params: #{opts}" }
 
       prep_and_fill(opts)
       swap_and_fill(opts)
     end
 
     def cleanup_database!(table_name)
-      logger.info {"Cleaning up database with params: #{table_name}"}
+      logger.info { "Cleaning up database with params: #{table_name}" }
 
       pg_slice_manager.analyze(table_name: table_name, swapped: true)
       pg_slice_manager.unswap!(table_name: table_name)

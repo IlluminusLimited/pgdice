@@ -31,6 +31,6 @@ module Minitest
       config.database_url = 'postgres:///pgdice_test'
       config.approved_tables = ['comments']
     end
-    PgDice.configuration.database_connection.exec(@sql)
+    PgDice.configuration.database_connection.execute(@sql)
   end
 end
