@@ -111,11 +111,7 @@ PgDice.partition_helper.partition_table!(table_name: 'comments',
 If you mess up (again you shouldn't use this in production)
 
 ```ruby
-PgDice.partition_helper.undo_partitioning!(table_name: 'comments', 
-                                            past: 30, 
-                                            future: 30, 
-                                            column_name: 'created_at', 
-                                            period: 'day')
+PgDice.partition_helper.undo_partitioning!(table_name: 'comments')
 ```
 
 ## Development
