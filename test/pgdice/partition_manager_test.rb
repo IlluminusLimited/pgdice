@@ -22,7 +22,7 @@ class PartitionManagerTest < Minitest::Test
     partition_manager = PgDice.configuration.partition_manager
     PgDice.configuration.preparation_helper.prepare_database!(table_name: table_name, past: 2, future: 1)
 
-    assert_equal 'bob', partition_manager.discover_old_partitions(table_name)
+    assert_equal 2, partition_manager.discover_old_partitions(table_name).size
   ensure
     PgDice.configuration.preparation_helper.cleanup_database(table_name)
   end

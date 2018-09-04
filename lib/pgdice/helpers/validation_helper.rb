@@ -7,14 +7,6 @@ module PgDice
       @configuration = configuration
     end
 
-    def database_connection
-      @configuration.database_connection
-    end
-
-    def approved_tables
-      @configuration.approved_tables
-    end
-
     def assert_future_tables(table_name, future_tables, interval = 'days')
       sql = build_assert_sql(table_name, future_tables, interval)
 
@@ -32,6 +24,14 @@ module PgDice
     end
 
     private
+
+    def database_connection
+      @configuration.database_connection
+    end
+
+    def approved_tables
+      @configuration.approved_tables
+    end
 
     def build_assert_sql(table_name, future_tables, interval)
       <<~SQL

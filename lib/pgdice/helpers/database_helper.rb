@@ -58,7 +58,7 @@ module PgDice
         SELECT tablename
         FROM pg_tables
         WHERE schemaname = '#{schema}'
-          AND tablename ~ '^#{base_table_name}_\d+$'
+          AND tablename ~ '^#{base_table_name}_\\d+$'
         ORDER BY tablename
       SQL
 
