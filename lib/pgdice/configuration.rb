@@ -26,19 +26,13 @@ module PgDice
                   :additional_validators
 
     def initialize
-      initialize_simple_params
-      @database_connection = PgDice::DatabaseConnection.new(self)
-      @partition_manager = PgDice::PartitionManager.new(self)
-      @table_dropper_helper = PgDice::TableDropperHelper.new(self)
-    end
-
-    private
-
-    def initialize_simple_params
       @logger = Logger.new('log/pgdice.log')
       @database_url = ''
       @approved_tables = []
       @additional_validators = []
+      @database_connection = PgDice::DatabaseConnection.new(self)
+      @partition_manager = PgDice::PartitionManager.new(self)
+      @table_dropper_helper = PgDice::TableDropperHelper.new(self)
     end
   end
 end

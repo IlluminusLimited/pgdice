@@ -6,13 +6,13 @@ require 'pgdice/helpers/validation_helper'
 module PgDice
   #  PartitionManager is a class used to fulfill high-level tasks for partitioning
   class PartitionManager
-    attr_reader :validation_helper, :pg_slice_manager, :database_helper
+    attr_reader :validation_helper, :pg_slice_manager, :database_connection
 
     def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
       @validation_helper = ValidationHelper.new(configuration)
       @pg_slice_manager = PgSliceManager.new(configuration)
-      @database_helper = DatabaseHelper.new(configuration)
+      @database_connection = DatabaseConnection.new(configuration)
     end
 
     def add_new_partitions(params = {})
@@ -41,9 +41,21 @@ module PgDice
 
       validation_helper.validate_parameters(params)
 
-      partition_tables = database_helper.fetch_partition_tables(params[:table_name])
+      partition_tables = fetch_partition_tables(params)
 
       filter_partitions(partition_tables, params[:table_name], partitions_older_than_utc_date)
+    end
+
+    # Grabs only tables that start with the base_table_name and end in numbers
+    def fetch_partition_tables(params = {})
+      schema = params[:schema] ||= 'public'
+      logger.info { "Fetching partition tables with params: #{params}" }
+
+      sql = build_partition_table_fetch_sql(params)
+
+      partition_tables = database_connection.execute(sql).values.flatten
+      logger.debug { "Table: #{schema}.#{params[:table_name]} has partition_tables: #{partition_tables}" }
+      partition_tables
     end
 
     private
@@ -57,6 +69,38 @@ module PgDice
         partition_created_at_date = Date.parse(partition_name.gsub(/#{base_table_name}_/, ''))
         partition_created_at_date < partitions_older_than_date
       end
+    end
+
+    def convert_comment_to_hash(comment)
+      partition_template = {}
+
+      comment.split(',').each do |key_value_pair|
+        key, value = key_value_pair.split(':')
+        partition_template[key.to_sym] = value
+      end
+
+      partition_template
+    end
+
+    def build_table_comment_sql(table_name, schema)
+      <<~SQL
+        SELECT obj_description('#{schema}.#{table_name}'::REGCLASS) AS comment
+      SQL
+    end
+
+    def build_partition_table_fetch_sql(params = {})
+      schema = params.fetch(:schema)
+      base_table_name = params.fetch(:table_name)
+      limit = params.fetch(:limit, 100)
+
+      <<~SQL
+        SELECT tablename
+        FROM pg_tables
+        WHERE schemaname = '#{schema}'
+          AND tablename ~ '^#{base_table_name}_\\d+$'
+        ORDER BY tablename
+        LIMIT #{limit}
+      SQL
     end
   end
 end

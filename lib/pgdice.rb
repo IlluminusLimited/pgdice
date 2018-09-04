@@ -9,7 +9,6 @@ require 'pgdice/configuration'
 require 'pgdice/pg_slice_manager'
 require 'pgdice/partition_manager'
 require 'pgdice/database_connection'
-require 'pgdice/helpers/database_helper'
 require 'pgdice/helpers/validation_helper'
 require 'pgdice/helpers/preparation_helper'
 require 'pgdice/helpers/table_dropper_helper'
@@ -24,11 +23,26 @@ module PgDice
   end
   class PgSliceError < Error
   end
+  class NotConfiguredError < Error
+  end
 
   class << self
     def partition_manager
-      self.configuration ||= PgDice::Configuration.new
-      @partition_manager ||= PgDice::PartitionManager.new(self.configuration)
+      unless configuration
+        raise PgDice::NotConfiguredError, 'Cannot use partition_manager before PgDice has been configured! '\
+          'See README.md for configuration help.'
+      end
+
+      @partition_manager ||= PgDice::PartitionManager.new(configuration)
+    end
+
+    def preparation_helper
+      unless configuration
+        raise PgDice::NotConfiguredError, 'Cannot use preparation_helper before PgDice has been configured! '\
+          'See README.md for configuration help.'
+      end
+
+      @preparation_helper ||= PgDice::PreparationHelper.new(configuration)
     end
   end
 end
