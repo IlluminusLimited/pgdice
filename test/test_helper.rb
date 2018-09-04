@@ -28,6 +28,7 @@ module Minitest
                 SELECT NOW(), NOW() FROM generate_series(1, 10000) n;
     SQL
     PgDice.configure do |config|
+      config.logger = Logger.new('pgdice.log')
       config.database_url = 'postgres:///pgdice_test'
       config.approved_tables = ['comments']
     end
@@ -38,7 +39,7 @@ module Minitest
     end
 
     def preparation_helper
-      @preparation_helper ||= PgDice::PreparationHelper.new(PgDice.configuration)
+      @preparation_helper ||= PgDice.preparation_helper
     end
   end
 end

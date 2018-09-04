@@ -15,6 +15,12 @@ module PgDice
 
     private
 
+    def database_connection
+      return @configuration.database_connection if @configuration.database_connection
+      raise PgDice::InvalidConfigurationError,
+            'PgDice is not configured properly. database_connection must be present'
+    end
+
     def drop_partition(table_name)
       <<~SQL
         BEGIN;

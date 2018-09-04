@@ -15,7 +15,7 @@ class PartitionManagerTest < Minitest::Test
 
     assert partition_manager.add_new_partitions(table_name: table_name, future: future_tables)
 
-    PgDice::ValidationHelper.new(PgDice.configuration).assert_future_tables(table_name, future_tables)
+    PgDice::Validation.new(PgDice.configuration).assert_future_tables(table_name, future_tables)
   end
 
   def test_old_partitions_can_be_listed

@@ -8,5 +8,4 @@
 /tmp/
 .idea
 Gemfile.lock
-!log/.keep
-/log/
+*.log

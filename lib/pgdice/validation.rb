@@ -2,7 +2,7 @@
 
 module PgDice
   # Collection of utilities that provide ways for users to ensure things are working properly
-  class ValidationHelper
+  class Validation
     def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
     end
@@ -32,15 +32,18 @@ module PgDice
     end
 
     def additional_validators
-      @configuration.additional_validators
+      return @configuration.additional_validators if @configuration.additional_validators.is_a?(Array)
+      raise PgDice::InvalidConfigurationError, 'additional_validators must be an array!'
     end
 
     def database_connection
-      @configuration.database_connection
+      return @configuration.database_connection if @configuration.database_connection
+      raise PgDice::InvalidConfigurationError, 'database_connection must be present!'
     end
 
     def approved_tables
-      @configuration.approved_tables
+      return @configuration.approved_tables if @configuration.approved_tables.is_a?(Array)
+      raise PgDice::InvalidConfigurationError, 'approved_tables must be an array of strings!'
     end
 
     def build_assert_sql(table_name, future_tables, interval)

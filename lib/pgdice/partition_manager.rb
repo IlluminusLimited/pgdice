@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'pgdice/helpers/validation_helper'
-
 # Entry point for PartitionManager
 module PgDice
   #  PartitionManager is a class used to fulfill high-level tasks for partitioning
@@ -10,7 +8,7 @@ module PgDice
 
     def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
-      @validation_helper = ValidationHelper.new(configuration)
+      @validation_helper = Validation.new(configuration)
       @pg_slice_manager = PgSliceManager.new(configuration)
       @database_connection = DatabaseConnection.new(configuration)
     end

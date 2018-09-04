@@ -12,7 +12,7 @@ module PgDice
     end
 
     def execute(query)
-      @pg_connection ||= PG::Connection.new(@configuration.database_url)
+      @pg_connection ||= PG::Connection.new(database_url)
       logger.debug { "DatabaseConnection to execute query: #{query}" }
       pg_connection.exec(query)
     end
@@ -21,6 +21,11 @@ module PgDice
 
     def logger
       @configuration.logger
+    end
+
+    def database_url
+      return @configuration.database_url if @configuration.database_url
+      raise PgDice::InvalidConfigurationError, 'database_url must be present!'
     end
   end
 end

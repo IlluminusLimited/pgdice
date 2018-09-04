@@ -9,7 +9,7 @@ module PgDice
     def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
       @pg_slice_manager = PgDice::PgSliceManager.new(configuration)
-      @validation_helper = PgDice::ValidationHelper.new(configuration)
+      @validation_helper = PgDice::Validation.new(configuration)
     end
 
     def prepare_database!(opts = {})
