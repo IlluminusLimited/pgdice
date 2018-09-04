@@ -20,7 +20,9 @@ class PartitionManagerTest < Minitest::Test
   def test_old_partitions_can_be_listed
     table_name = 'comments'
     partition_manager = PgDice.configuration.partition_manager
-    PgDice.configuration.preparation_helper.prepare_database!(table_name: table_name, past: 2, future: 1)
+    PgDice.configuration.preparation_helper.prepare_database!(table_name: table_name,
+                                                              past: 2,
+                                                              future: 1)
 
     assert_equal 2, partition_manager.discover_old_partitions(table_name).size
   ensure

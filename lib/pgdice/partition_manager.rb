@@ -16,17 +16,19 @@ module PgDice
     end
 
     def delete_old_partitions(params = {})
+      logger.warn { "delete_old_partitions has been called with params: #{params}" }
       validation_helper.validate_parameters(params)
       # this wont use pg_slice
     end
 
-    def discover_old_partitions(base_table_name, partitions_older_than_date = Time.now.to_date)
+    def discover_old_partitions(base_table_name, partitions_older_than_utc_date = Time.now.utc.to_date)
       validation_helper.validate_parameters(table_name: base_table_name)
       partition_tables = database_helper.fetch_partition_tables(base_table_name)
+      logger.debug("Filtering out partitions newer than #{partitions_older_than_utc_date}")
 
       partition_tables.select do |partition_name|
         partition_created_at_date = Date.parse(partition_name.gsub(/#{base_table_name}_/, ''))
-        partition_created_at_date < partitions_older_than_date
+        partition_created_at_date < partitions_older_than_utc_date
       end
     end
 
