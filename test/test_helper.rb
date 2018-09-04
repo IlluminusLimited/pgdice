@@ -32,5 +32,13 @@ module Minitest
       config.approved_tables = ['comments']
     end
     PgDice.configuration.database_connection.execute(@sql)
+
+    def table_name
+      @table_name ||= 'comments'
+    end
+
+    def preparation_helper
+      @preparation_helper ||= PgDice::PreparationHelper.new(PgDice.configuration)
+    end
   end
 end

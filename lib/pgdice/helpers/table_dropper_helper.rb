@@ -5,7 +5,7 @@ module PgDice
   # Simple class used to provide a mechanism that users can hook into if they want to override this
   # default behavior for dropping a table.
   class TableDropperHelper
-    def initialize(configuration = Configuration.new)
+    def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
     end
 

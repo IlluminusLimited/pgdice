@@ -6,7 +6,7 @@ module PgDice
     attr_accessor :configuration
 
     def configure
-      self.configuration ||= Configuration.new
+      self.configuration ||= PgDice::Configuration.new
       yield(configuration)
     end
   end
@@ -20,7 +20,6 @@ module PgDice
                   :pg_slice_manager,
                   :partition_manager,
                   :approved_tables,
-                  :validation_helper,
                   :preparation_helper,
                   :database_helper,
                   :table_dropper_helper,
@@ -29,11 +28,7 @@ module PgDice
     def initialize
       initialize_simple_params
       @database_connection = PgDice::DatabaseConnection.new(self)
-      @validation_helper = PgDice::ValidationHelper.new(self)
-      @pg_slice_manager = PgDice::PgSliceManager.new(self)
       @partition_manager = PgDice::PartitionManager.new(self)
-      @preparation_helper = PgDice::PreparationHelper.new(self)
-      @database_helper = PgDice::DatabaseHelper.new(self)
       @table_dropper_helper = PgDice::TableDropperHelper.new(self)
     end
 

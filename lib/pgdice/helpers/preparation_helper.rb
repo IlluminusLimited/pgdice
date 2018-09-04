@@ -4,8 +4,12 @@
 module PgDice
   # Helps do high-level tasks like getting tables partitioned
   class PreparationHelper
-    def initialize(configuration = Configuration.new)
+    attr_reader :pg_slice_manager, :validation_helper
+
+    def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
+      @pg_slice_manager = PgDice::PgSliceManager.new(configuration)
+      @validation_helper = PgDice::ValidationHelper.new(configuration)
     end
 
     def prepare_database!(opts = {})
@@ -34,6 +38,10 @@ module PgDice
 
     private
 
+    def logger
+      @configuration.logger
+    end
+
     def prep_and_fill(opts)
       pg_slice_manager.prep(opts)
       pg_slice_manager.add_partitions(opts.merge!(intermediate: true))
@@ -44,18 +52,6 @@ module PgDice
       pg_slice_manager.analyze(opts)
       pg_slice_manager.swap(opts)
       pg_slice_manager.fill(opts.merge!(swapped: true)) if opts[:fill]
-    end
-
-    def logger
-      @configuration.logger
-    end
-
-    def pg_slice_manager
-      @configuration.pg_slice_manager
-    end
-
-    def validation_helper
-      @configuration.validation_helper
     end
   end
 end

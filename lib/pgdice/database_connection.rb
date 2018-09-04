@@ -6,7 +6,7 @@ module PgDice
   class DatabaseConnection
     attr_reader :pg_connection
 
-    def initialize(configuration = Configuration.new)
+    def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
       @pg_connection = configuration.pg_connection
     end

@@ -4,8 +4,11 @@
 module PgDice
   # Collection of utilities that are necessary to achieve compliance with pg_slice
   class DatabaseHelper
-    def initialize(configuration = Configuration.new)
+    attr_reader :database_connection
+
+    def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
+      @database_connection = DatabaseConnection.new(configuration)
     end
 
     # Grabs only tables that start with the base_table_name and end in numbers
@@ -35,10 +38,6 @@ module PgDice
 
     def logger
       @configuration.logger
-    end
-
-    def database_connection
-      @configuration.database_connection
     end
 
     def convert_comment_to_hash(comment)

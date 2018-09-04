@@ -6,8 +6,13 @@ require 'pgdice/helpers/validation_helper'
 module PgDice
   #  PartitionManager is a class used to fulfill high-level tasks for partitioning
   class PartitionManager
-    def initialize(configuration = Configuration.new)
+    attr_reader :validation_helper, :pg_slice_manager, :database_helper
+
+    def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
+      @validation_helper = ValidationHelper.new(configuration)
+      @pg_slice_manager = PgSliceManager.new(configuration)
+      @database_helper = DatabaseHelper.new(configuration)
     end
 
     def add_new_partitions(params = {})
@@ -45,18 +50,6 @@ module PgDice
 
     def logger
       @configuration.logger
-    end
-
-    def pg_slice_manager
-      @configuration.pg_slice_manager
-    end
-
-    def validation_helper
-      @configuration.validation_helper
-    end
-
-    def database_helper
-      @configuration.database_helper
     end
 
     def filter_partitions(partition_tables, base_table_name, partitions_older_than_date)

@@ -3,7 +3,7 @@
 module PgDice
   # Collection of utilities that provide ways for users to ensure things are working properly
   class ValidationHelper
-    def initialize(configuration = Configuration.new)
+    def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
     end
 
@@ -50,7 +50,8 @@ module PgDice
         INNER JOIN pg_catalog.pg_namespace pg_namespace ON pg_namespace.oid = pg_class.relnamespace
         WHERE pg_class.relkind = 'r'
           AND pg_namespace.nspname = 'public'
-          AND pg_class.relname = '#{table_name}_' || to_char(NOW() + INTERVAL '#{future_tables} #{interval}', 'YYYYMMDD')
+          AND pg_class.relname = '#{table_name}_' || to_char(NOW()
+            + INTERVAL '#{future_tables} #{interval}', 'YYYYMMDD')
       SQL
     end
   end

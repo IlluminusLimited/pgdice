@@ -4,7 +4,7 @@
 module PgDice
   # PgSliceManager is a wrapper around PgSlice
   class PgSliceManager
-    def initialize(configuration = Configuration.new)
+    def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
     end
 
