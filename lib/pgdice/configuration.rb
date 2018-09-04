@@ -28,13 +28,13 @@ module PgDice
 
     def initialize
       initialize_simple_params
-      @database_connection = DatabaseConnection.new(self)
-      @validation_helper = ValidationHelper.new(self)
-      @pg_slice_manager = PgSliceManager.new(self)
-      @partition_manager = PartitionManager.new(self)
-      @preparation_helper = PreparationHelper.new(self)
-      @database_helper = DatabaseHelper.new(self)
-      @table_dropper_helper = TableDropperHelper.new(self)
+      @database_connection = PgDice::DatabaseConnection.new(self)
+      @validation_helper = PgDice::ValidationHelper.new(self)
+      @pg_slice_manager = PgDice::PgSliceManager.new(self)
+      @partition_manager = PgDice::PartitionManager.new(self)
+      @preparation_helper = PgDice::PreparationHelper.new(self)
+      @database_helper = PgDice::DatabaseHelper.new(self)
+      @table_dropper_helper = PgDice::TableDropperHelper.new(self)
     end
 
     private

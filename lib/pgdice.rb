@@ -14,11 +14,13 @@ require 'pgdice/helpers/validation_helper'
 require 'pgdice/helpers/preparation_helper'
 require 'pgdice/helpers/table_dropper_helper'
 
-class PgDiceError < StandardError
-end
-class InsufficientFutureTablesError < PgDiceError
-end
-class IllegalTableError < PgDiceError
-end
-class PgSliceError < PgDiceError
+module PgDice
+  class Error < StandardError
+  end
+  class InsufficientFutureTablesError < Error
+  end
+  class IllegalTableError < Error
+  end
+  class PgSliceError < Error
+  end
 end

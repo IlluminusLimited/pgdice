@@ -13,7 +13,7 @@ module PgDice
       response = database_connection.execute(sql)
 
       return if response.values.size == 1
-      raise InsufficientFutureTablesError, "Insufficient future tables exist for table: #{table_name}. "\
+      raise PgDice::InsufficientFutureTablesError, "Insufficient future tables exist for table: #{table_name}. "\
 "Expected: #{future_tables} having intervals of: #{interval}"
     end
 
@@ -22,7 +22,7 @@ module PgDice
       return if approved_tables.include?(table_name) &&
                 additional_validators.all? { |validator| validator.call(params, logger) }
 
-      raise IllegalTableError, "Table: #{table_name} is not in the list of approved tables!"
+      raise PgDice::IllegalTableError, "Table: #{table_name} is not in the list of approved tables!"
     end
 
     private
