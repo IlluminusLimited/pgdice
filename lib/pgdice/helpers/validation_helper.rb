@@ -19,11 +19,21 @@ module PgDice
 
     def validate_parameters(params)
       table_name = params.fetch(:table_name)
-      return if approved_tables.include?(table_name)
+      return if approved_tables.include?(table_name) &&
+                additional_validators.all? { |validator| validator.call(params, logger) }
+
       raise IllegalTableError, "Table: #{table_name} is not in the list of approved tables!"
     end
 
     private
+
+    def logger
+      @configuration.logger
+    end
+
+    def additional_validators
+      @configuration.additional_validators
+    end
 
     def database_connection
       @configuration.database_connection

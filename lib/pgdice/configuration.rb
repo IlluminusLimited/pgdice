@@ -23,12 +23,11 @@ module PgDice
                   :validation_helper,
                   :preparation_helper,
                   :database_helper,
-                  :table_dropper_helper
+                  :table_dropper_helper,
+                  :additional_validators
 
     def initialize
-      @logger = Logger.new('log/pgdice.log')
-      @database_url = ''
-      @approved_tables = []
+      initialize_simple_params
       @database_connection = DatabaseConnection.new(self)
       @validation_helper = ValidationHelper.new(self)
       @pg_slice_manager = PgSliceManager.new(self)
@@ -36,6 +35,15 @@ module PgDice
       @preparation_helper = PreparationHelper.new(self)
       @database_helper = DatabaseHelper.new(self)
       @table_dropper_helper = TableDropperHelper.new(self)
+    end
+
+    private
+
+    def initialize_simple_params
+      @logger = Logger.new('log/pgdice.log')
+      @database_url = ''
+      @approved_tables = []
+      @additional_validators = []
     end
   end
 end
