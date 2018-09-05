@@ -10,7 +10,7 @@ where logging and clear exception messages are crucial.
 
 There are some features in this gem which allow you to drop database tables. 
 
-If you choose to use these features without a __tested__ backup strategy in place then you 
+If you choose to use this software without a __tested and working__ backup and restore strategy in place then you 
 are a fool and will pay the price for your negligence. This software comes with no warranty 
 or any guarantees, implied or otherwise. By using this software you agree that the creator, 
 maintainers and any affiliated parties CANNOT BE HELD LIABLE FOR DATA LOSS OR LOSSES OF ANY KIND.
@@ -108,11 +108,16 @@ PgDice.partition_helper.partition_table!(table_name: 'comments',
                                             period: 'day')
 ```
 
-If you mess up (again you shouldn't use this in production)
+If you mess up (again you shouldn't use this in production). These two methods are useful for writing tests
+that work with partitions.
 
 ```ruby
 PgDice.partition_helper.undo_partitioning!(table_name: 'comments')
 ```
+
+In many cases with `partition_helper` and `partition_manager` there are versions of the methods that will
+throw exceptions (ending in `!`) and others that will return a truthy value or `false` if there is a failure.
+
 
 ## Development
 

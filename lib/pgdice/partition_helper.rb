@@ -30,9 +30,16 @@ module PgDice
       pg_slice_manager.unprep!(table_name: table_name)
     end
 
+    def partition_table(opts = {})
+      partition_table!(opts)
+    rescue PgDice::Error::PgSliceError => error
+      logger.error { "Rescued PgSliceError: #{error}" }
+      false
+    end
+
     def undo_partitioning(opts = {})
       undo_partitioning!(opts)
-    rescue PgSliceError => error
+    rescue PgDice::Error::PgSliceError => error
       logger.error { "Rescued PgSliceError: #{error}" }
       false
     end
