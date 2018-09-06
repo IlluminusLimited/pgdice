@@ -33,7 +33,8 @@ module Minitest
       username = ENV['DATABASE_USERNAME']
       password = ENV['DATABASE_PASSWORD']
       login = ''
-      login = "#{username}@#{password}" if username && password
+      login = username if username
+      login += "@#{password}" if password
       host = ENV['DATABASE_HOST']
 
       config.database_url = "postgres:/#{login}/#{host}/pgdice_test"
