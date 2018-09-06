@@ -9,3 +9,5 @@
 .idea
 Gemfile.lock
 *.log
+!tmp/.keep
+tmp/

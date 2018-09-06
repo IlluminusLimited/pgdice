@@ -6,9 +6,11 @@ require 'minitest/autorun'
 require 'simplecov'
 require 'minitest/ci'
 
-Minitest::Ci.report_dir = Rails.root.join('tmp', 'test-results')
+root_dir = Pathname.new('..').expand_path(File.dirname(__FILE__))
 
-SimpleCov.coverage_dir(Rails.root.join('tmp', 'coverage', 'pgdice'))
+Minitest::Ci.report_dir = root_dir.join('tmp', 'test-results')
+
+SimpleCov.coverage_dir(root_dir.join('tmp', 'coverage', 'pgdice'))
 
 SimpleCov.start
 
