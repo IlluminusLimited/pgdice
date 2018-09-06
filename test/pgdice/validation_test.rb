@@ -19,4 +19,12 @@ class ValidationTest < Minitest::Test
       PgDice::Validation.new(PgDice.configuration).validate_parameters(table_name: 'bob')
     end
   end
+
+  def test_additional_validators_work
+    configuration = PgDice.configuration.dup
+    configuration.additional_validators << ->(_params, _logger) { nil }
+    assert_raises(PgDice::CustomValidationError) do
+      PgDice::Validation.new(configuration).validate_parameters(table_name: 'comments')
+    end
+  end
 end

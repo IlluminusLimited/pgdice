@@ -19,10 +19,12 @@ module PgDice
 
     def validate_parameters(params)
       table_name = params.fetch(:table_name)
-      return if approved_tables.include?(table_name) &&
-                additional_validators.all? { |validator| validator.call(params, logger) }
+      unless approved_tables.include?(table_name)
+        raise PgDice::IllegalTableError, "Table: #{table_name} is not in the list of approved tables!"
+      end
 
-      raise PgDice::IllegalTableError, "Table: #{table_name} is not in the list of approved tables!"
+      return if additional_validators.all? { |validator| validator.call(params, logger) }
+      raise PgDice::CustomValidationError, "Custom validation failed with params: #{params}"
     end
 
     private

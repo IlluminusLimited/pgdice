@@ -17,9 +17,13 @@ require 'pgdice/database_connection'
 module PgDice
   class Error < StandardError
   end
-  class InsufficientFutureTablesError < Error
+  class ValidationError < Error
   end
-  class IllegalTableError < Error
+  class CustomValidationError < ValidationError
+  end
+  class IllegalTableError < ValidationError
+  end
+  class InsufficientFutureTablesError < Error
   end
   class PgSliceError < Error
   end

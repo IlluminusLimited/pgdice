@@ -5,7 +5,7 @@
 PgDice is a utility that builds on top of the excellent gem
  [https://github.com/ankane/pgslice](https://github.com/ankane/pgslice)
  
-PgDice  is intended to be used by scheduled background jobs in frameworks like [Sidekiq](https://github.com/mperham/sidekiq)
+PgDice is intended to be used by scheduled background jobs in frameworks like [Sidekiq](https://github.com/mperham/sidekiq)
 where logging and clear exception messages are crucial.
 
 ## Disclaimer
@@ -47,7 +47,7 @@ This is an example config from a project using `Sidekiq`
 require 'pgdice'
 PgDice.configure do |config|
   config.logger = Sidekiq.logger # This defaults to STDOUT if you don't specify a logger
-  config.database_url = ENV['DATABASE_URL'] # postgresql://[user[:password]@][host][:port][/dbname][?param1=value1&...]
+  config.database_url = ENV['PGDICE_DATABASE_URL'] # postgresql://[user[:password]@][host][:port][/dbname][?param1=value1&...]
   config.approved_tables = ENV['PGDICE_APPROVED_TABLES'] # Comma separated values: 'comments,posts'
 end
 ```
@@ -62,9 +62,9 @@ and it only takes a `url` currently.
 `approved_tables` This one is important. If you want to manipulate database tables with this gem you're going to
 need to add the base table name to this string of comma-separated values.
 
-`additional_validators` This can accept an array of `Proc` or `lambda` type predicates. 
+`additional_validators` This can accept an array of `proc` or `lambda` type predicates. 
 Each predicate will be passed the `params` hash and a `logger`. These predicates are called before doing things like
-dropping tables and adding tables.
+dropping tables and adding tables. 
 
 #### Advanced Configuration Parameters
 
@@ -91,7 +91,8 @@ This mechanism will be passed the `table_to_drop` and a `logger`.
  
 ### Converting existing tables to partitioned tables
 
-__This should only be used on small tables and ONLY after you have tested it on a non-production copy of your production database.__
+__This should only be used on small tables and ONLY after you have tested it on a non-production copy of your 
+production database.__
 In fact, you should just not do this in production. Schedule downtime or something and run it a few times on
 a copy of your database. Then practice restoring your database some more.
 
@@ -123,13 +124,19 @@ that will return a truthy value or `false` if there is a failure.
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. 
+You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the 
+version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version,
+ push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at [https://github.com/IlluminusLimited/pgdice](https://github.com/IlluminusLimited/pgdice). This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at 
+[https://github.com/IlluminusLimited/pgdice](https://github.com/IlluminusLimited/pgdice). This project is intended 
+to be a safe, welcoming space for collaboration, and contributors are expected to adhere to
+ the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
@@ -137,4 +144,5 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the Pgdice project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/IlluminusLimited/pgdice/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the Pgdice project’s codebases, issue trackers, chat rooms and mailing lists is expected 
+to follow the [code of conduct](https://github.com/IlluminusLimited/pgdice/blob/master/CODE_OF_CONDUCT.md).
