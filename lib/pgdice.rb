@@ -21,7 +21,6 @@ module PgDice
   end
   class PgSliceError < Error
   end
-
   class ValidationError < Error
   end
   class IllegalTableError < ValidationError
@@ -44,8 +43,11 @@ module PgDice
     end
   end
 
+  class ConfigurationError < Error
+  end
+
   # Rubocop is stupid
-  class NotConfiguredError < Error
+  class NotConfiguredError < ConfigurationError
     def initialize(method_name)
       super("Cannot use #{method_name} before PgDice has been configured! "\
           'See README.md for configuration help.')
@@ -53,7 +55,7 @@ module PgDice
   end
 
   # Rubocop is stupid
-  class InvalidConfigurationError < Error
+  class InvalidConfigurationError < ConfigurationError
     def initialize(message)
       super("PgDice is not configured properly. #{message}")
     end
