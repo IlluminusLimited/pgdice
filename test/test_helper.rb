@@ -12,7 +12,10 @@ Minitest::Ci.report_dir = root_dir.join('tmp', 'test-results')
 
 SimpleCov.coverage_dir(root_dir.join('tmp', 'coverage', 'pgdice'))
 
-SimpleCov.start
+SimpleCov.start do
+  add_group('pgdice', 'lib/pgdice')
+  add_filter %r{^/test/}
+end
 Coveralls.wear!
 
 module Minitest

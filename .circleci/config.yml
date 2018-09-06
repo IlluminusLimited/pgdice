@@ -31,21 +31,10 @@ jobs:
           curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./tmp/cc-test-reporter
           chmod +x ./tmp/cc-test-reporter
 
-    - restore_cache:
-        keys:
-        - gem-cache-{{ arch }}-{{ .Branch }}
-        - gem-cache
-
     - run:
         name: Setup dependencies
         command: |
           bundle install --jobs 4 --retry 3
-
-    - save_cache:
-        paths:
-        - vendor/bundle
-        key: gem-cache-{{ arch }}-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
-
 
     - run:
         name: Run tests
