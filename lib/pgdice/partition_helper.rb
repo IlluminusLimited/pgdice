@@ -12,17 +12,17 @@ module PgDice
       @validation_helper = PgDice::Validation.new(configuration)
     end
 
-    def partition_table!(opts = {})
-      opts[:column_name] ||= 'created_at'
-      opts[:period] ||= 'day'
-      logger.info { "Preparing database with params: #{opts}" }
+    def partition_table!(params = {})
+      params[:column_name] ||= 'created_at'
+      params[:period] ||= 'day'
+      logger.info { "Preparing database with params: #{params}" }
 
-      prep_and_fill(opts)
-      swap_and_fill(opts)
+      prep_and_fill(params)
+      swap_and_fill(params)
     end
 
-    def undo_partitioning!(opts = {})
-      table_name = opts.fetch(:table_name)
+    def undo_partitioning!(params = {})
+      table_name = params.fetch(:table_name)
       logger.info { "Cleaning up database with params: #{table_name}" }
 
       pg_slice_manager.analyze(table_name: table_name, swapped: true)
@@ -30,15 +30,15 @@ module PgDice
       pg_slice_manager.unprep!(table_name: table_name)
     end
 
-    def partition_table(opts = {})
-      partition_table!(opts)
+    def partition_table(params = {})
+      partition_table!(params)
     rescue PgDice::Error::PgSliceError => error
       logger.error { "Rescued PgSliceError: #{error}" }
       false
     end
 
-    def undo_partitioning(opts = {})
-      undo_partitioning!(opts)
+    def undo_partitioning(params = {})
+      undo_partitioning!(params)
     rescue PgDice::Error::PgSliceError => error
       logger.error { "Rescued PgSliceError: #{error}" }
       false
@@ -50,16 +50,16 @@ module PgDice
       @configuration.logger
     end
 
-    def prep_and_fill(opts)
-      pg_slice_manager.prep(opts)
-      pg_slice_manager.add_partitions(opts.merge!(intermediate: true))
-      pg_slice_manager.fill(opts) if opts[:fill]
+    def prep_and_fill(params)
+      pg_slice_manager.prep(params)
+      pg_slice_manager.add_partitions(params.merge!(intermediate: true))
+      pg_slice_manager.fill(params) if params[:fill]
     end
 
-    def swap_and_fill(opts)
-      pg_slice_manager.analyze(opts)
-      pg_slice_manager.swap(opts)
-      pg_slice_manager.fill(opts.merge!(swapped: true)) if opts[:fill]
+    def swap_and_fill(params)
+      pg_slice_manager.analyze(params)
+      pg_slice_manager.swap(params)
+      pg_slice_manager.fill(params.merge!(swapped: true)) if params[:fill]
     end
   end
 end

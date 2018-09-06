@@ -66,5 +66,9 @@ module Minitest
     def partition_helper
       @partition_helper ||= PgDice.partition_helper
     end
+
+    def assert_invalid_config(&block)
+      assert_raises(PgDice::InvalidConfigurationError) { block.yield }
+    end
   end
 end

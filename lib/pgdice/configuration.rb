@@ -23,14 +23,12 @@ module PgDice
                   :partition_manager,
                   :partition_helper
 
-    def initialize
-      @logger = Logger.new(STDOUT)
-      @database_url = nil
-      @approved_tables = []
-      @additional_validators = []
-      @database_connection = PgDice::DatabaseConnection.new(self)
-      @partition_manager = PgDice::PartitionManager.new(self)
-      @table_dropper = PgDice::TableDropper.new(self)
+    def initialize(existing_configuration = nil)
+      @logger = existing_configuration&.logger&.clone || Logger.new(STDOUT)
+      @database_url = existing_configuration&.database_url&.clone || nil
+      @approved_tables = existing_configuration&.approved_tables&.clone || []
+      @additional_validators = existing_configuration&.additional_validators&.clone || []
+      initialize_objects
     end
 
     def logger
@@ -45,7 +43,19 @@ module PgDice
 
     def database_connection
       return @database_connection unless @database_connection.nil?
-      raise PgDice.InvalidConfigurationError, 'database_connection must be present!'
+      raise PgDice::InvalidConfigurationError, 'database_connection must be present!'
+    end
+
+    def deep_clone
+      PgDice::Configuration.new(self)
+    end
+
+    private
+
+    def initialize_objects
+      @database_connection = PgDice::DatabaseConnection.new(self)
+      @partition_manager = PgDice::PartitionManager.new(self)
+      @table_dropper = PgDice::TableDropper.new(self)
     end
   end
 end

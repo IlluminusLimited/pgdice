@@ -17,9 +17,7 @@ class ConfigurationTest < Minitest::Test
     configuration = PgDice::Configuration.new
     configuration.logger = nil
 
-    assert_raises(PgDice::InvalidConfigurationError) do
-      configuration.logger
-    end
+    assert_invalid_config { configuration.logger }
   end
 
   private

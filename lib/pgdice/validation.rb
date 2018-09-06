@@ -7,14 +7,18 @@ module PgDice
       @configuration = configuration
     end
 
-    def assert_future_tables(table_name, future_tables, interval = 'days')
-      sql = build_assert_sql(table_name, future_tables, interval)
+    def assert_future_tables(params = {})
+      table_name = params.fetch(:table_name)
+      future = params.fetch(:future)
+      period = params.fetch(:period, 'day')
+
+      sql = build_assert_sql(table_name, future, period)
 
       response = database_connection.execute(sql)
 
-      return if response.values.size == 1
+      return true if response.values.size == 1
       raise PgDice::InsufficientFutureTablesError, "Insufficient future tables exist for table: #{table_name}. "\
-"Expected: #{future_tables} having intervals of: #{interval}"
+"Expected: #{future} having period of: #{period}"
     end
 
     def validate_parameters(params)
@@ -24,7 +28,9 @@ module PgDice
       end
 
       return if additional_validators.all? { |validator| validator.call(params, logger) }
-      raise PgDice::CustomValidationError, "Custom validation failed with params: #{params}"
+      raise PgDice::CustomValidationError,
+            "Custom validation failed with params: #{params}. "\
+            "Validators: #{additional_validators.map { |validator| source_location(validator) }}"
     end
 
     private
@@ -48,7 +54,7 @@ module PgDice
       raise PgDice::InvalidConfigurationError, 'approved_tables must be an array of strings!'
     end
 
-    def build_assert_sql(table_name, future_tables, interval)
+    def build_assert_sql(table_name, future_tables_count, period)
       <<~SQL
         SELECT 1
         FROM pg_catalog.pg_class pg_class
@@ -56,8 +62,13 @@ module PgDice
         WHERE pg_class.relkind = 'r'
           AND pg_namespace.nspname = 'public'
           AND pg_class.relname = '#{table_name}_' || to_char(NOW()
-            + INTERVAL '#{future_tables} #{interval}', 'YYYYMMDD')
+            + INTERVAL '#{future_tables_count} #{period}', 'YYYYMMDD')
       SQL
+    end
+
+    def source_location(proc)
+      return proc.source_location if proc.respond_to?(:source_location)
+      proc.to_s
     end
   end
 end

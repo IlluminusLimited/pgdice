@@ -4,26 +4,26 @@
 module PgDice
   #  PartitionManager is a class used to fulfill high-level tasks for partitioning
   class PartitionManager
-    attr_reader :validation_helper, :pg_slice_manager, :database_connection
+    attr_reader :validation, :pg_slice_manager, :database_connection
 
     def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
-      @validation_helper = Validation.new(configuration)
-      @pg_slice_manager = PgSliceManager.new(configuration)
-      @database_connection = DatabaseConnection.new(configuration)
+      @validation = PgDice::Validation.new(configuration)
+      @pg_slice_manager = PgDice::PgSliceManager.new(configuration)
+      @database_connection = PgDice::DatabaseConnection.new(configuration)
     end
 
     def add_new_partitions(params = {})
       logger.info { "add_new_partitions has been called with params: #{params}" }
 
-      validation_helper.validate_parameters(params)
+      validation.validate_parameters(params)
       pg_slice_manager.add_partitions(params)
     end
 
     def drop_old_partitions(params = {})
       logger.info { "drop_old_partitions has been called with params: #{params}" }
 
-      validation_helper.validate_parameters(params)
+      validation.validate_parameters(params)
       old_partitions = list_old_partitions(params)
       logger.warn { "Partitions to be deleted are: #{old_partitions}" }
 
@@ -37,7 +37,7 @@ module PgDice
       partitions_older_than_utc_date = params[:partitions_older_than_utc_date] ||= Time.now.utc.to_date
       logger.info { "Listing old partitions with params: #{params}" }
 
-      validation_helper.validate_parameters(params)
+      validation.validate_parameters(params)
 
       partition_tables = fetch_partition_tables(params)
 
