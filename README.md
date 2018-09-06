@@ -6,7 +6,7 @@ PgDice is a utility that builds on top of the excellent gem
 PgDice  is intended to be used by scheduled background jobs in frameworks like [Sidekiq](https://github.com/mperham/sidekiq)
 where logging and clear exception messages are crucial.
 
-# Disclaimer
+## Disclaimer
 
 There are some features in this gem which allow you to drop database tables. 
 
@@ -50,7 +50,7 @@ PgDice.configure do |config|
 end
 ```
 
-Here's a breakdown of all the configurable things.
+#### Configuration Parameters
 
 `logger` The logger to use.
 
@@ -64,7 +64,7 @@ need to add the base table name to this string of comma-separated values.
 Each predicate will be passed the `params` hash and a `logger`. These predicates are called before doing things like
 dropping tables and adding tables.
 
-#### Advanced Configurations
+#### Advanced Configuration Parameters
 
 `table_dropper` This defaults to [TableDropper](lib/pgdice/table_dropper.rb) which has a `lambda`-like interface. 
 If you would like to provide different behavior for dropping tables (like forcing a dry-run, for example).

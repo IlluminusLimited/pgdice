@@ -26,14 +26,13 @@ jobs:
         paths:
         - cc-test-reporter
 
-  backend-tests:
+  tests:
     <<: *defaults
     steps:
     - checkout
     # Download and cache dependencies
     - restore_cache:
         keys:
-        - gem-cache-{{ arch }}-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
         - gem-cache-{{ arch }}-{{ .Branch }}
         - gem-cache
 
@@ -51,7 +50,7 @@ jobs:
         at: ~/repo/tmp
 
     - run:
-        name: Run backend tests
+        name: Run tests
         command: |
           mkdir /tmp/test-results
           TEST_FILES="$(circleci tests glob "test/**/*_test.rb" | circleci tests split --split-by=timings)"
@@ -88,7 +87,7 @@ workflows:
   commit:
     jobs:
     - build
-    - backend-tests:
+    - tests:
         requires:
         - build
 
