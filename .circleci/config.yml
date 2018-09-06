@@ -10,6 +10,7 @@ defaults: &defaults
     environment:
       DATABASE_HOST: 127.0.0.1
       DATABASE_USERNAME: pgdice
+      DATABASE_PASSWORD:
       PGDICE_LOG_TARGET: STDOUT
 
   - image: circleci/postgres:10.4-alpine-ram
@@ -40,9 +41,6 @@ jobs:
           TEST_FILES="$(circleci tests glob "test/**/*_test.rb" | circleci tests split --split-by=timings)"
 
           bundle exec rake test
-
-
-
 
 workflows:
   version: 2
