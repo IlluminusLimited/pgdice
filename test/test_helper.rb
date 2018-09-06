@@ -3,6 +3,14 @@
 $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 require 'pgdice'
 require 'minitest/autorun'
+require 'simplecov'
+require 'minitest/ci'
+
+Minitest::Ci.report_dir = Rails.root.join('tmp', 'test-results')
+
+SimpleCov.coverage_dir(Rails.root.join('tmp', 'coverage', 'pgdice'))
+
+SimpleCov.start
 
 module Minitest
   class Test

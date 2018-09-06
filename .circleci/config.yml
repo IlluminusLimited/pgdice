@@ -58,16 +58,16 @@ jobs:
     - run:
         name: Run tests
         command: |
-          mkdir /tmp/test-results
+          mkdir -p /tmp/test-results
           TEST_FILES="$(circleci tests glob "test/**/*_test.rb" | circleci tests split --split-by=timings)"
 
           bundle exec rake test
-          ./tmp/cc-test-reporter format-coverage -t simplecov -o tmp/coverage/codeclimate.backend.json tmp/coverage/backend/.resultset.json
+          ./tmp/cc-test-reporter format-coverage -t simplecov -o tmp/coverage/codeclimate.pgdice.json tmp/coverage/pgdice/.resultset.json
 
     - persist_to_workspace:
          root: tmp
          paths:
-         - coverage/codeclimate.backend.json
+         - coverage/codeclimate.pgdice.json
 
     - store_test_results:
        path: ~/repo/tmp/test-results
