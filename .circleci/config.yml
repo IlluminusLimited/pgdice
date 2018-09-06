@@ -23,7 +23,7 @@ jobs:
         - gem-cache-{{ arch }}-{{ .Branch }}
         - gem-cache
 
-    - bundle_install:
+    - run:
         name: Setup dependencies
         command: |
           bundle install --jobs 4 --retry 3
