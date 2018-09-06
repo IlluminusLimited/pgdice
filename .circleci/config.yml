@@ -10,14 +10,14 @@ defaults: &defaults
     environment:
       DATABASE_HOST: 127.0.0.1
       DATABASE_USERNAME: pgdice
-      DATABASE_PASSWORD: password
+      DATABASE_PASSWORD:
       PGDICE_LOG_TARGET: STDOUT
 
   - image: circleci/postgres:10.4-alpine-ram
     environment:
       POSTGRES_USER: pgdice
       POSTGRES_DB: pgdice_test
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD:
 
 jobs:
   tests:
