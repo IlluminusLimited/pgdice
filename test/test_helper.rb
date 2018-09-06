@@ -5,7 +5,7 @@ require 'pgdice'
 require 'minitest/autorun'
 require 'simplecov'
 require 'minitest/ci'
-
+require 'coveralls'
 root_dir = Pathname.new('..').expand_path(File.dirname(__FILE__))
 
 Minitest::Ci.report_dir = root_dir.join('tmp', 'test-results')
@@ -13,6 +13,7 @@ Minitest::Ci.report_dir = root_dir.join('tmp', 'test-results')
 SimpleCov.coverage_dir(root_dir.join('tmp', 'coverage', 'pgdice'))
 
 SimpleCov.start
+Coveralls.wear!
 
 module Minitest
   class Test
