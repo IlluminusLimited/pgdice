@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/IlluminusLimited/pgdice.svg?style=shield)](https://circleci.com/gh/IlluminusLimited/pgdice)
+
 # PgDice
 
 PgDice is a utility that builds on top of the excellent gem
