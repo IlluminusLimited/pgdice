@@ -7,10 +7,10 @@ defaults: &defaults
   working_directory: ~/repo
   docker:
   - image: circleci/ruby:2.5.1
-      environment:
-        DATABASE_HOST: 127.0.0.1
-        DATABASE_USERNAME: pgdice
-        PGDICE_LOG_TARGET: STDOUT
+    environment:
+      DATABASE_HOST: 127.0.0.1
+      DATABASE_USERNAME: pgdice
+      PGDICE_LOG_TARGET: STDOUT
 
   - image: circleci/postgres:10.4-alpine-ram
     environment:
