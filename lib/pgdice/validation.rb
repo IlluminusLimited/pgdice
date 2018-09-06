@@ -3,6 +3,9 @@
 module PgDice
   # Collection of utilities that provide ways for users to ensure things are working properly
   class Validation
+    extend Forwardable
+    def_delegators :@configuration, :logger, :additional_validators, :database_connection, :approved_tables
+
     def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
     end
@@ -27,32 +30,13 @@ module PgDice
         raise PgDice::IllegalTableError, "Table: #{table_name} is not in the list of approved tables!"
       end
 
-      return if additional_validators.all? { |validator| validator.call(params, logger) }
+      return true if additional_validators.all? { |validator| validator.call(params, logger) }
       raise PgDice::CustomValidationError,
             "Custom validation failed with params: #{params}. "\
             "Validators: #{additional_validators.map { |validator| source_location(validator) }}"
     end
 
     private
-
-    def logger
-      @configuration.logger
-    end
-
-    def additional_validators
-      return @configuration.additional_validators if @configuration.additional_validators.is_a?(Array)
-      raise PgDice::InvalidConfigurationError, 'additional_validators must be an array!'
-    end
-
-    def database_connection
-      return @configuration.database_connection if @configuration.database_connection
-      raise PgDice::InvalidConfigurationError, 'database_connection must be present!'
-    end
-
-    def approved_tables
-      return @configuration.approved_tables if @configuration.approved_tables.is_a?(Array)
-      raise PgDice::InvalidConfigurationError, 'approved_tables must be an array of strings!'
-    end
 
     def build_assert_sql(table_name, future_tables_count, period)
       <<~SQL

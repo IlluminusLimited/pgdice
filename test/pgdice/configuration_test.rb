@@ -3,6 +3,10 @@
 require 'test_helper'
 
 class ConfigurationTest < Minitest::Test
+  def setup
+    @configuration = PgDice.configuration.deep_clone
+  end
+
   def test_no_config_throws
     configuration = PgDice.configuration
     PgDice.configuration = nil
@@ -13,11 +17,29 @@ class ConfigurationTest < Minitest::Test
     PgDice.configuration = configuration
   end
 
-  def test_missing_logger_throws
-    configuration = PgDice::Configuration.new
-    configuration.logger = nil
+  def test_nil_logger_throws
+    @configuration.logger = nil
+    assert_invalid_config { @configuration.logger }
+  end
 
-    assert_invalid_config { configuration.logger }
+  def test_nil_database_url_throws
+    @configuration.database_url = nil
+    assert_invalid_config { @configuration.database_url }
+  end
+
+  def test_nil_database_connection_throws
+    @configuration.database_connection = nil
+    assert_invalid_config { @configuration.database_connection }
+  end
+
+  def test_nil_additional_validators_throws
+    @configuration.additional_validators = nil
+    assert_invalid_config { @configuration.additional_validators }
+  end
+
+  def test_nil_approved_tables_throws
+    @configuration.approved_tables = nil
+    assert_invalid_config { @configuration.approved_tables }
   end
 
   private

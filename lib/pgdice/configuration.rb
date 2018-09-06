@@ -13,11 +13,9 @@ module PgDice
 
   # Configuration class which holds all configurable values
   class Configuration
-    attr_writer :logger, :database_url, :database_connection
+    attr_writer :logger, :database_url, :database_connection, :additional_validators, :approved_tables
 
-    attr_accessor :approved_tables,
-                  :additional_validators,
-                  :table_dropper,
+    attr_accessor :table_dropper,
                   :pg_connection,
                   :pg_slice_manager,
                   :partition_manager,
@@ -44,6 +42,16 @@ module PgDice
     def database_connection
       return @database_connection unless @database_connection.nil?
       raise PgDice::InvalidConfigurationError, 'database_connection must be present!'
+    end
+
+    def additional_validators
+      return @additional_validators if @additional_validators.is_a?(Array)
+      raise PgDice::InvalidConfigurationError, 'additional_validators must be an array!'
+    end
+
+    def approved_tables
+      return @approved_tables if @approved_tables.is_a?(Array)
+      raise PgDice::InvalidConfigurationError, 'approved_tables must be an array of strings!'
     end
 
     def deep_clone

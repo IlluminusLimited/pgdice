@@ -4,6 +4,9 @@
 module PgDice
   # PgSliceManager is a wrapper around PgSlice
   class PgSliceManager
+    extend Forwardable
+    def_delegators :@configuration, :logger
+
     def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
     end
@@ -81,10 +84,6 @@ module PgDice
     end
 
     private
-
-    def logger
-      @configuration.logger
-    end
 
     def run_pgslice(argument_string)
       parameters = build_pg_slice_command(argument_string)

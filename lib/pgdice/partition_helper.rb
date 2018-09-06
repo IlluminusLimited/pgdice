@@ -4,6 +4,9 @@
 module PgDice
   # Helps do high-level tasks like getting tables partitioned
   class PartitionHelper
+    extend Forwardable
+    def_delegators :@configuration, :logger
+
     attr_reader :pg_slice_manager, :validation_helper
 
     def initialize(configuration = PgDice::Configuration.new)
@@ -45,10 +48,6 @@ module PgDice
     end
 
     private
-
-    def logger
-      @configuration.logger
-    end
 
     def prep_and_fill(params)
       pg_slice_manager.prep(params)

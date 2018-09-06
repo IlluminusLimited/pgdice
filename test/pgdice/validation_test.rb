@@ -20,7 +20,7 @@ class ValidationTest < Minitest::Test
     end
   end
 
-  def test_additional_validators_work
+  def test_failed_custom_validator_throws
     configuration = PgDice.configuration.deep_clone
     configuration.additional_validators << ->(_params, _logger) { nil }
     assert_raises(PgDice::CustomValidationError) do
@@ -28,15 +28,9 @@ class ValidationTest < Minitest::Test
     end
   end
 
-  def test_configuration_checks
+  def test_good_custom_validator_works
     configuration = PgDice.configuration.deep_clone
-
-    configuration.additional_validators = {}
-    configuration.database_connection = nil
-    configuration.logger = nil
-
-    validation = PgDice::Validation.new(configuration)
-    assert_invalid_config { validation.validate_parameters(table_name: table_name) }
-    assert_invalid_config { validation.assert_future_tables(table_name: table_name, future: 1) }
+    configuration.additional_validators << ->(_params, _logger) { true }
+    assert PgDice::Validation.new(configuration).validate_parameters(table_name: table_name)
   end
 end
