@@ -10,6 +10,7 @@ defaults: &defaults
 
   - image: circleci/postgres:10.4-alpine-ram
     environment:
+      POSTGRES_DB: pgdice_test
 
 jobs:
   tests:
@@ -22,15 +23,10 @@ jobs:
         - gem-cache-{{ arch }}-{{ .Branch }}
         - gem-cache
 
-    - run:
+    - bundle_install:
         name: Setup dependencies
         command: |
           bundle install --jobs 4 --retry 3
-
-    - save_cache:
-        paths:
-        - vendor/bundle
-        key: gem-cache-{{ arch }}-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
 
     - attach_workspace:
         at: ~/repo/tmp
