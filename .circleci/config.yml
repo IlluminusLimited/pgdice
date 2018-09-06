@@ -18,25 +18,19 @@ defaults: &defaults
       POSTGRES_DB: pgdice_test
 
 jobs:
-  build:
+  test:
     <<: *defaults
+    environment:
+    - CC_TEST_REPORTER_ID: b39c211d102df8869887e0f5764fbb06114fd2430cdf6689868dec7a1261fd05
     steps:
+    - checkout
     - run:
         name:  Download cc-test-reporter
         command: |
           mkdir -p tmp/
           curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./tmp/cc-test-reporter
           chmod +x ./tmp/cc-test-reporter
-    - persist_to_workspace:
-        root: tmp
-        paths:
-        - cc-test-reporter
 
-  tests:
-    <<: *defaults
-    steps:
-    - checkout
-    # Download and cache dependencies
     - restore_cache:
         keys:
         - gem-cache-{{ arch }}-{{ .Branch }}
@@ -52,8 +46,6 @@ jobs:
         - vendor/bundle
         key: gem-cache-{{ arch }}-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
 
-    - attach_workspace:
-        at: ~/repo/tmp
 
     - run:
         name: Run tests
@@ -64,11 +56,6 @@ jobs:
           bundle exec rake test
           ./tmp/cc-test-reporter format-coverage -t simplecov -o tmp/coverage/codeclimate.pgdice.json tmp/coverage/pgdice/.resultset.json
 
-    - persist_to_workspace:
-         root: tmp
-         paths:
-         - coverage/codeclimate.pgdice.json
-
     - store_test_results:
        path: ~/repo/tmp/test-results
 
@@ -76,13 +63,6 @@ jobs:
        path: ~/repo/tmp/test-results
        destination: test-results
 
-  upload-coverage:
-    <<: *defaults
-    environment:
-    - CC_TEST_REPORTER_ID: b39c211d102df8869887e0f5764fbb06114fd2430cdf6689868dec7a1261fd05
-    steps:
-    - attach_workspace:
-        at: ~/repo/tmp
     - run:
         name: Upload coverage results to Code Climate
         command: |
@@ -94,11 +74,4 @@ workflows:
   version: 2
   commit:
     jobs:
-    - build
-    - tests:
-        requires:
-        - build
-
-    - upload-coverage:
-        requires:
-        - tests
+    - tests
