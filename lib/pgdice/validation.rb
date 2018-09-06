@@ -30,10 +30,12 @@ module PgDice
         raise PgDice::IllegalTableError, "Table: #{table_name} is not in the list of approved tables!"
       end
 
-      return true if additional_validators.all? { |validator| validator.call(params, logger) }
-      raise PgDice::CustomValidationError,
-            "Custom validation failed with params: #{params}. "\
-            "Validators: #{additional_validators.map { |validator| source_location(validator) }}"
+      begin
+        return true if additional_validators.all? { |validator| validator.call(params, logger) }
+        raise PgDice::CustomValidationError.new(params, additional_validators)
+      rescue StandardError => error
+        raise PgDice::CustomValidationError.new(params, additional_validators, error)
+      end
     end
 
     private
@@ -48,11 +50,6 @@ module PgDice
           AND pg_class.relname = '#{table_name}_' || to_char(NOW()
             + INTERVAL '#{future_tables_count} #{period}', 'YYYYMMDD')
       SQL
-    end
-
-    def source_location(proc)
-      return proc.source_location if proc.respond_to?(:source_location)
-      proc.to_s
     end
   end
 end

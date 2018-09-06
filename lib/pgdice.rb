@@ -17,18 +17,41 @@ require 'pgdice/database_connection'
 module PgDice
   class Error < StandardError
   end
-  class ValidationError < Error
-  end
-  class CustomValidationError < ValidationError
-  end
-  class IllegalTableError < ValidationError
-  end
   class InsufficientFutureTablesError < Error
   end
   class PgSliceError < Error
   end
-  class NotConfiguredError < Error
+
+  class ValidationError < Error
   end
+  class IllegalTableError < ValidationError
+  end
+
+  # Rubocop is stupid
+  class CustomValidationError < ValidationError
+    def initialize(params, validators, error = nil)
+      error_message = "Custom validation failed with params: #{params}. "
+      error_message += "Caused by error: #{error} " if error
+      error_message += "Validators: #{validators.map { |validator| source_location(validator) }.flatten}"
+      super(error_message)
+    end
+
+    private
+
+    def source_location(proc)
+      return proc.source_location if proc.respond_to?(:source_location)
+      proc.to_s
+    end
+  end
+
+  # Rubocop is stupid
+  class NotConfiguredError < Error
+    def initialize(method_name)
+      super("Cannot use #{method_name} before PgDice has been configured! "\
+          'See README.md for configuration help.')
+    end
+  end
+
   # Rubocop is stupid
   class InvalidConfigurationError < Error
     def initialize(message)
@@ -38,28 +61,19 @@ module PgDice
 
   class << self
     def partition_manager
-      unless configuration
-        raise PgDice::NotConfiguredError, 'Cannot use partition_manager before PgDice has been configured! '\
-          'See README.md for configuration help.'
-      end
+      raise PgDice::NotConfiguredError, 'partition_manager' unless configuration
 
       @partition_manager ||= PgDice::PartitionManager.new(configuration)
     end
 
     def partition_helper
-      unless configuration
-        raise PgDice::NotConfiguredError, 'Cannot use partition_helper before PgDice has been configured! '\
-          'See README.md for configuration help.'
-      end
+      raise PgDice::NotConfiguredError, 'partition_helper' unless configuration
 
       @partition_helper ||= PgDice::PartitionHelper.new(configuration)
     end
 
     def validation
-      unless configuration
-        raise PgDice::NotConfiguredError, 'Cannot use validation before PgDice has been configured! '\
-          'See README.md for configuration help.'
-      end
+      raise PgDice::NotConfiguredError, 'validation' unless configuration
 
       @validation ||= PgDice::Validation.new(configuration)
     end

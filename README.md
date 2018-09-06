@@ -121,6 +121,8 @@ PgDice.partition_helper.undo_partitioning!(table_name: 'comments')
 In `partition_helper` there are versions of the methods that will throw exceptions (ending in `!`) and others 
 that will return a truthy value or `false` if there is a failure.
 
+### Maintaining existing partitioned tables
+
 
 ## Development
 
