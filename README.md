@@ -1,5 +1,5 @@
 [![CircleCI](https://circleci.com/gh/IlluminusLimited/pgdice.svg?style=shield)](https://circleci.com/gh/IlluminusLimited/pgdice)
-
+[![Coverage Status](https://coveralls.io/repos/github/IlluminusLimited/pgdice/badge.svg?branch=master)](https://coveralls.io/github/IlluminusLimited/pgdice?branch=master)
 # PgDice
 
 PgDice is a utility that builds on top of the excellent gem
