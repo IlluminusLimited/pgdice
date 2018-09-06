@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
-require 'pgdice'
-require 'minitest/autorun'
 require 'simplecov'
-require 'minitest/ci'
 require 'coveralls'
+require 'minitest/autorun'
+require 'minitest/ci'
+Coveralls.wear!
+
 root_dir = Pathname.new('..').expand_path(File.dirname(__FILE__))
 
 Minitest::Ci.report_dir = root_dir.join('tmp', 'test-results')
@@ -16,7 +17,8 @@ SimpleCov.start do
   add_group('pgdice', 'lib/pgdice')
   add_filter %r{^/test/}
 end
-Coveralls.wear!
+
+require 'pgdice'
 
 module Minitest
   class Test
