@@ -33,11 +33,11 @@ module Minitest
       username = ENV['DATABASE_USERNAME']
       password = ENV['DATABASE_PASSWORD']
       login = ''
-      login = username if username
-      login += "@#{password}" if password
+      login = "#{username}@" if username
+      login = "#{username}:#{password}@" if password
       host = ENV['DATABASE_HOST']
 
-      config.database_url = "postgres:/#{login}/#{host}/pgdice_test"
+      config.database_url = "postgres://#{login}#{host}/pgdice_test"
       config.approved_tables = ['comments']
     end
     PgDice.configuration.database_connection.execute(@sql)
