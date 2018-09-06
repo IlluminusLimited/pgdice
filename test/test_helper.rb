@@ -28,7 +28,8 @@ module Minitest
                 SELECT NOW(), NOW() FROM generate_series(1, 10000) n;
     SQL
     PgDice.configure do |config|
-      config.logger = Logger.new('pgdice.log')
+      log_target = ENV['PGDICE_LOG_TARGET'] || 'pgdice.log'
+      config.logger = Logger.new(log_target)
       username = ENV['DATABASE_USERNAME']
       password = ENV['DATABASE_PASSWORD']
       login = ''

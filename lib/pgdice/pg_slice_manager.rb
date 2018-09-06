@@ -93,8 +93,9 @@ module PgDice
       log_result(stdout, stderr, status)
 
       if status.exitstatus.to_i.positive?
-        raise PgDice::Error::PgSliceError, "pgslice with arguments: '#{argument_string}' failed with status: '#{status.exitstatus}' "\
-"STDOUT: '#{stdout}' STDERR: '#{stderr}'"
+        raise PgDice::Error::PgSliceError,
+              "pgslice with arguments: '#{argument_string}' failed with status: '#{status.exitstatus}' "\
+                 "STDOUT: '#{stdout}' STDERR: '#{stderr}'"
       end
       true
     end
