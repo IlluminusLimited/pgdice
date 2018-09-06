@@ -29,7 +29,13 @@ module Minitest
     SQL
     PgDice.configure do |config|
       config.logger = Logger.new('pgdice.log')
-      config.database_url = 'postgres:///pgdice_test'
+      username = ENV['DATABASE_USERNAME']
+      password = ENV['DATABASE_PASSWORD']
+      login = ''
+      login = "#{username}@#{password}" if username && password
+      host = ENV['DATABASE_HOST']
+
+      config.database_url = "postgres:/#{login}/#{host}/pgdice_test"
       config.approved_tables = ['comments']
     end
     PgDice.configuration.database_connection.execute(@sql)

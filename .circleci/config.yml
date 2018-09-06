@@ -7,9 +7,14 @@ defaults: &defaults
   working_directory: ~/repo
   docker:
   - image: circleci/ruby:2.5.1
+      environment:
+        DATABASE_HOST: 127.0.0.1
+        DATABASE_USERNAME: pgdice
+        DATABASE_PASSWORD:
 
   - image: circleci/postgres:10.4-alpine-ram
     environment:
+      POSTGRES_USER: pgdice
       POSTGRES_DB: pgdice_test
 
 jobs:
@@ -27,9 +32,6 @@ jobs:
         name: Setup dependencies
         command: |
           bundle install --jobs 4 --retry 3
-
-    - attach_workspace:
-        at: ~/repo/tmp
 
     - run:
         name: Run tests
