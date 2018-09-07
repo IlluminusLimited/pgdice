@@ -26,11 +26,11 @@ module PgDice
 
     attr_writer :logger,
                 :database_url,
-                :database_connection,
                 :additional_validators,
                 :approved_tables,
                 :keep_tables_newer_than,
-                :dry_run
+                :dry_run,
+                :database_connection
 
     attr_accessor :table_dropper,
                   :pg_connection,
