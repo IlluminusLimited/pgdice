@@ -18,6 +18,12 @@ class PartitionManagerTest < Minitest::Test
     assert PgDice.validation.assert_future_tables(table_name: table_name, future: future_tables)
   end
 
+  def test_future_partitions_blows_up_on_unpartitioned_table
+    assert_raises(PgDice::PgSliceError) do
+      PgDice.partition_manager.add_new_partitions(table_name: table_name, future: 2)
+    end
+  end
+
   def test_old_partitions_can_be_listed
     partition_manager = PgDice.partition_manager
     partition_helper.partition_table!(table_name: table_name,

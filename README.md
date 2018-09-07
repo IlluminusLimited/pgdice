@@ -133,6 +133,17 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version,
  push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
+
+### Running tests
+
+You're going to need to have postgres 10 or greater installed.
+
+Run the following commands from your terminal. Don't run these on anything but a development machine.
+
+1. `psql postgres -c create role pgdice with createdb superuser login password 'password';`
+1. `createdb pgdice_test`
+1. Now you can run the tests via `guard` or `rake test`
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at 
