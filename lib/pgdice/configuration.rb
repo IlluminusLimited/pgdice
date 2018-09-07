@@ -42,12 +42,6 @@ module PgDice
       VALUES.each do |key, value|
         initialize_value(key, value, existing_configuration)
       end
-      # @logger = existing_configuration&.logger&.clone || Logger.new(STDOUT)
-      # @database_url = existing_configuration&.database_url&.clone || nil
-      # @approved_tables = existing_configuration&.approved_tables&.clone || []
-      # @additional_validators = existing_configuration&.additional_validators&.clone || []
-      # @keep_tables_newer_than = existing_configuration&.keep_tables_newer_than&.clone || days_ago(90)
-      # @dry_run = existing_configuration&.dry_run&.clone || false
       initialize_objects
     end
 
