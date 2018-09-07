@@ -9,8 +9,10 @@ module PgDice
       @configuration = configuration
     end
 
-    def call(table_to_drop, _logger)
-      @configuration.database_connection.execute(drop_partition(table_to_drop))
+    def call(table_to_drop, logger)
+      sql = drop_partition(table_to_drop)
+      logger.debug { "TableDropper executing: #{sql}" }
+      @configuration.database_connection.execute(sql)
     end
 
     private

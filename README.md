@@ -121,8 +121,30 @@ PgDice.partition_helper.undo_partitioning!(table_name: 'comments')
 In `partition_helper` there are versions of the methods that will throw exceptions (ending in `!`) and others 
 that will return a truthy value or `false` if there is a failure.
 
-### Maintaining existing partitioned tables
+### Maintaining partitioned tables
 
+#### Adding more tables
+
+If you have existing tables that need to periodically have more tables added you can run:
+
+```ruby
+PgDice.partition_manager.add_new_partitions(table_name: 'comments', future: 30)
+```
+
+The above command would add 30 new tables and their associated indexes all based on the `period` that the
+partitioned table was defined with.
+
+#### Dropping old tables
+
+__Dropping tables is irreversible! Do this at your own risk!!__
+
+If you want to drop old tables (after backing them up of course) you can run:
+
+```ruby
+PgDice.partition_manager.drop_old_partitions(table_name: 'comments', keep_tables_newer_than: Time.now.utc - 90*24*60*60)
+```
+
+This command would drop old partitions that are older than `90` days.
 
 ## Development
 

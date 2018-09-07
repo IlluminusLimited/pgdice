@@ -5,7 +5,7 @@ module PgDice
   #  PartitionManager is a class used to fulfill high-level tasks for partitioning
   class PartitionManager
     extend Forwardable
-    def_delegators :@configuration, :logger
+    def_delegators :@configuration, :logger, :keep_tables_newer_than
 
     attr_reader :validation, :pg_slice_manager, :database_connection
 
@@ -37,14 +37,14 @@ module PgDice
     end
 
     def list_old_partitions(params = {})
-      partitions_older_than_utc_date = params[:partitions_older_than_utc_date] ||= Time.now.utc.to_date
+      params[:keep_tables_newer_than] ||= keep_tables_newer_than
       logger.info { "Listing old partitions with params: #{params}" }
 
       validation.validate_parameters(params)
 
       partition_tables = fetch_partition_tables(params)
 
-      filter_partitions(partition_tables, params[:table_name], partitions_older_than_utc_date)
+      filter_partitions(partition_tables, params[:table_name], params[:keep_tables_newer_than])
     end
 
     # Grabs only tables that start with the base_table_name and end in numbers
@@ -63,7 +63,7 @@ module PgDice
 
     def filter_partitions(partition_tables, base_table_name, partitions_older_than_date)
       partition_tables.select do |partition_name|
-        partition_created_at_date = Date.parse(partition_name.gsub(/#{base_table_name}_/, ''))
+        partition_created_at_date = Date.parse(partition_name.gsub(/#{base_table_name}_/, '')).to_time
         partition_created_at_date < partitions_older_than_date
       end
     end
