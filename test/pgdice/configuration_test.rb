@@ -42,6 +42,16 @@ class ConfigurationTest < Minitest::Test
     assert_invalid_config { @configuration.approved_tables }
   end
 
+  def test_nil_keep_tables_newer_than_throws
+    @configuration.keep_tables_newer_than = nil
+    assert_invalid_config { @configuration.keep_tables_newer_than }
+  end
+
+  def test_nil_dry_run_throws
+    @configuration.dry_run = nil
+    assert_invalid_config { @configuration.dry_run }
+  end
+
   private
 
   def assert_not_configured(&block)
