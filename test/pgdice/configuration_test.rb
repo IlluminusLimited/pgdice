@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'test_helper'
+require 'active_support/time'
 
 class ConfigurationTest < Minitest::Test
   def setup
@@ -50,6 +51,11 @@ class ConfigurationTest < Minitest::Test
   def test_nil_dry_run_throws
     @configuration.dry_run = nil
     assert_invalid_config { @configuration.dry_run }
+  end
+
+  def test_nil_older_than_takes_activesupport_date
+    @configuration.older_than = 90.days.ago
+    assert @configuration.older_than
   end
 
   private

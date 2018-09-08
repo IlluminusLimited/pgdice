@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Andrew Newell']
   spec.email         = ['andrew@andrewcn.com illuminuslimited@gmail.com']
 
-  spec.summary       = 'Postgres partitioning built on top of https://github.com/ankane/pgslice'
-  spec.description   = 'Postgres partitioning built on top of https://github.com/ankane/pgslice'
+  spec.summary       = 'Postgres partitioning with a Ruby API!'
+  spec.description   = 'Postgres partitioning with a Ruby API built on top of https://github.com/ankane/pgslice'
   spec.homepage      = 'https://github.com/IlluminusLimited/pgdice'
   spec.license       = 'MIT'
 
@@ -28,6 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'pg', '>= 0.12.2'
   spec.add_runtime_dependency 'pgslice', '0.4.4'
 
+  spec.add_development_dependency 'activesupport', '~> 5.0.0'
   spec.add_development_dependency 'bundler', '~> 1.16'
   spec.add_development_dependency 'coveralls'
   spec.add_development_dependency 'guard'

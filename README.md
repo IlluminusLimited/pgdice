@@ -54,7 +54,7 @@ end
 
 #### Configuration Parameters
 
-`logger` Optional: The logger to use. If you don't set this it defaults to STDOUT
+`logger` Optional: The logger to use. If you don't set this it defaults to STDOUT.
 
 `database_url` The postgres database url to connect to. This is required since `pgslice` is used to accomplish some tasks
 and it only takes a `url` currently.
@@ -66,10 +66,12 @@ need to add the base table name to this string of comma-separated values.
 Each predicate will be passed the `params` hash and a `logger`. These predicates are called before doing things like
 dropping tables and adding tables. 
 
-`dry_run` Optional: You can set it to either `true` or `false`
+`dry_run` Optional: You can set it to either `true` or `false`. This will make PgDice print the commands but not 
+execute them.
 
-`older_than` Optional: Time object for the limit on 
+`older_than` Optional: Time object used to scope the queries on droppable tables.
 
+`table_drop_batch_size` Optional: Maximum number of tables you can drop in one query. Defaults to 7.
 
 #### Advanced Configuration Parameters
 
@@ -162,6 +164,11 @@ If you want to check what partitions are eligible for dropping you can do:
 PgDice.partition_manager.list_old_partitions(table_name: 'comments', older_than: Time.now.utc - 90*24*60*60)
 ```
 
+
+## Planned Features
+
+1. Full `PG::Connection` support (no more database URLs).
+2. Non time-range based partitioning.
 
 ## Development
 
