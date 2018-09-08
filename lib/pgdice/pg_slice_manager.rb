@@ -5,7 +5,7 @@ module PgDice
   # PgSliceManager is a wrapper around PgSlice
   class PgSliceManager
     extend Forwardable
-    def_delegators :@configuration, :logger
+    def_delegators :@configuration, :logger, :database_url, :dry_run
 
     def initialize(configuration = PgDice::Configuration.new)
       @configuration = configuration
@@ -104,7 +104,10 @@ module PgDice
       logger.info { "Running pgslice command: '#{argument_string}'" }
       $stdout.flush
       $stderr.flush
-      "pgslice #{argument_string} --url #{@configuration.database_url}"
+      command = "pgslice #{argument_string} "
+      command += '--dry-run true ' if dry_run
+      command += "--url #{database_url}"
+      command
     end
 
     def log_result(stdout, stderr, status)

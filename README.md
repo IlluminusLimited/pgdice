@@ -54,7 +54,7 @@ end
 
 #### Configuration Parameters
 
-`logger` The logger to use.
+`logger` Optional: The logger to use. If you don't set this it defaults to STDOUT
 
 `database_url` The postgres database url to connect to. This is required since `pgslice` is used to accomplish some tasks
 and it only takes a `url` currently.
@@ -62,9 +62,14 @@ and it only takes a `url` currently.
 `approved_tables` This one is important. If you want to manipulate database tables with this gem you're going to
 need to add the base table name to this string of comma-separated values.
 
-`additional_validators` This can accept an array of `proc` or `lambda` type predicates. 
+`additional_validators` Optional: This can accept an array of `proc` or `lambda` type predicates. 
 Each predicate will be passed the `params` hash and a `logger`. These predicates are called before doing things like
 dropping tables and adding tables. 
+
+`dry_run` Optional: You can set it to either `true` or `false`
+
+`older_than` Optional: Time object for the limit on 
+
 
 #### Advanced Configuration Parameters
 
@@ -121,7 +126,41 @@ PgDice.partition_helper.undo_partitioning!(table_name: 'comments')
 In `partition_helper` there are versions of the methods that will throw exceptions (ending in `!`) and others 
 that will return a truthy value or `false` if there is a failure.
 
-### Maintaining existing partitioned tables
+### Maintaining partitioned tables
+
+#### Adding more tables
+
+If you have existing tables that need to periodically have more tables added you can run:
+
+```ruby
+PgDice.partition_manager.add_new_partitions(table_name: 'comments', future: 30)
+```
+
+The above command would add 30 new tables and their associated indexes all based on the `period` that the
+partitioned table was defined with.
+
+#### Dropping old tables
+
+_Dropping tables is irreversible! Do this at your own risk!!_
+
+If you want to drop old tables (after backing them up of course) you can run:
+
+```ruby
+PgDice.partition_manager.drop_old_partitions(table_name: 'comments', older_than: Time.now.utc - 90*24*60*60)
+```
+
+If you have `active_support` you could do:
+```ruby
+PgDice.partition_manager.drop_old_partitions(table_name: 'comments', older_than: 90.days.ago)
+```
+
+This command would drop old partitions that are older than `90` days.
+
+If you want to check what partitions are eligible for dropping you can do:
+
+```ruby
+PgDice.partition_manager.list_old_partitions(table_name: 'comments', older_than: Time.now.utc - 90*24*60*60)
+```
 
 
 ## Development
@@ -132,6 +171,17 @@ You can also run `bin/console` for an interactive prompt that will allow you to 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the 
 version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version,
  push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+
+
+### Running tests
+
+You're going to need to have postgres 10 or greater installed.
+
+Run the following commands from your terminal. Don't run these on anything but a development machine.
+
+1. `psql postgres -c create role pgdice with createdb superuser login password 'password';`
+1. `createdb pgdice_test`
+1. Now you can run the tests via `guard` or `rake test`
 
 ## Contributing
 

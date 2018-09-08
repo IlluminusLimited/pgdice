@@ -35,14 +35,14 @@ module PgDice
 
     def partition_table(params = {})
       partition_table!(params)
-    rescue PgDice::Error::PgSliceError => error
+    rescue PgDice::PgSliceError => error
       logger.error { "Rescued PgSliceError: #{error}" }
       false
     end
 
     def undo_partitioning(params = {})
       undo_partitioning!(params)
-    rescue PgDice::Error::PgSliceError => error
+    rescue PgDice::PgSliceError => error
       logger.error { "Rescued PgSliceError: #{error}" }
       false
     end
