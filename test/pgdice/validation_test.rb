@@ -3,9 +3,19 @@
 require 'test_helper'
 
 class ValidationTest < Minitest::Test
-  def test_assert_future_tables_throws
+  def test_assert_tables_throws
     assert_raises(PgDice::InsufficientFutureTablesError) do
-      PgDice.validation.assert_future_tables(table_name: table_name, future: 30)
+      PgDice.validation.assert_tables(table_name: table_name, future: 30)
+    end
+
+    assert_raises(PgDice::InsufficientPastTablesError) do
+      PgDice.validation.assert_tables(table_name: table_name, past: 30)
+    end
+  end
+
+  def test_assert_tables_requires_past_or_future
+    assert_raises(ArgumentError) do
+      PgDice.validation.assert_tables(table_name: table_name)
     end
   end
 

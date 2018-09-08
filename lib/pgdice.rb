@@ -17,13 +17,33 @@ require 'pgdice/database_connection'
 module PgDice
   class Error < StandardError
   end
-  class InsufficientFutureTablesError < Error
-  end
   class PgSliceError < Error
   end
   class ValidationError < Error
   end
   class IllegalTableError < ValidationError
+  end
+
+  # Rubocop is stupid
+  class InsufficientTablesError < Error
+    def initialize(direction, table_name, table_count, period)
+      super("Insufficient #{direction} tables exist for table: #{table_name}. "\
+        "Expected: #{table_count} having period of: #{period}")
+    end
+  end
+
+  # Rubocop is stupid
+  class InsufficientFutureTablesError < InsufficientTablesError
+    def initialize(table_name, table_count, period)
+      super('future', table_name, table_count, period)
+    end
+  end
+
+  # Rubocop is stupid
+  class InsufficientPastTablesError < InsufficientTablesError
+    def initialize(table_name, table_count, period)
+      super('past', table_name, table_count, period)
+    end
   end
 
   # Rubocop is stupid
@@ -37,6 +57,7 @@ module PgDice
 
     private
 
+    # Helps users know what went wrong in their custom validators
     def source_location(proc)
       return proc.source_location if proc.respond_to?(:source_location)
       proc.to_s

@@ -10,18 +10,13 @@ module PgDice
       @configuration = configuration
     end
 
-    def assert_future_tables(params = {})
+    def assert_tables(params = {})
+      raise ArgumentError unless params[:future] || params[:past]
       table_name = params.fetch(:table_name)
-      future = params.fetch(:future)
       period = params.fetch(:period, 'day')
-
-      sql = build_assert_sql(table_name, future, period)
-
-      response = database_connection.execute(sql)
-
-      return true if response.values.size == 1
-      raise PgDice::InsufficientFutureTablesError, "Insufficient future tables exist for table: #{table_name}. "\
-"Expected: #{future} having period of: #{period}"
+      assert_future_tables(table_name, params[:future], period) if params[:future]
+      assert_past_tables(table_name, params[:past], period) if params[:past]
+      true
     end
 
     def validate_parameters(params)
@@ -40,7 +35,26 @@ module PgDice
 
     private
 
-    def build_assert_sql(table_name, future_tables_count, period)
+    def assert_future_tables(table_name, future, period)
+      sql = build_assert_sql(table_name, future, period, :future)
+
+      response = database_connection.execute(sql)
+
+      return true if response.values.size == 1
+      raise PgDice::InsufficientFutureTablesError.new(table_name, future, period)
+    end
+
+    def assert_past_tables(table_name, past, period)
+      sql = build_assert_sql(table_name, past, period, :past)
+
+      response = database_connection.execute(sql)
+
+      return true if response.values.size == 1
+      raise PgDice::InsufficientPastTablesError.new(table_name, past, period)
+    end
+
+    def build_assert_sql(table_name, table_count, period, direction)
+      add_or_subtract = { future: '+', past: '-' }.fetch(direction, '+')
       <<~SQL
         SELECT 1
         FROM pg_catalog.pg_class pg_class
@@ -48,7 +62,7 @@ module PgDice
         WHERE pg_class.relkind = 'r'
           AND pg_namespace.nspname = 'public'
           AND pg_class.relname = '#{table_name}_' || to_char(NOW()
-            + INTERVAL '#{future_tables_count} #{period}', 'YYYYMMDD')
+            #{add_or_subtract} INTERVAL '#{table_count} #{period}', 'YYYYMMDD')
       SQL
     end
   end

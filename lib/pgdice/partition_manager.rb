@@ -68,23 +68,6 @@ module PgDice
       end
     end
 
-    def convert_comment_to_hash(comment)
-      partition_template = {}
-
-      comment.split(',').each do |key_value_pair|
-        key, value = key_value_pair.split(':')
-        partition_template[key.to_sym] = value
-      end
-
-      partition_template
-    end
-
-    def build_table_comment_sql(table_name, schema)
-      <<~SQL
-        SELECT obj_description('#{schema}.#{table_name}'::REGCLASS) AS comment
-      SQL
-    end
-
     def build_partition_table_fetch_sql(params = {})
       schema = params.fetch(:schema)
       base_table_name = params.fetch(:table_name)

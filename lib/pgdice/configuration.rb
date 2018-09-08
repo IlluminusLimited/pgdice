@@ -84,7 +84,7 @@ module PgDice
 
     def table_drop_batch_size
       return @table_drop_batch_size.to_i if @table_drop_batch_size.to_i >= 0
-      raise PgDice::InvalidConfigurationError, 'table_drop_batch_size must be an Integer!'
+      raise PgDice::InvalidConfigurationError, 'table_drop_batch_size must be a non-negative Integer!'
     end
 
     # Lazily initialized
