@@ -32,10 +32,10 @@ module PgDice
                 :older_than,
                 :dry_run,
                 :table_drop_batch_size,
-                :database_connection
+                :database_connection,
+                :pg_connection
 
     attr_accessor :table_dropper,
-                  :pg_connection,
                   :pg_slice_manager,
                   :partition_manager,
                   :partition_helper
@@ -85,6 +85,13 @@ module PgDice
     def table_drop_batch_size
       return @table_drop_batch_size.to_i if @table_drop_batch_size.to_i >= 0
       raise PgDice::InvalidConfigurationError, 'table_drop_batch_size must be an Integer!'
+    end
+
+    # Lazily initialized
+    def pg_connection
+      @pg_connection ||= PG::Connection.new(database_url)
+      return @pg_connection if @pg_connection.respond_to?(:exec)
+      raise PgDice::InvalidConfigurationError, 'pg_connection must be present!'
     end
 
     def deep_clone
