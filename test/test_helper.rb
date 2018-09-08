@@ -56,7 +56,7 @@ module Minitest
 
       config.database_url = "postgres://#{login}#{host}/pgdice_test"
       config.approved_tables = ['comments']
-      config.keep_tables_newer_than = PgDice::Configuration.days_ago(1)
+      config.older_than = PgDice::Configuration.days_ago(1)
     end
     PgDice.configuration.logger.info { 'Starting tests' }
 

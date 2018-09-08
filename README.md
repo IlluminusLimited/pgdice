@@ -54,7 +54,7 @@ end
 
 #### Configuration Parameters
 
-`logger` The logger to use.
+`logger` Optional: The logger to use. If you don't set this it defaults to STDOUT
 
 `database_url` The postgres database url to connect to. This is required since `pgslice` is used to accomplish some tasks
 and it only takes a `url` currently.
@@ -62,9 +62,14 @@ and it only takes a `url` currently.
 `approved_tables` This one is important. If you want to manipulate database tables with this gem you're going to
 need to add the base table name to this string of comma-separated values.
 
-`additional_validators` This can accept an array of `proc` or `lambda` type predicates. 
+`additional_validators` Optional: This can accept an array of `proc` or `lambda` type predicates. 
 Each predicate will be passed the `params` hash and a `logger`. These predicates are called before doing things like
 dropping tables and adding tables. 
+
+`dry_run` Optional: You can set it to either `true` or `false`
+
+`older_than` Optional: Time object for the limit on 
+
 
 #### Advanced Configuration Parameters
 
@@ -136,15 +141,27 @@ partitioned table was defined with.
 
 #### Dropping old tables
 
-__Dropping tables is irreversible! Do this at your own risk!!__
+_Dropping tables is irreversible! Do this at your own risk!!_
 
 If you want to drop old tables (after backing them up of course) you can run:
 
 ```ruby
-PgDice.partition_manager.drop_old_partitions(table_name: 'comments', keep_tables_newer_than: Time.now.utc - 90*24*60*60)
+PgDice.partition_manager.drop_old_partitions(table_name: 'comments', older_than: Time.now.utc - 90*24*60*60)
+```
+
+If you have `active_support` you could do:
+```ruby
+PgDice.partition_manager.drop_old_partitions(table_name: 'comments', older_than: 90.days.ago)
 ```
 
 This command would drop old partitions that are older than `90` days.
+
+If you want to check what partitions are eligible for dropping you can do:
+
+```ruby
+PgDice.partition_manager.list_old_partitions(table_name: 'comments', older_than: Time.now.utc - 90*24*60*60)
+```
+
 
 ## Development
 
