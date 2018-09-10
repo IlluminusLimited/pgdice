@@ -69,14 +69,14 @@ dropping tables and adding tables.
 `dry_run` Optional: You can set it to either `true` or `false`. This will make PgDice print the commands but not 
 execute them.
 
-`older_than` Optional: Time object used to scope the queries on droppable tables.
+`older_than` Optional: Time object used to scope the queries on droppable tables. Defaults to 90 days ago.
 
 `table_drop_batch_size` Optional: Maximum number of tables you can drop in one query. Defaults to 7.
 
 #### Advanced Configuration Parameters
 
 `table_dropper` This defaults to [TableDropper](lib/pgdice/table_dropper.rb) which has a `lambda`-like interface. 
-If you would like to provide different behavior for dropping tables (like forcing a dry-run, for example).
+An example use-case would be calling out to your backup system to confirm the table is backed up.
 This mechanism will be passed the `table_to_drop` and a `logger`.
 
 `pg_connection` This is a `PG::Connection` object used for the database queries made from `pgdice`.
@@ -98,7 +98,7 @@ This mechanism will be passed the `table_to_drop` and a `logger`.
  
 ### Converting existing tables to partitioned tables
 
-__This should only be used on small tables and ONLY after you have tested it on a non-production copy of your 
+__This should only be used on smallish tables and ONLY after you have tested it on a non-production copy of your 
 production database.__
 In fact, you should just not do this in production. Schedule downtime or something and run it a few times on
 a copy of your database. Then practice restoring your database some more.
@@ -141,6 +141,26 @@ PgDice.partition_manager.add_new_partitions(table_name: 'comments', future: 30)
 The above command would add 30 new tables and their associated indexes all based on the `period` that the
 partitioned table was defined with.
 
+
+#### Listing old tables
+
+Sometimes you just want to know what's out there and if there are tables ready to be dropped.
+
+To list all eligible tables for dropping you can run:
+```ruby
+PgDice.partition_manager.list_old_partitions(table_name: 'comments', older_than: Time.now.utc - 90*24*60*60)
+```
+
+If you have `active_support` you could do:
+```ruby
+PgDice.partition_manager.list_old_partitions(table_name: 'comments', older_than: 90.days.ago)
+```
+
+Technically `older_than` is optional and defaults to `90 days` (see the configuration section).
+It is recommended that you pass it in to be explicit, but you can rely on the configuration 
+mechanism if you so choose.
+
+
 #### Dropping old tables
 
 _Dropping tables is irreversible! Do this at your own risk!!_
@@ -158,11 +178,9 @@ PgDice.partition_manager.drop_old_partitions(table_name: 'comments', older_than:
 
 This command would drop old partitions that are older than `90` days.
 
-If you want to check what partitions are eligible for dropping you can do:
-
-```ruby
-PgDice.partition_manager.list_old_partitions(table_name: 'comments', older_than: Time.now.utc - 90*24*60*60)
-```
+Technically `older_than` is optional and defaults to `90 days` (see the configuration section).
+It is recommended that you pass it in to be explicit, but you can rely on the configuration 
+mechanism if you so choose.
 
 
 ## Planned Features
