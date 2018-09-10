@@ -49,41 +49,49 @@ module PgDice
 
     def logger
       return @logger unless @logger.nil?
+
       raise PgDice::InvalidConfigurationError, 'logger must be present!'
     end
 
     def database_url
       return @database_url unless @database_url.nil?
+
       raise PgDice::InvalidConfigurationError, 'database_url must be present!'
     end
 
     def database_connection
       return @database_connection unless @database_connection.nil?
+
       raise PgDice::InvalidConfigurationError, 'database_connection must be present!'
     end
 
     def additional_validators
       return @additional_validators if @additional_validators.is_a?(Array)
+
       raise PgDice::InvalidConfigurationError, 'additional_validators must be an Array!'
     end
 
     def approved_tables
       return @approved_tables if @approved_tables.is_a?(Array)
+
       raise PgDice::InvalidConfigurationError, 'approved_tables must be an Array of strings!'
     end
 
     def older_than
       return @older_than if @older_than.is_a?(Time)
+
       raise PgDice::InvalidConfigurationError, 'older_than must be a Time!'
     end
 
     def dry_run
       return @dry_run if [true, false].include?(@dry_run)
+
       raise PgDice::InvalidConfigurationError, 'dry_run must be either true or false!'
     end
 
     def table_drop_batch_size
       return @table_drop_batch_size.to_i if @table_drop_batch_size.to_i >= 0
+
       raise PgDice::InvalidConfigurationError, 'table_drop_batch_size must be a non-negative Integer!'
     end
 
@@ -91,6 +99,7 @@ module PgDice
     def pg_connection
       @pg_connection ||= PG::Connection.new(database_url)
       return @pg_connection if @pg_connection.respond_to?(:exec)
+
       raise PgDice::InvalidConfigurationError, 'pg_connection must be present!'
     end
 

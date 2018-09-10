@@ -17,7 +17,10 @@ module PgDice
 
     def partition_table!(params = {})
       params[:column_name] ||= 'created_at'
-      params[:period] ||= 'day'
+      params[:period] ||= :day
+
+      validation_helper.validate_parameters(params)
+
       logger.info { "Preparing database with params: #{params}" }
 
       prep_and_fill(params)
@@ -26,6 +29,8 @@ module PgDice
 
     def undo_partitioning!(params = {})
       table_name = params.fetch(:table_name)
+
+      validation_helper.validate_parameters(params)
       logger.info { "Cleaning up database with params: #{table_name}" }
 
       pg_slice_manager.analyze(table_name: table_name, swapped: true)

@@ -79,4 +79,16 @@ class PartitionManagerTest < Minitest::Test
     assert_equal batch_size, @partition_manager.drop_old_partitions(table_name: table_name).size
     assert PgDice.validation.assert_tables(table_name: table_name, past: 1)
   end
+
+  def test_add_future_partitions_checks_allowed_tables
+    assert_raises(PgDice::IllegalTableError) do
+      @partition_manager.add_new_partitions(table_name: 'bob')
+    end
+  end
+
+  def test_drop_old_partitions_checks_allowed_tables
+    assert_raises(PgDice::IllegalTableError) do
+      @partition_manager.drop_old_partitions(table_name: 'bob')
+    end
+  end
 end

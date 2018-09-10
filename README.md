@@ -183,6 +183,20 @@ It is recommended that you pass it in to be explicit, but you can rely on the co
 mechanism if you so choose.
 
 
+#### Validating everything is still working
+
+If you've got background jobs creating and dropping tables you're going to want to 
+ensure they are actually doing their jobs correctly. 
+
+To validate that your expected number of tables exist, you can run:
+```ruby
+PgDice.validation.assert_tables(table_name: 'comments', future: 30, past: 90)
+```
+
+This will check that the table 30 days from now exists and that there is 
+still a table from 90 days ago. The above example assumes the table was partitioned
+by day.
+
 ## Planned Features
 
 1. Full `PG::Connection` support (no more database URLs).
@@ -204,7 +218,7 @@ You're going to need to have postgres 10 or greater installed.
 
 Run the following commands from your terminal. Don't run these on anything but a development machine.
 
-1. `psql postgres -c create role pgdice with createdb superuser login password 'password';`
+1. `psql postgres -c "create role pgdice with createdb superuser login password 'password';"`
 1. `createdb pgdice_test`
 1. Now you can run the tests via `guard` or `rake test`
 

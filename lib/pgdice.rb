@@ -60,6 +60,7 @@ module PgDice
     # Helps users know what went wrong in their custom validators
     def source_location(proc)
       return proc.source_location if proc.respond_to?(:source_location)
+
       proc.to_s
     end
   end
@@ -81,6 +82,8 @@ module PgDice
       super("PgDice is not configured properly. #{message}")
     end
   end
+
+  SUPPORTED_PERIODS = %i[day year].freeze
 
   class << self
     def partition_manager
