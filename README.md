@@ -182,6 +182,9 @@ Technically `older_than` is optional and defaults to `90 days` (see the configur
 It is recommended that you pass it in to be explicit, but you can rely on the configuration 
 mechanism if you so choose.
 
+Another good reason to pass in the `older_than` parameter is if you are managing tables that
+are partiioned by different schemes or have different use-cases 
+e.g. daily vs yearly partitioned tables.
 
 #### Validating everything is still working
 
@@ -192,6 +195,8 @@ To validate that your expected number of tables exist, you can run:
 ```ruby
 PgDice.validation.assert_tables(table_name: 'comments', future: 30, past: 90)
 ```
+
+An [InsufficientTablesError](lib/pgdice.rb) will be raised if any conditions are not met.
 
 This will check that the table 30 days from now exists and that there is 
 still a table from 90 days ago. The above example assumes the table was partitioned

@@ -24,25 +24,40 @@ module Minitest
   class Test
     @sql = <<~SQL
       SET client_min_messages = warning;
+      DROP TABLE IF EXISTS "posts_intermediate" CASCADE;
+      DROP TABLE IF EXISTS "posts" CASCADE;
+      DROP TABLE IF EXISTS "posts_retired" CASCADE;
       DROP TABLE IF EXISTS "comments_intermediate" CASCADE;
       DROP TABLE IF EXISTS "comments" CASCADE;
       DROP TABLE IF EXISTS "comments_retired" CASCADE;
       DROP FUNCTION IF EXISTS "comments_insert_trigger"();
       DROP TABLE IF EXISTS "users" CASCADE;
-        CREATE TABLE "users" (
-         "id" SERIAL PRIMARY KEY
-        );
-         CREATE TABLE "comments" (
-          "id" SERIAL PRIMARY KEY,
-          "user_id" INTEGER,
-          "created_at" timestamp,
-          "created_on" date,
-          CONSTRAINT "foreign_key_1" FOREIGN KEY ("user_id") REFERENCES "users"("id")
-        );
-        CREATE INDEX ON "comments" ("created_at");
-        INSERT INTO "comments" ("created_at", "created_on")
-                SELECT NOW(), NOW() FROM generate_series(1, 10000) n;
+      CREATE TABLE "users" (
+       "id" SERIAL PRIMARY KEY
+      );
+      CREATE TABLE "comments" (
+        "id" SERIAL PRIMARY KEY,
+        "user_id" INTEGER,
+        "created_at" timestamp,
+        "created_on" date,
+        CONSTRAINT "foreign_key_1" FOREIGN KEY ("user_id") REFERENCES "users"("id")
+      );
+      CREATE INDEX ON "comments" ("created_at");
+      INSERT INTO "comments" ("created_at", "created_on")
+        SELECT NOW(), NOW() FROM generate_series(1, 10000) n;
+
+      CREATE TABLE "posts" (
+        "id" SERIAL PRIMARY KEY,
+        "user_id" INTEGER,
+        "created_at" timestamp,
+        "created_on" date,
+        CONSTRAINT "foreign_key_1" FOREIGN KEY ("user_id") REFERENCES "users"("id")
+      );
+      CREATE INDEX ON "posts" ("created_at");
+      INSERT INTO "posts" ("created_at", "created_on")
+        SELECT NOW(), NOW() FROM generate_series(1, 10000) n;
     SQL
+
     PgDice.configure do |config|
       log_target = ENV['PGDICE_LOG_TARGET'] || 'pgdice.log'
       config.logger = Logger.new(log_target)
@@ -55,7 +70,7 @@ module Minitest
       host = ENV['DATABASE_HOST']
 
       config.database_url = "postgres://#{login}#{host}/pgdice_test"
-      config.approved_tables = ['comments']
+      config.approved_tables = %w[comments posts]
       config.older_than = PgDice::Configuration.days_ago(1)
     end
     PgDice.configuration.logger.info { 'Starting tests' }

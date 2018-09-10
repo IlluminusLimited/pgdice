@@ -19,16 +19,16 @@ class ValidationTest < Minitest::Test
     end
   end
 
-  # def test_assert_tables_works_with_yearsthrows
-  #   # table_name = 'yearly'
-  #   # PgDice.partition_helper.partition_table!(table_name: table_name, period: )
-  #   # assert_raises(PgDice::InsufficientFutureTablesError) do
-  #   #   PgDice.validation.assert_tables(table_name: table_name, future: 30)
-  #   # end
-  #   #
-  #   # assert_raises(PgDice::InsufficientPastTablesError) do
-  #   #   PgDice.validation.assert_tables(table_name: table_name, past: 30)
-  #   # end
+  # def test_assert_tables_works_with_year_tables
+  #   table_name = 'posts'
+  #   PgDice.partition_helper.partition_table!(table_name: table_name, period: :year)
+  #   assert_raises(PgDice::InsufficientFutureTablesError) do
+  #     PgDice.validation.assert_tables(table_name: table_name, future: 30)
+  #   end
+  #
+  #   assert_raises(PgDice::InsufficientPastTablesError) do
+  #     PgDice.validation.assert_tables(table_name: table_name, past: 30)
+  #   end
   # end
 
   def test_assert_tables_requires_past_or_future

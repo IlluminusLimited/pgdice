@@ -83,7 +83,7 @@ module PgDice
     end
   end
 
-  SUPPORTED_PERIODS = %i[day year].freeze
+  SUPPORTED_PERIODS = %i[day month year].freeze
 
   class << self
     def partition_manager
