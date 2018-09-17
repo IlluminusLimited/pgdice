@@ -88,5 +88,13 @@ module Minitest
     def assert_invalid_config(&block)
       assert_raises(PgDice::InvalidConfigurationError) { block.yield }
     end
+
+    def assert_future_tables_error(&block)
+      assert_raises(PgDice::InsufficientFutureTablesError) { block.yield }
+    end
+
+    def assert_past_tables_error(&block)
+      assert_raises(PgDice::InsufficientPastTablesError) { block.yield }
+    end
   end
 end

@@ -16,7 +16,7 @@ module PgDice
       end
 
       table_name = validate_table_name(params)
-      period = validate_period(params)
+      period = resolve_period(params)
 
       assert_future_tables(table_name, params[:future], period) if params[:future]
       assert_past_tables(table_name, params[:past], period) if params[:past]
@@ -32,6 +32,16 @@ module PgDice
     end
 
     private
+
+    def resolve_period(params)
+      period = validate_period(params) || fetch_period_from_table_comment(params.fetch(:table_name))
+
+      unless period
+        raise TableNotPartitionedError,
+              "Table: #{params.fetch(:table_name)} is not partitioned! Cannot validate partitions that don't exist!"
+      end
+      period
+    end
 
     def run_additional_validators(params)
       return true if additional_validators.all? { |validator| validator.call(params, logger) }
@@ -55,10 +65,10 @@ module PgDice
 
       unless PgDice::SUPPORTED_PERIODS.include?(params[:period])
         raise ArgumentError,
-              "Period must be one of: #{PgDice::SUPPORTED_PERIODS}. Value: #{params[:period]} is not valid."
+              "Period must be one of: #{PgDice::SUPPORTED_PERIODS.keys}. Value: #{params[:period]} is not valid."
       end
 
-      params[:period]
+      params[:period].to_sym
     end
 
     def assert_future_tables(table_name, future, period)
@@ -90,7 +100,29 @@ module PgDice
         WHERE pg_class.relkind = 'r'
           AND pg_namespace.nspname = 'public'
           AND pg_class.relname = '#{table_name}_' || to_char(NOW()
-            #{add_or_subtract} INTERVAL '#{table_count} #{period}', 'YYYYMMDD')
+            #{add_or_subtract} INTERVAL '#{table_count} #{period}', '#{SUPPORTED_PERIODS[period.to_sym]}')
+      SQL
+    end
+
+    def fetch_period_from_table_comment(table_name)
+      sql = build_table_comment_sql(table_name, 'public')
+      values = database_connection.execute(sql).values.flatten.compact
+      convert_comment_to_hash(values.first)[:period]
+    end
+
+    def convert_comment_to_hash(comment)
+      return {} unless comment
+      partition_template = {}
+      comment.split(',').each do |key_value_pair|
+        key, value = key_value_pair.split(':')
+        partition_template[key.to_sym] = value
+      end
+      partition_template
+    end
+
+    def build_table_comment_sql(table_name, schema)
+      <<~SQL
+        SELECT obj_description('#{schema}.#{table_name}'::REGCLASS) AS comment
       SQL
     end
   end

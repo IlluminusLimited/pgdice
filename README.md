@@ -201,7 +201,7 @@ e.g. daily vs yearly partitioned tables.
 #### Validating everything is still working
 
 If you've got background jobs creating and dropping tables you're going to want to 
-ensure they are actually doing their jobs correctly. 
+ensure they are actually working correctly. 
 
 To validate that your expected number of tables exist, you can run:
 ```ruby
