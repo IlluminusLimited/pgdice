@@ -9,7 +9,7 @@ module PgDice
 
     def initialize(configuration = PgDice::Configuration.new, params = {})
       @configuration = configuration
-      @logger ||= params[:logger]
+      @logger = params[:logger]
     end
 
     def assert_tables(params = {})
