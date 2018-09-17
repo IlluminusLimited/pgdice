@@ -118,7 +118,7 @@ PgDice.partition_helper.partition_table!(table_name: 'comments',
                                             past: 30, 
                                             future: 30, 
                                             column_name: 'created_at', 
-                                            period: 'day')
+                                            period: :day)
 ```
 
 If you mess up (again you shouldn't use this in production). These two methods are useful for writing tests
@@ -130,6 +130,9 @@ PgDice.partition_helper.undo_partitioning!(table_name: 'comments')
 
 In `partition_helper` there are versions of the methods that will throw exceptions (ending in `!`) and others 
 that will return a truthy value or `false` if there is a failure.
+
+`period` can be set to one of these values: `:day`, `:month`, `:year`
+
 
 ### Maintaining partitioned tables
 
