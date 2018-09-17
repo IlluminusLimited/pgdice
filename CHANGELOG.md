@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changelog added
 
 ### Added
-- Support for overriding configuration parameters 
+- Support for overriding configuration parameters. Currently only the `:logger` option is supported.
     - [DatabaseConnection](lib/pgdice/database_connection.rb) now accepts an opts hash
     - [PartitionHelper](lib/pgdice/partition_helper.rb) now accepts an opts hash
     - [PartitionManager](lib/pgdice/partition_manager.rb) now accepts an opts hash
