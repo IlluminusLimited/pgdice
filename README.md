@@ -218,7 +218,8 @@ by day.
 ## Planned Features
 
 1. Full `PG::Connection` support (no more database URLs).
-2. Non time-range based partitioning.
+1. Custom schema support for all operations. Defaults to `public` currently.
+1. Non time-range based partitioning.
 
 
 ## Development
