@@ -4,13 +4,15 @@
 module PgDice
   #  PartitionManager is a class used to fulfill high-level tasks for partitioning
   class PartitionManager
+    include PgDice::Loggable
     extend Forwardable
-    def_delegators :@configuration, :logger, :older_than, :table_drop_batch_size
+    def_delegators :@configuration, :older_than, :table_drop_batch_size
 
     attr_reader :validation, :pg_slice_manager, :database_connection
 
-    def initialize(configuration = PgDice::Configuration.new)
+    def initialize(configuration = PgDice::Configuration.new, opts = {})
       @configuration = configuration
+      @logger = opts[:logger]
       @validation = PgDice::Validation.new(configuration)
       @pg_slice_manager = PgDice::PgSliceManager.new(configuration)
       @database_connection = PgDice::DatabaseConnection.new(configuration)
