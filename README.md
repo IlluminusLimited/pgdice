@@ -217,11 +217,18 @@ by day.
 
 
 ## FAQ
-    
-Q: How do I get a postgres url if I'm running in rails?
 
-A: ```ruby
+1. How do I get a postgres url if I'm running in Rails?
+```ruby
+ def build_postgres_url
+  config = Rails.configuration.database_configuration
+  host = config[Rails.env]["host"]
+  database = config[Rails.env]["database"]
+  username = config[Rails.env]["username"]
+  password = config[Rails.env]["password"]
 
+  "postgres://#{username}:#{password}@#{host}/#{database}"
+end
 ```
 
 ## Planned Features
