@@ -6,7 +6,7 @@
 
 # PgDice
 
-PgDice is a utility that builds on top of the excellent gem
+PgDice is a utility for creating and maintaining partitioned database tables that builds on top of the excellent gem
  [https://github.com/ankane/pgslice](https://github.com/ankane/pgslice)
  
 PgDice is intended to be used by scheduled background jobs in frameworks like [Sidekiq](https://github.com/mperham/sidekiq)
@@ -215,6 +215,14 @@ This will check that the table 30 days from now exists and that there is
 still a table from 90 days ago. The above example assumes the table was partitioned
 by day.
 
+
+## FAQ
+    
+Q: How do I get a postgres url if I'm running in rails?
+
+A: ```ruby
+
+```
 
 ## Planned Features
 
