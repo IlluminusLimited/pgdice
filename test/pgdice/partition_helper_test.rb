@@ -16,13 +16,12 @@ class PartitionHelperTest < Minitest::Test
     PgDice.partition_helper.partition_table!(table_name: table_name, period: :year)
     PgDice.partition_manager.add_new_partitions(table_name: table_name, future: 2, past: 2)
 
-    assert_raises(PgDice::InsufficientFutureTablesError) do
-      PgDice.validation.assert_tables(table_name: table_name, future: 2)
-    end
+    PgDice.validation.assert_tables(table_name: table_name, future: 2, past: 2)
 
-    assert_raises(PgDice::InsufficientPastTablesError) do
-      PgDice.validation.assert_tables(table_name: table_name, past: 2)
-    end
+    assert_future_tables_error { PgDice.validation.assert_tables(table_name: table_name, future: 3) }
+    assert_past_tables_error { PgDice.validation.assert_tables(table_name: table_name, past: 3) }
+  ensure
+    partition_helper.undo_partitioning(table_name: 'posts')
   end
 
   def test_works_month_tables
@@ -30,13 +29,12 @@ class PartitionHelperTest < Minitest::Test
     PgDice.partition_helper.partition_table!(table_name: table_name, period: :month)
     PgDice.partition_manager.add_new_partitions(table_name: table_name, future: 2, past: 2)
 
-    assert_raises(PgDice::InsufficientFutureTablesError) do
-      PgDice.validation.assert_tables(table_name: table_name, future: 2)
-    end
+    PgDice.validation.assert_tables(table_name: table_name, future: 2, past: 2)
 
-    assert_raises(PgDice::InsufficientPastTablesError) do
-      PgDice.validation.assert_tables(table_name: table_name, past: 2)
-    end
+    assert_future_tables_error { PgDice.validation.assert_tables(table_name: table_name, future: 3) }
+    assert_past_tables_error { PgDice.validation.assert_tables(table_name: table_name, past: 3) }
+  ensure
+    partition_helper.undo_partitioning(table_name: 'posts')
   end
 
   def test_partition_table_checks_allowed_tables

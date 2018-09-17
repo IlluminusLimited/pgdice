@@ -23,6 +23,8 @@ module PgDice
   end
   class IllegalTableError < ValidationError
   end
+  class TableNotPartitionedError < Error
+  end
 
   # Rubocop is stupid
   class InsufficientTablesError < Error
@@ -83,7 +85,7 @@ module PgDice
     end
   end
 
-  SUPPORTED_PERIODS = %i[day month year].freeze
+  SUPPORTED_PERIODS = { day: 'YYYYMMDD', month: 'YYYYMM', year: 'YYYY' }.freeze
 
   class << self
     def partition_manager
