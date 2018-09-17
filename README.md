@@ -216,6 +216,21 @@ still a table from 90 days ago. The above example assumes the table was partitio
 by day.
 
 
+## FAQ
+
+1. How do I get a postgres url if I'm running in Rails?
+```ruby
+ def build_postgres_url
+  config = Rails.configuration.database_configuration
+  host = config[Rails.env]["host"]
+  database = config[Rails.env]["database"]
+  username = config[Rails.env]["username"]
+  password = config[Rails.env]["password"]
+
+  "postgres://#{username}:#{password}@#{host}/#{database}"
+end
+```
+
 ## Planned Features
 
 1. Full `PG::Connection` support (no more database URLs).
