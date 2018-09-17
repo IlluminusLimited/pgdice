@@ -6,7 +6,7 @@
 
 # PgDice
 
-PgDice is a utility that builds on top of the excellent gem
+PgDice is a utility for creating and maintaining partitioned database tables that builds on top of the excellent gem
  [https://github.com/ankane/pgslice](https://github.com/ankane/pgslice)
  
 PgDice is intended to be used by scheduled background jobs in frameworks like [Sidekiq](https://github.com/mperham/sidekiq)
