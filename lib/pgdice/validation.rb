@@ -114,6 +114,7 @@ module PgDice
 
     def convert_comment_to_hash(comment)
       return {} unless comment
+
       partition_template = {}
       comment.split(',').each do |key_value_pair|
         key, value = key_value_pair.split(':')
