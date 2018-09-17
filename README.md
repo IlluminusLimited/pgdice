@@ -54,7 +54,8 @@ require 'pgdice'
 PgDice.configure do |config|
   config.logger = Sidekiq.logger # This defaults to STDOUT if you don't specify a logger
   config.database_url = ENV['PGDICE_DATABASE_URL'] # postgresql://[user[:password]@][host][:port][/dbname][?param1=value1&...]
-  config.approved_tables = ENV['PGDICE_APPROVED_TABLES'] # Comma separated values: 'comments,posts'
+  # Comma separated values work well for approved_tables: 'comments,posts' Or just use an array of strings
+  config.approved_tables = ENV['PGDICE_APPROVED_TABLES']&.split(',')
 end
 ```
 
