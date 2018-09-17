@@ -36,6 +36,8 @@ module PgDice
     def resolve_period(params)
       period = validate_period(params) || fetch_period_from_table_comment(params.fetch(:table_name))
 
+      # If the user doesn't supply a period and we fail to find one on the table then it's a pretty good bet
+      # this table is not partitioned at all.
       unless period
         raise TableNotPartitionedError,
               "Table: #{params.fetch(:table_name)} is not partitioned! Cannot validate partitions that don't exist!"
