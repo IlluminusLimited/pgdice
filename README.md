@@ -2,6 +2,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/IlluminusLimited/pgdice/badge.svg?branch=master)](https://coveralls.io/github/IlluminusLimited/pgdice?branch=master)
 [![Maintainability](https://api.codeclimate.com/v1/badges/311e005a14749bf2f826/maintainability)](https://codeclimate.com/github/IlluminusLimited/pgdice/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/311e005a14749bf2f826/test_coverage)](https://codeclimate.com/github/IlluminusLimited/pgdice/test_coverage)
+[![Gem Version](https://badge.fury.io/rb/pgdice.svg)](https://badge.fury.io/rb/pgdice)
 
 # PgDice
 
