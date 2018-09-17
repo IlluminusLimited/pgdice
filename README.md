@@ -11,6 +11,7 @@ PgDice is a utility that builds on top of the excellent gem
 PgDice is intended to be used by scheduled background jobs in frameworks like [Sidekiq](https://github.com/mperham/sidekiq)
 where logging and clear exception messages are crucial.
 
+
 ## Disclaimer
 
 There are some features in this gem which allow you to drop database tables. 
@@ -21,6 +22,7 @@ or any guarantees, implied or otherwise. By using this software you agree that t
 maintainers and any affiliated parties CANNOT BE HELD LIABLE FOR DATA LOSS OR LOSSES OF ANY KIND.
 
 See the [LICENSE](LICENSE) for more information.
+
 
 ## Installation
 
@@ -55,6 +57,7 @@ PgDice.configure do |config|
 end
 ```
 
+
 #### Configuration Parameters
 
 `logger` Optional: The logger to use. If you don't set this it defaults to STDOUT.
@@ -75,6 +78,7 @@ execute them.
 `older_than` Optional: Time object used to scope the queries on droppable tables. Defaults to 90 days ago.
 
 `table_drop_batch_size` Optional: Maximum number of tables you can drop in one query. Defaults to 7.
+
 
 #### Advanced Configuration Parameters
 
@@ -98,6 +102,7 @@ This mechanism will be passed the `table_to_drop` and a `logger`.
   
  `partition_helper` You can supply your own [PartitionHelper](lib/pgdice/partition_helper.rb) if you like.
   I'm not sure why you would do this.
+ 
  
 ### Converting existing tables to partitioned tables
 
@@ -192,6 +197,7 @@ Another good reason to pass in the `older_than` parameter is if you are managing
 are partiioned by different schemes or have different use-cases 
 e.g. daily vs yearly partitioned tables.
 
+
 #### Validating everything is still working
 
 If you've got background jobs creating and dropping tables you're going to want to 
@@ -208,10 +214,12 @@ This will check that the table 30 days from now exists and that there is
 still a table from 90 days ago. The above example assumes the table was partitioned
 by day.
 
+
 ## Planned Features
 
 1. Full `PG::Connection` support (no more database URLs).
 2. Non time-range based partitioning.
+
 
 ## Development
 
@@ -233,6 +241,7 @@ Run the following commands from your terminal. Don't run these on anything but a
 1. `createdb pgdice_test`
 1. Now you can run the tests via `guard` or `rake test`
 
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at 
@@ -240,9 +249,11 @@ Bug reports and pull requests are welcome on GitHub at
 to be a safe, welcoming space for collaboration, and contributors are expected to adhere to
  the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
 
 ## Code of Conduct
 
