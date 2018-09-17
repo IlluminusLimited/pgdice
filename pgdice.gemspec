@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Andrew Newell']
   spec.email         = ['andrew@andrewcn.com illuminuslimited@gmail.com']
 
-  spec.summary       = 'Postgres partitioning with a Ruby API!'
-  spec.description   = 'Postgres partitioning with a Ruby API built on top of https://github.com/ankane/pgslice'
+  spec.summary       = 'Postgres table partitioning with a Ruby API!'
+  spec.description   = 'Postgres table partitioning with a Ruby API built on top of https://github.com/ankane/pgslice'
   spec.homepage      = 'https://github.com/IlluminusLimited/pgdice'
   spec.license       = 'MIT'
 
