@@ -66,48 +66,60 @@ end
 
 #### Configuration Parameters
 
-- `logger` Optional: The logger to use. If you don't set this it defaults to STDOUT.
+- `database_url` - Required: The postgres database url to connect to. 
+  - This is required since `pgslice` requires a postgres `url`.
 
-- `database_url` The postgres database url to connect to. This is required since `pgslice` is used to accomplish some tasks
-and it only takes a `url` currently.
+- `logger` - Optional: The logger to use.
+  - Defaults to `STDOUT`.
 
-- `approved_tables` This one is important. If you want to manipulate database tables with this gem you're going to
-need to add the base table name to this string of comma-separated values.
+- `approved_tables` - Optional: The list of tables to allow modification on.
+ - If you want to manipulate database tables with this gem you're going to need to provide the 
+   table name for all of the partitions you wish to manage.
+   - Example: if you want to manage the `comments` table (partitioned or not)
+    then  the value would be `['comments']`
 
-- `additional_validators` Optional: This can accept an array of `proc` or `lambda` type predicates. 
-Each predicate will be passed the `params` hash and a `logger`. These predicates are called before doing things like
-dropping tables and adding tables. 
+- `dry_run` - Optional: Boolean value to control whether changes are executed on the database.
+  - You can set it to either `true` or `false`. 
+    - `true` will make PgDice log out the commands but not execute them.
 
-- `dry_run` Optional: You can set it to either `true` or `false`. This will make PgDice print the commands but not 
-execute them.
+- `older_than` - Optional: Time object used to scope the queries on droppable tables. 
+  - Defaults to 90 days ago.
+    - This is calculated when the gem is first required.
 
-- `older_than` Optional: Time object used to scope the queries on droppable tables. Defaults to 90 days ago.
-
-- `table_drop_batch_size` Optional: Maximum number of tables you can drop in one query. Defaults to 7.
+- `table_drop_batch_size` - Optional: Maximum number of tables you can drop in one `drop_old_tables` call. 
+  - Defaults to 7.
 
 
 #### Advanced Configuration Parameters
 
-- `table_dropper` This defaults to [TableDropper](lib/pgdice/table_dropper.rb) which has a `lambda`-like interface. 
-An example use-case would be calling out to your backup system to confirm the table is backed up.
-This mechanism will be passed the `table_to_drop` and a `logger`.
+All of the following parameters are optional.
 
-- `pg_connection` This is a `PG::Connection` object used for the database queries made from `pgdice`.
- By default it will be initialized from the `database_url` if left `nil`. Keep in mind the dependency 
- `pgslice` will still establish its own connection using the `database_url` so this feature may not be very
- useful if you are trying to only use one connection for this utility.
+- `additional_validators` - A list of validators to run before performing table manipulation operations.
+  - This can accept an array of `proc` or `lambda` type predicates. 
+    - Each predicate will be passed the `params` hash and a `logger`. 
+    - These predicates are called before doing things like dropping tables and adding tables. 
+
+
+- `table_dropper` - This defaults to [TableDropper](lib/pgdice/table_dropper.rb) which has a `lambda`-like interface. 
+  - An example use-case would be calling out to your backup system to confirm the table is backed up.
+    - This mechanism will be passed the `table_to_drop` and a `logger`.
+
+- `pg_connection` - This is a `PG::Connection` object used for the database queries made from `pgdice`.
+  - By default it will be initialized from the `database_url` if left `nil`. 
+  - Keep in mind the dependency `pgslice` will still establish its own connection using the `database_url` 
+  so this feature may not be very useful if you are trying to only use one connection for this utility.
  
-- `database_connection` You can supply your own [DatabaseConnection](lib/pgdice/database_connection.rb) if you like.
- I'm not sure why you would do this.
+- `database_connection` - You can supply your own [DatabaseConnection](lib/pgdice/database_connection.rb) if you like.
+  - I'm not sure why you would do this.
  
-- `pg_slice_manager` This is an internal wrapper around `pgslice`. [PgSliceManager](lib/pgdice/pg_slice_manager.rb)
-  This configuration lets you provide your own if you wish. I'm not sure why you would do this.
+- `pg_slice_manager` - This is an internal wrapper around `pgslice`. [PgSliceManager](lib/pgdice/pg_slice_manager.rb)
+  - This configuration lets you provide your own if you wish. I'm not sure why you would do this.
  
-- `partition_manager` You can supply your own [PartitionManager](lib/pgdice/partition_manager.rb) if you like.
-  I'm not sure why you would do this.
+- `partition_manager` - You can supply your own [PartitionManager](lib/pgdice/partition_manager.rb) if you like.
+  - I'm not sure why you would do this.
   
-- `partition_helper` You can supply your own [PartitionHelper](lib/pgdice/partition_helper.rb) if you like.
-  I'm not sure why you would do this.
+- `partition_helper` - You can supply your own [PartitionHelper](lib/pgdice/partition_helper.rb) if you like.
+  - I'm not sure why you would do this.
  
  
 ### Converting existing tables to partitioned tables
@@ -139,10 +151,12 @@ that work with partitions.
 PgDice.partition_helper.undo_partitioning!(table_name: 'comments')
 ```
 
-In `partition_helper` there are versions of the methods that will throw exceptions (ending in `!`) and others 
+#### Notes on `partition_table!`
+
+- In `partition_helper` there are versions of the methods that will throw exceptions (ending in `!`) and others 
 that will return a truthy value or `false` if there is a failure.
 
-`period` can be set to one of these values: `:day`, `:month`, `:year`
+- `period` can be set to one of these values: `:day`, `:month`, `:year`
 
 
 ### Maintaining partitioned tables
@@ -155,7 +169,9 @@ If you have existing tables that need to periodically have more tables added you
 PgDice.partition_manager.add_new_partitions(table_name: 'comments', future: 30)
 ```
 
-The above command would add 30 new tables and their associated indexes all based on the `period` that the
+##### Notes on `add_new_partitions`
+
+- The above command would add 30 new tables and their associated indexes all based on the `period` that the
 partitioned table was defined with.
 
 
@@ -173,8 +189,10 @@ If you have `active_support` you could do:
 PgDice.partition_manager.list_old_partitions(table_name: 'comments', older_than: 90.days.ago)
 ```
 
-Technically `older_than` is optional and defaults to `90 days` (see the configuration section).
-It is recommended that you pass it in to be explicit, but you can rely on the configuration 
+##### Notes on `list_old_partitions`
+
+- Technically `older_than` is optional and defaults to `90 days` (see the configuration section).
+  - It is recommended that you pass it in to be explicit, but you can rely on the configuration 
 mechanism if you so choose.
 
 
@@ -193,13 +211,14 @@ If you have `active_support` you could do:
 PgDice.partition_manager.drop_old_partitions(table_name: 'comments', older_than: 90.days.ago)
 ```
 
-This command would drop old partitions that are older than `90` days.
+##### Notes on `drop_old_partitions`
 
-Technically `older_than` is optional and defaults to `90 days` (see the configuration section).
-It is recommended that you pass it in to be explicit, but you can rely on the configuration 
+- This command would drop old partitions that are older than `90` days.
+
+- Technically `older_than` is optional and defaults to `90 days` (see the configuration section).
+  - It is recommended that you pass it in to be explicit, but you can rely on the configuration 
 mechanism if you so choose.
-
-Another good reason to pass in the `older_than` parameter is if you are managing tables that
+  - Another good reason to pass in the `older_than` parameter is if you are managing tables that
 are partiioned by different schemes or have different use-cases 
 e.g. daily vs yearly partitioned tables.
 
