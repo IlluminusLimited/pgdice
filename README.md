@@ -66,47 +66,47 @@ end
 
 #### Configuration Parameters
 
-`logger` Optional: The logger to use. If you don't set this it defaults to STDOUT.
+- `logger` Optional: The logger to use. If you don't set this it defaults to STDOUT.
 
-`database_url` The postgres database url to connect to. This is required since `pgslice` is used to accomplish some tasks
+- `database_url` The postgres database url to connect to. This is required since `pgslice` is used to accomplish some tasks
 and it only takes a `url` currently.
 
-`approved_tables` This one is important. If you want to manipulate database tables with this gem you're going to
+- `approved_tables` This one is important. If you want to manipulate database tables with this gem you're going to
 need to add the base table name to this string of comma-separated values.
 
-`additional_validators` Optional: This can accept an array of `proc` or `lambda` type predicates. 
+- `additional_validators` Optional: This can accept an array of `proc` or `lambda` type predicates. 
 Each predicate will be passed the `params` hash and a `logger`. These predicates are called before doing things like
 dropping tables and adding tables. 
 
-`dry_run` Optional: You can set it to either `true` or `false`. This will make PgDice print the commands but not 
+- `dry_run` Optional: You can set it to either `true` or `false`. This will make PgDice print the commands but not 
 execute them.
 
-`older_than` Optional: Time object used to scope the queries on droppable tables. Defaults to 90 days ago.
+- `older_than` Optional: Time object used to scope the queries on droppable tables. Defaults to 90 days ago.
 
-`table_drop_batch_size` Optional: Maximum number of tables you can drop in one query. Defaults to 7.
+- `table_drop_batch_size` Optional: Maximum number of tables you can drop in one query. Defaults to 7.
 
 
 #### Advanced Configuration Parameters
 
-`table_dropper` This defaults to [TableDropper](lib/pgdice/table_dropper.rb) which has a `lambda`-like interface. 
+- `table_dropper` This defaults to [TableDropper](lib/pgdice/table_dropper.rb) which has a `lambda`-like interface. 
 An example use-case would be calling out to your backup system to confirm the table is backed up.
 This mechanism will be passed the `table_to_drop` and a `logger`.
 
-`pg_connection` This is a `PG::Connection` object used for the database queries made from `pgdice`.
+- `pg_connection` This is a `PG::Connection` object used for the database queries made from `pgdice`.
  By default it will be initialized from the `database_url` if left `nil`. Keep in mind the dependency 
  `pgslice` will still establish its own connection using the `database_url` so this feature may not be very
  useful if you are trying to only use one connection for this utility.
  
- `database_connection` You can supply your own [DatabaseConnection](lib/pgdice/database_connection.rb) if you like.
+- `database_connection` You can supply your own [DatabaseConnection](lib/pgdice/database_connection.rb) if you like.
  I'm not sure why you would do this.
  
- `pg_slice_manager` This is an internal wrapper around `pgslice`. [PgSliceManager](lib/pgdice/pg_slice_manager.rb)
+- `pg_slice_manager` This is an internal wrapper around `pgslice`. [PgSliceManager](lib/pgdice/pg_slice_manager.rb)
   This configuration lets you provide your own if you wish. I'm not sure why you would do this.
  
- `partition_manager` You can supply your own [PartitionManager](lib/pgdice/partition_manager.rb) if you like.
+- `partition_manager` You can supply your own [PartitionManager](lib/pgdice/partition_manager.rb) if you like.
   I'm not sure why you would do this.
   
- `partition_helper` You can supply your own [PartitionHelper](lib/pgdice/partition_helper.rb) if you like.
+- `partition_helper` You can supply your own [PartitionHelper](lib/pgdice/partition_helper.rb) if you like.
   I'm not sure why you would do this.
  
  
