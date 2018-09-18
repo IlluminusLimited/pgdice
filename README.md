@@ -52,7 +52,11 @@ This is an example config from a project using `Sidekiq`
 ```ruby
 require 'pgdice'
 PgDice.configure do |config|
-  config.logger = Sidekiq.logger # This defaults to STDOUT if you don't specify a logger
+  # This defaults to STDOUT if you don't specify a logger
+  # Make sure your logger is initialized correctly before setting this.
+  # If you make a pgdice.rb initializer in rails, it will be run before sidekiq.rb 
+  #   which may not give you the result you want.
+  config.logger = Sidekiq.logger
   config.database_url = ENV['PGDICE_DATABASE_URL'] # postgresql://[user[:password]@][host][:port][/dbname][?param1=value1&...]
   # Comma separated values work well for approved_tables: 'comments,posts' Or just use an array of strings
   config.approved_tables = ENV['PGDICE_APPROVED_TABLES']&.split(',')
