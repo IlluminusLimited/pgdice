@@ -73,9 +73,9 @@ end
   - Defaults to `STDOUT`.
 
 - `approved_tables` - Optional: The list of tables to allow modification on.
- - If you want to manipulate database tables with this gem you're going to need to provide the 
+  - If you want to manipulate database tables with this gem you're going to need to provide the 
    table name for all of the partitions you wish to manage.
-   - Example: if you want to manage the `comments` table (partitioned or not)
+    - Example: if you want to manage the `comments` table (partitioned or not)
     then  the value would be `['comments']`
 
 - `dry_run` - Optional: Boolean value to control whether changes are executed on the database.
