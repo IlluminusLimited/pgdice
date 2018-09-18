@@ -213,7 +213,7 @@ PgDice.partition_manager.drop_old_partitions(table_name: 'comments', older_than:
 
 ##### Notes on `drop_old_partitions`
 
-- This command would drop old partitions that are older than `90` days.
+- The above example command would drop old partitions that are older than `90` days.
 
 - Technically `older_than` is optional and defaults to `90 days` (see the configuration section).
   - It is recommended that you pass it in to be explicit, but you can rely on the configuration 
