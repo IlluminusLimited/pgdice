@@ -4,11 +4,13 @@
 module PgDice
   # Wrapper class around database connection handlers
   class DatabaseConnection
+    include PgDice::Loggable
     extend Forwardable
-    def_delegators :@configuration, :logger, :dry_run, :pg_connection
+    def_delegators :@configuration, :dry_run, :pg_connection
 
-    def initialize(configuration = PgDice::Configuration.new)
+    def initialize(configuration = PgDice::Configuration.new, opts = {})
       @configuration = configuration
+      @logger = opts[:logger]
     end
 
     def execute(query)

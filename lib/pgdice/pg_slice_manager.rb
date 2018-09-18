@@ -4,11 +4,13 @@
 module PgDice
   # PgSliceManager is a wrapper around PgSlice
   class PgSliceManager
+    include PgDice::Loggable
     extend Forwardable
-    def_delegators :@configuration, :logger, :database_url, :dry_run
+    def_delegators :@configuration, :database_url, :dry_run
 
-    def initialize(configuration = PgDice::Configuration.new)
+    def initialize(configuration = PgDice::Configuration.new, opts = {})
       @configuration = configuration
+      @logger = opts[:logger]
     end
 
     def prep(params = {})
