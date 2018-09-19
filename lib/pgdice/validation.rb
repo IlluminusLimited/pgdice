@@ -12,7 +12,7 @@ module PgDice
       @logger = params[:logger]
     end
 
-    def assert_tables(params = {})
+    def assert_tables(params)
       unless params[:future] || params[:past]
         raise ArgumentError, 'You must provide either a future or past number of tables to assert on.'
       end
@@ -57,7 +57,7 @@ module PgDice
 
     def validate_table_name(params)
       table_name = params.fetch(:table_name)
-      unless approved_tables.keys.map(&:to_s).include?(table_name.to_s)
+      unless approved_tables.include?(table_name)
         raise PgDice::IllegalTableError, "Table: #{table_name} is not in the list of approved tables!"
       end
 

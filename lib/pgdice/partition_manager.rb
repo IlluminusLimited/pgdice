@@ -74,9 +74,17 @@ module PgDice
         "will not be exceeded. Looking back from: #{current_time}"
       end
 
+      if older_than > current_time
+        raise ArgumentError, "Cannot drop tables that are not older than the current time: #{current_time}"
+      end
+
       eligible_partitions = list_partitions(table_name: table_name, older_than: current_time)
       selected_partitions = filter_partitions(eligible_partitions, table_name, older_than)
-      tables_to_drop = batch_size - selected_partitions.size
+      tables_to_drop = if batch_size > selected_partitions.size
+                         selected_partitions.size
+                       else
+                         batch_size
+                       end
 
       if (eligible_partitions.size - tables_to_drop) < minimum_tables
         logger.warn do
@@ -85,10 +93,6 @@ module PgDice
 "minimum_table_threshold of #{minimum_tables}. Table dropping will not occur."
         end
         return []
-        # raise PgDice::MinimumTableCountExceededError.new(table_name,
-        #                                                  tables_to_drop,
-        #                                                  minimum_tables,
-        #                                                  current_partition_count)
       end
       droppable_tables = selected_partitions.first(tables_to_drop)
       logger.debug { "Partitions eligible for dropping are: #{droppable_tables}" }
@@ -105,7 +109,7 @@ module PgDice
     end
 
     def build_partition_table_fetch_sql(params)
-      schema = params.fetch(:schema)
+      schema = params.fetch(:schema, 'public')
       base_table_name = params.fetch(:table_name)
 
       <<~SQL
