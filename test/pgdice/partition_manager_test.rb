@@ -42,7 +42,7 @@ class PartitionManagerTest < Minitest::Test
   def test_old_partitions_can_be_listed
     partition_helper.partition_table!(table_name: table_name, past: 2, future: 1)
 
-    assert_equal 2, @partition_manager.list_partitions(table_name: table_name, older_than: yesterday).size
+    assert_equal 2, @partition_manager.list_partitions(table_name: table_name, older_than: today).size
     assert PgDice.validation.assert_tables(table_name: table_name, past: 2, future: 1)
   end
 
@@ -67,10 +67,10 @@ class PartitionManagerTest < Minitest::Test
   def test_drop_old_partitions_uses_batch_size
     batch_size = PgDice.configuration.table_drop_batch_size
     minimum_tables = PgDice.configuration.minimum_table_threshold(table_name)
-    partition_helper.partition_table!(table_name: table_name, past: batch_size + 1 - minimum_tables)
+    partition_helper.partition_table!(table_name: table_name, past: (batch_size - minimum_tables + 1))
 
     assert_equal batch_size, @partition_manager.drop_old_partitions(table_name: table_name, older_than: today).size
-    assert PgDice.validation.assert_tables(table_name: table_name, past: minimum_tables + 1)
+    assert PgDice.validation.assert_tables(table_name: table_name, past: minimum_tables)
   end
 
   def test_will_not_drop_more_than_minimum
@@ -103,7 +103,7 @@ class PartitionManagerTest < Minitest::Test
   end
 
   # Comments table is configured to have a minimum_table_threshold of 1 table
-  # Thus there should be no droppable tables if looking older than today.
+  # Thus there should be no droppable tables if looking older than yesterday.
   def test_list_droppable_tables
     PgDice.partition_helper.partition_table!(table_name: table_name, past: 1)
     assert_empty PgDice.partition_manager.list_droppable_tables(table_name: table_name, older_than: today)

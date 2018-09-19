@@ -84,9 +84,9 @@ module PgDice
     end
 
     def minimum_table_threshold(table_name)
-      return approved_tables[table_name].to_i if approved_tables.fetch(table_name).to_i >= 0
+      return approved_tables[table_name].to_i if approved_tables.fetch(table_name).to_i.positive?
 
-      raise PgDice::InvalidConfigurationError, 'approved_tables entries must have a non-negative Integer for the minimum_table_threshold!'
+      raise PgDice::InvalidConfigurationError, 'approved_tables entries must have a positive Integer for the minimum_table_threshold!'
     end
 
     # Lazily initialized

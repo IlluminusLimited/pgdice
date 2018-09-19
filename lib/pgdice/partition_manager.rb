@@ -62,29 +62,26 @@ module PgDice
       partition_tables
     end
 
-    def list_droppable_tables(params)
+    def list_droppable_tables(params = {})
       table_name = params.fetch(:table_name)
       batch_size = params.fetch(:table_drop_batch_size, table_drop_batch_size)
-      older_than = params.fetch(:older_than)
+      older_than = params.fetch(:older_than).to_date
       minimum_tables = minimum_table_threshold(table_name)
-      current_time = Time.now.utc
+      current_date = Date.today.to_date
 
       logger.debug do
         "Checking if the minimum_table_threshold of #{minimum_tables} tables for base_table: #{table_name} "\
-        "will not be exceeded. Looking back from: #{current_time}"
+        "will not be exceeded. Looking back from: #{current_date}"
       end
 
-      if older_than > current_time
-        raise ArgumentError, "Cannot drop tables that are not older than the current time: #{current_time}"
+      if older_than > current_date
+        raise ArgumentError, "Cannot drop tables that are not older than the current date: #{current_date}"
       end
 
-      eligible_partitions = list_partitions(table_name: table_name, older_than: current_time)
+      eligible_partitions = list_partitions(table_name: table_name, older_than: current_date)
       selected_partitions = filter_partitions(eligible_partitions, table_name, older_than)
-      tables_to_drop = if batch_size > selected_partitions.size
-                         selected_partitions.size
-                       else
-                         batch_size
-                       end
+      tables_to_drop = batch_size > selected_partitions.size ? selected_partitions.size : batch_size
+      tables_to_drop = (eligible_partitions.size - tables_to_drop) < minimum_tables ? tables_to_drop - minimum_tables + 1 : tables_to_drop
 
       if (eligible_partitions.size - tables_to_drop) < minimum_tables
         logger.warn do
@@ -101,14 +98,14 @@ module PgDice
 
     private
 
-    def filter_partitions(partition_tables, base_table_name, partitions_older_than_time)
+    def filter_partitions(partition_tables, base_table_name, partitions_older_than_date)
       partition_tables.select do |partition_name|
-        partition_created_at_time = Date.parse(partition_name.gsub(/#{base_table_name}_/, '')).to_time
-        partition_created_at_time < partitions_older_than_time
+        partition_created_at_time = Date.parse(partition_name.gsub(/#{base_table_name}_/, ''))
+        partition_created_at_time < partitions_older_than_date.to_date
       end
     end
 
-    def build_partition_table_fetch_sql(params)
+    def build_partition_table_fetch_sql(params = {})
       schema = params.fetch(:schema, 'public')
       base_table_name = params.fetch(:table_name)
 
