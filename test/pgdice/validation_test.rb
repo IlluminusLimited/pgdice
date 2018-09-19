@@ -19,8 +19,10 @@ class ValidationTest < Minitest::Test
     PgDice.partition_helper.partition_table!(table_name: table_name, future: 0, past: 0)
 
     assert_future_tables_error { PgDice.validation.assert_tables(table_name: table_name, future: 1) }
+    assert_future_tables_error { PgDice.validation.assert_tables(table_name: table_name.to_sym, future: 1) }
 
     assert_past_tables_error { PgDice.validation.assert_tables(table_name: table_name, past: 1) }
+    assert_past_tables_error { PgDice.validation.assert_tables(table_name: table_name.to_sym, past: 1) }
   ensure
     partition_helper.undo_partitioning(table_name: table_name)
   end

@@ -29,25 +29,32 @@ module PgDice
 
   # Rubocop is stupid
   class InsufficientTablesError < Error
-    def initialize(direction, table_name, table_count, period)
-      super("Insufficient #{direction} tables exist for table: #{table_name}. "\
-        "Expected: #{table_count} having period of: #{period}")
+    def initialize(direction, table_name, additional_info = '')
+      super("Insufficient #{direction} tables exist for table: #{table_name}. #{additional_info}")
     end
   end
 
   # Rubocop is stupid
   class InsufficientFutureTablesError < InsufficientTablesError
     def initialize(table_name, table_count, period)
-      super('future', table_name, table_count, period)
+      super('future', table_name, "Expected: #{table_count} having period of: #{period}.")
     end
   end
 
   # Rubocop is stupid
   class InsufficientPastTablesError < InsufficientTablesError
-    def initialize(table_name, table_count, period)
-      super('past', table_name, table_count, period)
+    def initialize(table_name, additional_info = '')
+      super('past', table_name, additional_info)
     end
   end
+
+  #   # Rubocop is stupid
+  #   class MinimumTableCountExceededError < InsufficientPastTablesError
+  #     def initialize(table_name, tables_to_drop, minimum_tables, current_tables)
+  #       super(table_name, "Attempt to drop #{tables_to_drop} from #{table_name} would result in "\
+  # "#{current_tables - tables_to_drop} which is exceeds the minimum_table_threshold of #{minimum_tables}.")
+  #     end
+  #   end
 
   # Rubocop is stupid
   class CustomValidationError < ValidationError

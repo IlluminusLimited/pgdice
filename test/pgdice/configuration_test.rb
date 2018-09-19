@@ -43,11 +43,6 @@ class ConfigurationTest < Minitest::Test
     assert_invalid_config { @configuration.approved_tables }
   end
 
-  def test_nil_older_than_throws
-    @configuration.older_than = nil
-    assert_invalid_config { @configuration.older_than }
-  end
-
   def test_nil_dry_run_throws
     @configuration.dry_run = nil
     assert_invalid_config { @configuration.dry_run }
@@ -61,11 +56,6 @@ class ConfigurationTest < Minitest::Test
   def test_invalid_pg_connection_throws
     @configuration.pg_connection = -1
     assert_invalid_config { @configuration.pg_connection }
-  end
-
-  def test_nil_older_than_takes_activesupport_date
-    @configuration.older_than = 90.days.ago
-    assert @configuration.older_than
   end
 
   private

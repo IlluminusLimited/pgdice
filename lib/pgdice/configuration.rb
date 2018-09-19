@@ -13,15 +13,10 @@ module PgDice
 
   # Configuration class which holds all configurable values
   class Configuration
-    def self.days_ago(days)
-      Time.now.utc - days * 24 * 60 * 60
-    end
-
     VALUES = { logger: Logger.new(STDOUT),
                database_url: nil,
                additional_validators: [],
-               approved_tables: [],
-               older_than: PgDice::Configuration.days_ago(90),
+               approved_tables: {},
                dry_run: false,
                table_drop_batch_size: 7 }.freeze
 
@@ -29,7 +24,6 @@ module PgDice
                 :database_url,
                 :additional_validators,
                 :approved_tables,
-                :older_than,
                 :dry_run,
                 :table_drop_batch_size,
                 :database_connection,
@@ -72,15 +66,9 @@ module PgDice
     end
 
     def approved_tables
-      return @approved_tables if @approved_tables.is_a?(Array)
+      return @approved_tables if @approved_tables.is_a?(Hash)
 
       raise PgDice::InvalidConfigurationError, 'approved_tables must be an Array of strings!'
-    end
-
-    def older_than
-      return @older_than if @older_than.is_a?(Time)
-
-      raise PgDice::InvalidConfigurationError, 'older_than must be a Time!'
     end
 
     def dry_run
@@ -93,6 +81,12 @@ module PgDice
       return @table_drop_batch_size.to_i if @table_drop_batch_size.to_i >= 0
 
       raise PgDice::InvalidConfigurationError, 'table_drop_batch_size must be a non-negative Integer!'
+    end
+
+    def minimum_table_threshold(table_name)
+      return approved_tables[table_name].to_i if approved_tables.fetch(table_name).to_i >= 0
+
+      raise PgDice::InvalidConfigurationError, 'approved_tables entries must have a non-negative Integer for the minimum_table_threshold!'
     end
 
     # Lazily initialized

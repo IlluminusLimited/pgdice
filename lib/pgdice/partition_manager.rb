@@ -6,7 +6,7 @@ module PgDice
   class PartitionManager
     include PgDice::Loggable
     extend Forwardable
-    def_delegators :@configuration, :older_than, :table_drop_batch_size
+    def_delegators :@configuration, :older_than, :table_drop_batch_size, :minimum_table_threshold
 
     attr_reader :validation, :pg_slice_manager, :database_connection
 
@@ -29,7 +29,7 @@ module PgDice
       logger.info { "drop_old_partitions has been called with params: #{params}" }
 
       validation.validate_parameters(params)
-      old_partitions = list_old_partitions(params)
+      old_partitions = list_droppable_tables(params)
       logger.warn { "Partitions to be deleted are: #{old_partitions}" }
 
       old_partitions.each do |old_partition|
@@ -38,42 +38,75 @@ module PgDice
       old_partitions
     end
 
-    def list_old_partitions(params = {})
-      params[:older_than] ||= older_than
-      logger.info { "Listing old partitions with params: #{params}" }
+    # Grabs only tables that start with the base_table_name and end in numbers
+    def list_partitions(params = {})
+      table_name = params.fetch(:table_name)
+      schema = params.fetch(:schema, 'public')
+      older_than = params[:older_than]
 
       validation.validate_parameters(params)
 
-      partition_tables = fetch_partition_tables(params)
-
-      filter_partitions(partition_tables, params[:table_name], params[:older_than])
-    end
-
-    # Grabs only tables that start with the base_table_name and end in numbers
-    def fetch_partition_tables(params = {})
-      schema = params[:schema] ||= 'public'
       logger.info { "Fetching partition tables with params: #{params}" }
 
       sql = build_partition_table_fetch_sql(params)
 
       partition_tables = database_connection.execute(sql).values.flatten
-      logger.debug { "Table: #{schema}.#{params[:table_name]} has partition_tables: #{partition_tables}" }
+      logger.debug { "Table: #{schema}.#{table_name} has partition_tables: #{partition_tables}" }
+      if older_than
+        filtered_partitions = filter_partitions(partition_tables, table_name, older_than)
+        logger.debug do
+          "Filtered partitions for table: #{schema}.#{table_name} and "\
+            "older_than: #{older_than} are: #{filtered_partitions}"
+        end
+      end
       partition_tables
+    end
+
+    def list_droppable_tables(params)
+      table_name = params.fetch(:table_name)
+      batch_size = params.fetch(:table_drop_batch_size, table_drop_batch_size)
+      older_than = params.fetch(:older_than)
+      minimum_tables = minimum_table_threshold(table_name)
+      current_time = Time.now.utc
+
+      logger.debug do
+        "Checking if the minimum_table_threshold of #{minimum_tables} tables for base_table: #{table_name} "\
+        "will not be exceeded. Looking back from: #{current_time}"
+      end
+
+      eligible_partitions = list_partitions(table_name: table_name, older_than: current_time)
+      selected_partitions = filter_partitions(eligible_partitions, table_name, older_than)
+      tables_to_drop = batch_size - selected_partitions.size
+
+      if (eligible_partitions.size - tables_to_drop) < minimum_tables
+        logger.warn do
+          "Attempt to drop #{tables_to_drop} tables from #{table_name} would result in "\
+"#{eligible_partitions.size - tables_to_drop} remaining tables which exceeds the "\
+"minimum_table_threshold of #{minimum_tables}. Table dropping will not occur."
+        end
+        return []
+        # raise PgDice::MinimumTableCountExceededError.new(table_name,
+        #                                                  tables_to_drop,
+        #                                                  minimum_tables,
+        #                                                  current_partition_count)
+      end
+      droppable_tables = selected_partitions.first(tables_to_drop)
+      logger.debug { "Partitions eligible for dropping are: #{droppable_tables}" }
+      droppable_tables
     end
 
     private
 
     def filter_partitions(partition_tables, base_table_name, partitions_older_than_time)
       partition_tables.select do |partition_name|
-        partition_created_at_date = Date.parse(partition_name.gsub(/#{base_table_name}_/, '')).to_time
-        partition_created_at_date < partitions_older_than_time
+        partition_created_at_time = Date.parse(partition_name.gsub(/#{base_table_name}_/, '')).to_time
+        partition_created_at_time < partitions_older_than_time
       end
     end
 
-    def build_partition_table_fetch_sql(params = {})
+    def build_partition_table_fetch_sql(params)
       schema = params.fetch(:schema)
       base_table_name = params.fetch(:table_name)
-      limit = params.fetch(:limit, table_drop_batch_size)
 
       <<~SQL
         SELECT tablename
@@ -81,7 +114,6 @@ module PgDice
         WHERE schemaname = '#{schema}'
           AND tablename ~ '^#{base_table_name}_\\d+$'
         ORDER BY tablename
-        LIMIT #{limit}
       SQL
     end
   end

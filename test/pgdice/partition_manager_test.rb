@@ -91,4 +91,20 @@ class PartitionManagerTest < Minitest::Test
       @partition_manager.drop_old_partitions(table_name: 'bob')
     end
   end
+
+  def test_cannot_drop_more_than_minimum_tables
+    table_name = 'posts'
+    PgDice.partition_helper.partition_table!(table_name: table_name, past: 10)
+    assert_empty PgDice.partition_manager.list_droppable_tables(table_name: table_name)
+    assert_empty PgDice.partition_manager.drop_old_partitions(table_name: table_name)
+  ensure
+    partition_helper.undo_partitioning(table_name: 'posts')
+  end
+
+  def test_will_not_drop_more_than_minimum
+    PgDice.partition_helper.partition_table!(table_name: table_name, past: 3)
+    assert_equal 2, PgDice.partition_manager.drop_old_partitions(table_name: table_name).size
+  ensure
+    partition_helper.undo_partitioning(table_name: table_name)
+  end
 end

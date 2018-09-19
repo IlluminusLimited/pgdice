@@ -57,7 +57,7 @@ module PgDice
 
     def validate_table_name(params)
       table_name = params.fetch(:table_name)
-      unless approved_tables.include?(table_name)
+      unless approved_tables.keys.map(&:to_s).include?(table_name.to_s)
         raise PgDice::IllegalTableError, "Table: #{table_name} is not in the list of approved tables!"
       end
 
@@ -92,7 +92,7 @@ module PgDice
 
       return true if response.values.size == 1
 
-      raise PgDice::InsufficientPastTablesError.new(table_name, past, period)
+      raise PgDice::InsufficientPastTablesError.new(table_name, "Expected: #{past} having period of: #{period}.")
     end
 
     def build_assert_sql(table_name, table_count, period, direction)
