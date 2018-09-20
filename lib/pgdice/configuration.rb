@@ -18,8 +18,7 @@ module PgDice
                        additional_validators: [],
                        approved_tables: [],
                        dry_run: false,
-                       table_drop_batch_size: 7
-    }.freeze
+                       table_drop_batch_size: 7 }.freeze
 
     attr_writer :logger,
                 :database_url,
@@ -35,7 +34,6 @@ module PgDice
                   :partition_manager,
                   :partition_helper,
                   :config_loader
-
 
     def initialize(existing_config = nil, config_file_loader = PgDice::Configuration::ConfigFileLoader.new('config/pgdice.yml'))
       config_file_loader.call(existing_config || self)
