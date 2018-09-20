@@ -13,12 +13,13 @@ module PgDice
 
   # Configuration class which holds all configurable values
   class Configuration
-    VALUES = { logger: Logger.new(STDOUT),
-               database_url: nil,
-               additional_validators: [],
-               approved_tables: {},
-               dry_run: false,
-               table_drop_batch_size: 7 }.freeze
+    DEFAULT_VALUES = { logger: Logger.new(STDOUT),
+                       database_url: nil,
+                       additional_validators: [],
+                       approved_tables: [],
+                       dry_run: false,
+                       table_drop_batch_size: 7
+    }.freeze
 
     attr_writer :logger,
                 :database_url,
@@ -32,12 +33,16 @@ module PgDice
     attr_accessor :table_dropper,
                   :pg_slice_manager,
                   :partition_manager,
-                  :partition_helper
+                  :partition_helper,
+                  :config_loader
 
-    def initialize(existing_configuration = nil)
-      VALUES.each do |key, value|
-        initialize_value(key, value, existing_configuration)
+
+    def initialize(existing_config = nil, config_file_loader = PgDice::Configuration::ConfigFileLoader.new('config/pgdice.yml'))
+      config_file_loader.call(existing_config || self)
+      DEFAULT_VALUES.each do |key, value|
+        initialize_value(key, value, existing_config)
       end
+
       initialize_objects
     end
 
@@ -65,10 +70,18 @@ module PgDice
       raise PgDice::InvalidConfigurationError, 'additional_validators must be an Array!'
     end
 
-    def approved_tables
-      return @approved_tables if @approved_tables.is_a?(Hash)
+    def config_file
+      return @config_file unless @config_file.nil?
 
-      raise PgDice::InvalidConfigurationError, 'approved_tables must be an Array of strings!'
+      raise PgDice::InvalidConfigurationError, 'config_file must be present'
+    end
+
+    def approved_tables
+      if @approved_tables.is_a?(Array) && @approved_tables.all? { |item| item.is_a?(PgDice::Table) }
+        return @approved_tables
+      end
+
+      raise PgDice::InvalidConfigurationError, 'approved_tables must be an Array of PgDice::Table!'
     end
 
     def dry_run
@@ -111,6 +124,24 @@ module PgDice
       @database_connection = PgDice::DatabaseConnection.new(self)
       @partition_manager = PgDice::PartitionManager.new(self)
       @table_dropper = PgDice::TableDropper.new(self)
+    end
+
+    class ConfigFileLoader
+      def initialize(config_file)
+        @file = config_file
+      end
+
+      def call(configuration = PgDice::Configuration.new)
+        unless File.exist?(@file)
+          raise ArgumentError, "File: #{@file} could not be found or does not exist. Is this the correct configuration file?"
+        end
+
+        config_hash = YAML.safe_load(ERB.new(IO.read(@file)).result)
+        config_hash.each do |key, value|
+          configuration.initialize_value(key, value, nil)
+        end
+        configuration
+      end
     end
   end
 end

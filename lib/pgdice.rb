@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require 'pg'
+require 'yaml'
+require 'json'
 require 'open3'
 require 'logger'
 require 'pgslice'
+require 'forwardable'
 require 'pgdice/version'
 require 'pgdice/loggable'
 require 'pgdice/validation'
@@ -93,7 +96,7 @@ module PgDice
     end
   end
 
-  SUPPORTED_PERIODS = { day: 'YYYYMMDD', month: 'YYYYMM', year: 'YYYY' }.freeze
+  SUPPORTED_PERIODS = { 'day' => 'YYYYMMDD', 'month' => 'YYYYMM', 'year' => 'YYYY' }.freeze
 
   class << self
     def partition_manager
