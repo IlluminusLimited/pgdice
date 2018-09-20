@@ -35,8 +35,7 @@ module PgDice
                   :partition_helper,
                   :config_loader
 
-    def initialize(existing_config = nil, config_file_loader = PgDice::Configuration::ConfigFileLoader.new('config/pgdice.yml'))
-      config_file_loader.call(existing_config || self)
+    def initialize(existing_config = nil)
       DEFAULT_VALUES.each do |key, value|
         initialize_value(key, value, existing_config)
       end

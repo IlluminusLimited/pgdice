@@ -58,6 +58,8 @@ module Minitest
         SELECT NOW(), NOW() FROM generate_series(1, 10000) n;
     SQL
 
+    PgDice.config_file_loader = -> { PgDice::Configuration.new }
+
     PgDice.configure do |config|
       log_target = ENV['PGDICE_LOG_TARGET'] || 'pgdice.log'
       config.logger = Logger.new(log_target)
@@ -70,7 +72,7 @@ module Minitest
       host = ENV['DATABASE_HOST']
 
       config.database_url = "postgres://#{login}#{host}/pgdice_test"
-      config.approved_tables = { 'comments' => 1, 'posts' => 10 }
+      config.approved_tables = { 'comments' => { 'past' => 1 }, 'posts' => { 'past' => 10 } }
     end
     PgDice.configuration.logger.info { 'Starting tests' }
 

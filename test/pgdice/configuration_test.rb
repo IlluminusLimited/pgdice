@@ -58,6 +58,22 @@ class ConfigurationTest < Minitest::Test
     assert_invalid_config { @configuration.pg_connection }
   end
 
+  def test_config_file_initializes_new_obj
+    config_file_loader = lambda do |_|
+      unless File.exist?(@file)
+        raise ArgumentError, "File: #{@file} could not be found or does not exist. Is this the correct configuration file?"
+      end
+
+      config_hash = YAML.safe_load(ERB.new(IO.read(@file)).result)
+      config_hash.each do |key, value|
+        configuration.initialize_value(key, value, nil)
+      end
+      configuration
+    end
+
+    assert PgDice::Configuration.new(config_file_loader: config_file_loader)
+  end
+
   private
 
   def assert_not_configured(&block)
