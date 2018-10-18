@@ -20,7 +20,6 @@ module PgDice
 
     def partition_table!(table_name, params = {})
       table = approved_tables.fetch(table_name)
-      table.validate!
       all_params = table.to_h.merge(params)
       validation_helper.validate_parameters(all_params)
 
@@ -32,22 +31,22 @@ module PgDice
 
     def undo_partitioning!(table_name)
       approved_tables.fetch(table_name)
-      logger.info { "Cleaning up database with params: #{table_name}" }
+      logger.info { "Undoing partitioning for table: #{table_name}" }
 
       pg_slice_manager.analyze(table_name: table_name, swapped: true)
       pg_slice_manager.unswap!(table_name: table_name)
       pg_slice_manager.unprep!(table_name: table_name)
     end
 
-    def partition_table(params = {})
-      partition_table!(params)
+    def partition_table(table_name, params = {})
+      partition_table!(table_name, params)
     rescue PgDice::PgSliceError => error
       logger.error { "Rescued PgSliceError: #{error}" }
       false
     end
 
-    def undo_partitioning(params = {})
-      undo_partitioning!(params)
+    def undo_partitioning(table_name)
+      undo_partitioning!(table_name)
     rescue PgDice::PgSliceError => error
       logger.error { "Rescued PgSliceError: #{error}" }
       false

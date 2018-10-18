@@ -32,6 +32,7 @@ module PgDice
     def <<(object)
       raise ArgumentError, 'Objects must be a PgDice::Table!' unless object.is_a?(PgDice::Table)
 
+      object.validate!
       @tables << object
       self
     end
