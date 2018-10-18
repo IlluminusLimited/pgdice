@@ -91,13 +91,6 @@ module PgDice
       raise PgDice::InvalidConfigurationError, 'table_drop_batch_size must be a non-negative Integer!'
     end
 
-    def minimum_table_threshold(table_name)
-      return approved_tables[table_name].to_i if approved_tables.fetch(table_name).to_i.positive?
-
-      raise PgDice::InvalidConfigurationError,
-            'approved_tables entries must have a positive Integer for the minimum_table_threshold!'
-    end
-
     # Lazily initialized
     def pg_connection
       @pg_connection ||= PG::Connection.new(database_url)
@@ -134,7 +127,7 @@ module PgDice
         end
 
         approved_tables_hash = YAML.safe_load(ERB.new(IO.read(@file)).result)
-        approved_tables_hash[:approved_tables].each do |hash|
+        approved_tables_hash['approved_tables'].each do |hash|
           configuration.approved_tables << PgDice::Table.from_hash(hash)
         end
         configuration

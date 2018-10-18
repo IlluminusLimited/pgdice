@@ -61,17 +61,18 @@ class ConfigurationTest < Minitest::Test
   def test_approved_tables_config_initializes_new_obj
     approved_tables_config = lambda do |_|
       unless File.exist?(@file)
-        raise ArgumentError, "File: #{@file} could not be found or does not exist. Is this the correct configuration file?"
+        raise ArgumentError,
+              "File: #{@file} could not be found or does not exist. Is this the correct configuration file?"
       end
 
-      config_hash = YAML.safe_load(ERB.new(IO.read(@file)).result)
-      config_hash.each do |key, value|
-        configuration.initialize_value(key, value, nil)
+      approved_tables_hash = YAML.safe_load(ERB.new(IO.read(@file)).result)
+      approved_tables_hash[:approved_tables].each do |hash|
+        configuration.approved_tables << PgDice::Table.from_hash(hash)
       end
       configuration
     end
 
-    assert PgDice::Configuration.new(config_file_loader: approved_tables_config)
+    assert PgDice::Configuration.new(approved_tables_loader: approved_tables_config)
   end
 
   private

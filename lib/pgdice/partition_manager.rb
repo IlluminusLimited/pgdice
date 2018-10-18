@@ -6,7 +6,7 @@ module PgDice
   class PartitionManager
     include PgDice::Loggable
     extend Forwardable
-    def_delegators :@configuration, :older_than, :table_drop_batch_size, :minimum_table_threshold
+    def_delegators :@configuration, :older_than, :table_drop_batch_size, :approved_tables
 
     attr_reader :validation, :pg_slice_manager, :database_connection
 
@@ -66,7 +66,7 @@ module PgDice
       table_name = params.fetch(:table_name)
       batch_size = params.fetch(:table_drop_batch_size, table_drop_batch_size)
       older_than = params.fetch(:older_than).to_date
-      minimum_tables = minimum_table_threshold(table_name)
+      minimum_tables = approved_tables.fetch(table_name).past
       current_date = Date.today.to_date
 
       logger.debug do
