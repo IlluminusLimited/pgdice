@@ -66,7 +66,7 @@ class PartitionManagerTest < Minitest::Test
 
   def test_drop_old_partitions_uses_batch_size
     batch_size = PgDice.configuration.table_drop_batch_size
-    minimum_tables = PgDice.configuration.minimum_table_threshold(table_name)
+    minimum_tables = PgDice.configuration.approved_tables[table_name].past
     partition_helper.partition_table!(table_name: table_name, past: (batch_size - minimum_tables + 1))
 
     assert_equal batch_size, @partition_manager.drop_old_partitions(table_name: table_name, older_than: today).size

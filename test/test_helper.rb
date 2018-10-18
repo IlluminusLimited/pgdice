@@ -71,8 +71,8 @@ module Minitest
 
       config.database_url = "postgres://#{login}#{host}/pgdice_test"
       config.approved_tables = PgDice::ApprovedTables.new(
-        PgDice::Table.new(table_base_name: 'comments', past: 1),
-        PgDice::Table.new(table_base_name: 'posts', past: 10)
+        PgDice::Table.new(table_name: 'comments', past: 1),
+        PgDice::Table.new(table_name: 'posts', past: 10)
       )
     end
     PgDice.configuration.logger.info { 'Starting tests' }

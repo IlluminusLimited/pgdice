@@ -1,11 +1,13 @@
 #database_url: <%= ENV['PGDICE_DATABASE_URL'] %>
 #table_drop_batch_size: 7
 approved_tables:
-  - table_base_name: comments
-    past: 90
-    future: 14
-    period: day
-  - table_base_name: posts
-    past: 2
-    future: 2
-    period: year
+- table_name: comments
+  past: 90
+  future: 14
+  column: created_at
+  period: day
+- table_name: posts
+  past: 2
+  future: 2
+  column: created_at
+  period: year

@@ -5,6 +5,9 @@ module PgDice
   # Helps do high-level tasks like getting tables partitioned
   class PartitionHelper
     include PgDice::Loggable
+    extend Forwardable
+
+    def_delegators :@configuration, :approved_tables
 
     attr_reader :pg_slice_manager, :validation_helper
 
@@ -15,22 +18,19 @@ module PgDice
       @validation_helper = PgDice::Validation.new(configuration)
     end
 
-    def partition_table!(params = {})
-      params[:column_name] ||= 'created_at'
-      params[:period] ||= :day
+    def partition_table!(table_name, params = {})
+      table = approved_tables.fetch(table_name)
+      table.validate!
+      validation_helper.run_additional_validators(params)
 
-      validation_helper.validate_parameters(params)
+      logger.info { "Preparing database for table: #{table}" }
 
-      logger.info { "Preparing database with params: #{params}" }
-
-      prep_and_fill(params)
-      swap_and_fill(params)
+      prep_and_fill(table.to_h.merge(params))
+      swap_and_fill(table.to_h.merge(params))
     end
 
-    def undo_partitioning!(params = {})
-      table_name = params.fetch(:table_name)
-
-      validation_helper.validate_parameters(params)
+    def undo_partitioning!(table_name)
+      approved_tables.fetch(table_name)
       logger.info { "Cleaning up database with params: #{table_name}" }
 
       pg_slice_manager.analyze(table_name: table_name, swapped: true)

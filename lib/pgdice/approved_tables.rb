@@ -8,11 +8,7 @@ module PgDice
     def initialize(*args)
       raise ArgumentError, 'Objects must be a PgDice::Table!' unless args.all? { |item| item.is_a?(PgDice::Table) }
 
-      @tables = args
-    end
-
-    def include?(object)
-      tables.any? { |table| table.name == object }
+      @tables = Set.new(args)
     end
 
     def [](key)
@@ -20,10 +16,17 @@ module PgDice
     end
 
     def fetch(key)
+      raise ArgumentError, 'key must be a String' unless key.is_a?(String)
+
       found_table = self.[](key)
-      raise KeyError, key unless found_table
+      raise PgDice::IllegalTableError, "Table name: '#{key}' is not in the list of approved tables!" unless found_table
 
       found_table
+    end
+
+    def include?(object)
+      fetch(object)
+      true
     end
 
     def <<(object)
@@ -32,5 +35,11 @@ module PgDice
       @tables << object
       self
     end
+
+    # def validate!(params)
+    #   validate_table_name(params)
+    #
+    #   true
+    # end
   end
 end
