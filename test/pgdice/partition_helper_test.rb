@@ -14,7 +14,7 @@ class PartitionHelperTest < Minitest::Test
   def test_works_year_tables
     table_name = 'posts'
     PgDice.partition_helper.partition_table!(table_name, period: :year)
-    PgDice.partition_manager.add_new_partitions(table_name: table_name, future: 2, past: 2)
+    PgDice.partition_manager.add_new_partitions(table_name, future: 2, past: 2)
 
     PgDice.validation.assert_tables(table_name: table_name, future: 2, past: 2)
 
@@ -27,7 +27,7 @@ class PartitionHelperTest < Minitest::Test
   def test_works_month_tables
     table_name = 'posts'
     PgDice.partition_helper.partition_table!(table_name, period: :month)
-    PgDice.partition_manager.add_new_partitions(table_name: table_name, future: 2, past: 2)
+    PgDice.partition_manager.add_new_partitions(table_name, future: 2, past: 2)
 
     PgDice.validation.assert_tables(table_name: table_name, future: 2, past: 2)
 

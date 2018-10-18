@@ -44,6 +44,10 @@ module PgDice
       self
     end
 
+    def smash(table_name, override_parameters)
+      fetch(table_name).smash(override_parameters)
+    end
+
     # def validate!(params)
     #   validate_table_name(params)
     #

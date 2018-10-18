@@ -18,18 +18,19 @@ module PgDice
       @database_connection = PgDice::DatabaseConnection.new(configuration)
     end
 
-    def add_new_partitions(params = {})
-      logger.info { "add_new_partitions has been called with params: #{params}" }
-
-      validation.validate_parameters(params)
-      pg_slice_manager.add_partitions(params)
+    def add_new_partitions(table_name, params = {})
+      all_params = approved_tables.smash(table_name, params)
+      logger.info { "add_new_partitions has been called with params: #{all_params}" }
+      validation.validate_parameters(all_params)
+      pg_slice_manager.add_partitions(all_params)
     end
 
-    def drop_old_partitions(params = {})
-      logger.info { "drop_old_partitions has been called with params: #{params}" }
+    def drop_old_partitions(table_name, params = {})
+      all_params = approved_tables.smash(table_name, params)
+      logger.info { "drop_old_partitions has been called with params: #{all_params}" }
 
-      validation.validate_parameters(params)
-      old_partitions = list_droppable_tables(params)
+      validation.validate_parameters(all_params)
+      old_partitions = list_droppable_tables(table_name, all_params)
       logger.warn { "Partitions to be deleted are: #{old_partitions}" }
 
       old_partitions.each do |old_partition|
@@ -39,9 +40,8 @@ module PgDice
     end
 
     # Grabs only tables that start with the base_table_name and end in numbers
-    def list_partitions(params = {})
-      table_name = params.fetch(:table_name)
-      schema = params.fetch(:schema, 'public')
+    def list_partitions(table_name, params = {})
+      params = approved_tables.smash(table_name, params)
       older_than = params[:older_than]
 
       validation.validate_parameters(params)
@@ -51,22 +51,22 @@ module PgDice
       sql = build_partition_table_fetch_sql(params)
 
       partition_tables = database_connection.execute(sql).values.flatten
-      logger.debug { "Table: #{schema}.#{table_name} has partition_tables: #{partition_tables}" }
+      logger.debug { "Table: #{params[:schema]}.#{table_name} has partition_tables: #{partition_tables}" }
       if older_than
         filtered_partitions = filter_partitions(partition_tables, table_name, older_than)
         logger.debug do
-          "Filtered partitions for table: #{schema}.#{table_name} and "\
+          "Filtered partitions for table: #{params[:schema]}.#{table_name} and "\
             "older_than: #{older_than} are: #{filtered_partitions}"
         end
       end
       partition_tables
     end
 
-    def list_droppable_tables(params = {})
-      table_name = params.fetch(:table_name)
+    def list_droppable_tables(table_name, params = {})
+      params = approved_tables.smash(table_name, params)
       batch_size = params.fetch(:table_drop_batch_size, table_drop_batch_size)
       older_than = params.fetch(:older_than).to_date
-      minimum_tables = approved_tables.fetch(table_name).past
+      minimum_tables = params.fetch(:past)
       current_date = Date.today.to_date
 
       logger.debug do
@@ -78,7 +78,7 @@ module PgDice
         raise ArgumentError, "Cannot drop tables that are not older than the current date: #{current_date}"
       end
 
-      eligible_partitions = list_partitions(table_name: table_name, older_than: current_date)
+      eligible_partitions = list_partitions(table_name, older_than: current_date)
       selected_partitions = filter_partitions(eligible_partitions, table_name, older_than)
       tables_to_drop = batch_size > selected_partitions.size ? selected_partitions.size : batch_size
       tables_to_drop = (eligible_partitions.size - tables_to_drop) < minimum_tables ? tables_to_drop - minimum_tables + 1 : tables_to_drop

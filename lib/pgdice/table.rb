@@ -4,9 +4,9 @@ module PgDice
   # Object to represent a table's configuration in the context of PgDice.
   class Table
     attr_reader :table_name
-    attr_accessor :past, :future, :column_name, :period
+    attr_accessor :past, :future, :column_name, :period, :schema
 
-    def initialize(table_name:, past: 90, future: 0, column_name: 'created_at', period: 'day')
+    def initialize(table_name:, past: 90, future: 0, column_name: 'created_at', period: 'day', schema: 'public')
       raise ArgumentError, 'table_name must be a string' unless table_name.is_a?(String)
 
       @table_name = table_name
@@ -14,6 +14,7 @@ module PgDice
       @future = future
       @column_name = column_name
       @period = period
+      @schema = schema
     end
 
     def validate!
@@ -21,6 +22,7 @@ module PgDice
       check_type(:future, Integer)
       check_type(:column_name, String)
       check_type(:period, String)
+      check_type(:schema, String)
       unless PgDice::SUPPORTED_PERIODS.include?(period)
         raise ArgumentError,
               "Period must be one of: #{PgDice::SUPPORTED_PERIODS.keys}. Value: #{period} is not valid."
@@ -37,15 +39,20 @@ module PgDice
         past: past,
         future: future,
         column_name: column_name,
-        period: period }
+        period: period,
+        schema: schema }
     end
 
     def to_s
-      "#{name}: <past: #{past}, future: #{future}, column_name: #{column_name}, period: #{period}>"
+      "#{schema}.#{name}: <past: #{past}, future: #{future}, column_name: #{column_name}, period: #{period}>"
     end
 
     def ==(other)
       to_h == other.to_h
+    end
+
+    def smash(override_parameters)
+      to_h.merge(override_parameters)
     end
 
     def self.from_hash(hash)
