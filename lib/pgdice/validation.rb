@@ -67,7 +67,7 @@ module PgDice
     def validate_period(params)
       return unless params[:period]
 
-      unless PgDice::SUPPORTED_PERIODS.include?(params[:period])
+      unless PgDice::SUPPORTED_PERIODS.include?(params[:period].to_s)
         raise ArgumentError,
               "Period must be one of: #{PgDice::SUPPORTED_PERIODS.keys}. Value: #{params[:period]} is not valid."
       end

@@ -27,7 +27,7 @@ class ValidationTest < Minitest::Test
 
   def test_assert_tables_works_with_year_tables
     table_name = 'posts'
-    PgDice.partition_helper.partition_table!(table_name: table_name, future: 1, period: :year)
+    PgDice.partition_helper.partition_table!(table_name: table_name, future: 1, period: 'year')
 
     PgDice.validation.assert_tables(table_name: table_name, future: 1)
 

@@ -58,8 +58,8 @@ class ConfigurationTest < Minitest::Test
     assert_invalid_config { @configuration.pg_connection }
   end
 
-  def test_config_file_initializes_new_obj
-    config_file_loader = lambda do |_|
+  def test_approved_tables_config_initializes_new_obj
+    approved_tables_config = lambda do |_|
       unless File.exist?(@file)
         raise ArgumentError, "File: #{@file} could not be found or does not exist. Is this the correct configuration file?"
       end
@@ -71,7 +71,7 @@ class ConfigurationTest < Minitest::Test
       configuration
     end
 
-    assert PgDice::Configuration.new(config_file_loader: config_file_loader)
+    assert PgDice::Configuration.new(config_file_loader: approved_tables_config)
   end
 
   private

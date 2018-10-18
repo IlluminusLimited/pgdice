@@ -13,12 +13,12 @@ module PgDice
 
   # Configuration class which holds all configurable values
   class Configuration
-    DEFAULT_VALUES = { logger: Logger.new(STDOUT),
-                       database_url: nil,
-                       additional_validators: [],
-                       approved_tables: [],
-                       dry_run: false,
-                       table_drop_batch_size: 7 }.freeze
+    DEFAULT_VALUES ||= { logger: Logger.new(STDOUT),
+                         database_url: nil,
+                         additional_validators: [],
+                         approved_tables: [],
+                         dry_run: false,
+                         table_drop_batch_size: 7 }.freeze
 
     attr_writer :logger,
                 :database_url,
@@ -74,11 +74,9 @@ module PgDice
     end
 
     def approved_tables
-      if @approved_tables.is_a?(Array) && @approved_tables.all? { |item| item.is_a?(PgDice::Table) }
-        return @approved_tables
-      end
+      return @approved_tables if @approved_tables.is_a?(PgDice::ApprovedTables)
 
-      raise PgDice::InvalidConfigurationError, 'approved_tables must be an Array of PgDice::Table!'
+      raise PgDice::InvalidConfigurationError, 'approved_tables must be an instance of PgDice::ApprovedTables!'
     end
 
     def dry_run
@@ -96,7 +94,8 @@ module PgDice
     def minimum_table_threshold(table_name)
       return approved_tables[table_name].to_i if approved_tables.fetch(table_name).to_i.positive?
 
-      raise PgDice::InvalidConfigurationError, 'approved_tables entries must have a positive Integer for the minimum_table_threshold!'
+      raise PgDice::InvalidConfigurationError,
+            'approved_tables entries must have a positive Integer for the minimum_table_threshold!'
     end
 
     # Lazily initialized
@@ -123,19 +122,20 @@ module PgDice
       @table_dropper = PgDice::TableDropper.new(self)
     end
 
-    class ConfigFileLoader
-      def initialize(config_file)
-        @file = config_file
+    class ApprovedTablesLoader
+      def initialize(approved_tables_file)
+        @file = approved_tables_file
       end
 
       def call(configuration = PgDice::Configuration.new)
         unless File.exist?(@file)
-          raise ArgumentError, "File: #{@file} could not be found or does not exist. Is this the correct configuration file?"
+          raise ArgumentError,
+                "File: #{@file} could not be found or does not exist. Is this the correct configuration file?"
         end
 
-        config_hash = YAML.safe_load(ERB.new(IO.read(@file)).result)
-        config_hash.each do |key, value|
-          configuration.initialize_value(key, value, nil)
+        approved_tables_hash = YAML.safe_load(ERB.new(IO.read(@file)).result)
+        approved_tables_hash[:approved_tables].each do |hash|
+          configuration.approved_tables << PgDice::Table.from_hash(hash)
         end
         configuration
       end
