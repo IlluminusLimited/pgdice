@@ -9,7 +9,7 @@ class ApprovedTablesTest < Minitest::Test
 
   def test_duplicate_tables_cannot_be_added
     approved_tables = PgDice::ApprovedTables.new(@table)
-
-    assert approved_tables << @table
+    approved_tables << @table.dup
+    assert_equal 1, approved_tables.size
   end
 end

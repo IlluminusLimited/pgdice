@@ -25,6 +25,7 @@ module PgDice
         raise ArgumentError,
               "Period must be one of: #{PgDice::SUPPORTED_PERIODS.keys}. Value: #{period} is not valid."
       end
+      true
     end
 
     def name
@@ -59,6 +60,7 @@ module PgDice
               "PgDice::Table: #{name} failed validation on field: #{field}. "\
                 "Expected type of: #{expected_type} but found #{send(field).class}"
       end
+      true
     end
   end
 end
