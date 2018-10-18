@@ -21,12 +21,13 @@ module PgDice
     def partition_table!(table_name, params = {})
       table = approved_tables.fetch(table_name)
       table.validate!
-      validation_helper.run_additional_validators(params)
+      all_params = table.to_h.merge(params)
+      validation_helper.validate_parameters(all_params)
 
       logger.info { "Preparing database for table: #{table}" }
 
-      prep_and_fill(table.to_h.merge(params))
-      swap_and_fill(table.to_h.merge(params))
+      prep_and_fill(all_params)
+      swap_and_fill(all_params)
     end
 
     def undo_partitioning!(table_name)

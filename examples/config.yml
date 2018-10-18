@@ -4,10 +4,10 @@ approved_tables:
 - table_name: comments
   past: 90
   future: 14
-  column: created_at
+  column_name: created_at
   period: day
 - table_name: posts
   past: 2
   future: 2
-  column: created_at
+  column_name: created_at
   period: year

@@ -16,18 +16,18 @@ class ValidationTest < Minitest::Test
   end
 
   def test_assert_tables_throws
-    PgDice.partition_helper.partition_table!(table_name: table_name, future: 0, past: 0)
+    PgDice.partition_helper.partition_table!(table_name, future: 0, past: 0)
 
     assert_future_tables_error { PgDice.validation.assert_tables(table_name: table_name, future: 1) }
 
     assert_past_tables_error { PgDice.validation.assert_tables(table_name: table_name, past: 1) }
   ensure
-    partition_helper.undo_partitioning(table_name: table_name)
+    partition_helper.undo_partitioning(table_name)
   end
 
   def test_assert_tables_works_with_year_tables
     table_name = 'posts'
-    PgDice.partition_helper.partition_table!(table_name: table_name, future: 1, period: 'year')
+    PgDice.partition_helper.partition_table!(table_name, future: 1, period: 'year')
 
     PgDice.validation.assert_tables(table_name: table_name, future: 1)
 
@@ -35,7 +35,7 @@ class ValidationTest < Minitest::Test
 
     assert_past_tables_error { PgDice.validation.assert_tables(table_name: table_name, past: 1) }
   ensure
-    partition_helper.undo_partitioning(table_name: 'posts')
+    partition_helper.undo_partitioning('posts')
   end
 
   def test_assert_tables_requires_past_or_future

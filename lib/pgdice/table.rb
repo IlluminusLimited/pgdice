@@ -4,22 +4,22 @@ module PgDice
   # Object to represent a table's configuration in the context of PgDice.
   class Table
     attr_reader :table_name
-    attr_accessor :past, :future, :column, :period
+    attr_accessor :past, :future, :column_name, :period
 
-    def initialize(table_name:, past: 90, future: 0, column: 'created_at', period: 'day')
+    def initialize(table_name:, past: 90, future: 0, column_name: 'created_at', period: 'day')
       raise ArgumentError, 'table_name must be a string' unless table_name.is_a?(String)
 
       @table_name = table_name
       @past = past
       @future = future
-      @column = column
+      @column_name = column_name
       @period = period
     end
 
     def validate!
       check_type(:past, Integer)
       check_type(:future, Integer)
-      check_type(:column, String)
+      check_type(:column_name, String)
       check_type(:period, String)
       unless PgDice::SUPPORTED_PERIODS.include?(period)
         raise ArgumentError,
@@ -35,12 +35,12 @@ module PgDice
       { table_name: table_name,
         past: past,
         future: future,
-        column: column,
+        column_name: column_name,
         period: period }
     end
 
     def to_s
-      "#{name}: <past: #{past}, future: #{future}, column: #{column}, period: #{period}>"
+      "#{name}: <past: #{past}, future: #{future}, column_name: #{column_name}, period: #{period}>"
     end
 
     def ==(other)
