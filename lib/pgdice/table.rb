@@ -52,7 +52,7 @@ module PgDice
     end
 
     def smash(override_parameters)
-      to_h.merge(override_parameters)
+      to_h.merge!(override_parameters)
     end
 
     def self.from_hash(hash)

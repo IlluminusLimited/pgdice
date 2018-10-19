@@ -12,16 +12,21 @@ module PgDice
       @logger = params[:logger]
     end
 
-    def assert_tables(params)
+    def assert_tables(table_name, params)
       unless params[:future] || params[:past]
         raise ArgumentError, 'You must provide either a future or past number of tables to assert on.'
       end
 
-      table_name = validate_table_name(params)
-      period = resolve_period(params)
+      table = approved_tables.fetch(table_name)
+      period = resolve_period(table_name: table_name, **params)
 
-      assert_future_tables(table_name, params[:future], period) if params[:future]
-      assert_past_tables(table_name, params[:past], period) if params[:past]
+      all_params = table.smash(params.merge!(period: period))
+      validate_parameters(all_params)
+
+      logger.debug { "Running asserts on table: #{table} with params: #{all_params}" }
+
+      assert_future_tables(table.name, params[:future], period) if params[:future]
+      assert_past_tables(table.name, params[:past], period) if params[:past]
       true
     end
 
@@ -36,7 +41,8 @@ module PgDice
     private
 
     def resolve_period(params)
-      period = validate_period(params) || fetch_period_from_table_comment(params.fetch(:table_name))
+      validate_period(params) if params[:period]
+      period = fetch_period_from_table_comment(params.fetch(:table_name))
 
       # If the user doesn't supply a period and we fail to find one on the table then it's a pretty good bet
       # this table is not partitioned at all.
@@ -44,6 +50,7 @@ module PgDice
         raise TableNotPartitionedError,
               "Table: #{params.fetch(:table_name)} is not partitioned! Cannot validate partitions that don't exist!"
       end
+      validate_period(period: period)
       period
     end
 
@@ -104,7 +111,7 @@ module PgDice
         WHERE pg_class.relkind = 'r'
           AND pg_namespace.nspname = 'public'
           AND pg_class.relname = '#{table_name}_' || to_char(NOW()
-            #{add_or_subtract} INTERVAL '#{table_count} #{period}', '#{SUPPORTED_PERIODS[period.to_sym]}')
+            #{add_or_subtract} INTERVAL '#{table_count} #{period}', '#{SUPPORTED_PERIODS[period.to_s]}')
       SQL
     end
 

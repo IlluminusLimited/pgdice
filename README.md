@@ -230,7 +230,7 @@ ensure they are actually working correctly.
 
 To validate that your expected number of tables exist, you can run:
 ```ruby
-PgDice.validation.assert_tables(table_name: 'comments', future: 30, past: 90)
+PgDice.validation.assert_tables('comments', future: 30, past: 90)
 ```
 
 An [InsufficientTablesError](lib/pgdice.rb) will be raised if any conditions are not met.

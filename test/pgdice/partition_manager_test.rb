@@ -18,7 +18,7 @@ class PartitionManagerTest < Minitest::Test
 
     assert @partition_manager.add_new_partitions(table_name, future: future_tables)
 
-    assert PgDice.validation.assert_tables(table_name: table_name, future: future_tables)
+    assert PgDice.validation.assert_tables(table_name, future: future_tables)
   end
 
   def test_future_partitions_can_be_dry_run
@@ -30,7 +30,7 @@ class PartitionManagerTest < Minitest::Test
 
     assert configuration.partition_manager.add_new_partitions(table_name, future: future_tables)
 
-    assert PgDice.validation.assert_tables(table_name: table_name, future: 0, past: 0)
+    assert PgDice.validation.assert_tables(table_name, future: 0, past: 0)
   end
 
   def test_future_partitions_blows_up_on_unpartitioned_table
@@ -43,7 +43,7 @@ class PartitionManagerTest < Minitest::Test
     partition_helper.partition_table!(table_name, past: 2, future: 1)
 
     assert_equal 2, @partition_manager.list_partitions(table_name, older_than: today).size
-    assert PgDice.validation.assert_tables(table_name: table_name, past: 2, future: 1)
+    assert PgDice.validation.assert_tables(table_name, past: 2, future: 1)
   end
 
   def test_drop_old_partitions_can_be_dry_run
@@ -54,14 +54,14 @@ class PartitionManagerTest < Minitest::Test
 
     assert_equal 0, configuration.partition_manager.drop_old_partitions(table_name,
                                                                         older_than: today).size
-    assert PgDice.validation.assert_tables(table_name: table_name, past: 2)
+    assert PgDice.validation.assert_tables(table_name, past: 2)
   end
 
   def test_old_partitions_can_be_dropped
     partition_helper.partition_table!(table_name, past: 2)
 
     assert_equal 2, @partition_manager.drop_old_partitions(table_name, older_than: today).size
-    assert PgDice.validation.assert_tables(table_name: table_name, past: 0)
+    assert PgDice.validation.assert_tables(table_name, past: 0)
   end
 
   def test_drop_old_partitions_uses_batch_size
@@ -70,7 +70,7 @@ class PartitionManagerTest < Minitest::Test
     partition_helper.partition_table!(table_name, past: (batch_size - minimum_tables + 1))
 
     assert_equal batch_size, @partition_manager.drop_old_partitions(table_name, older_than: today).size
-    assert PgDice.validation.assert_tables(table_name: table_name, past: minimum_tables)
+    assert PgDice.validation.assert_tables(table_name, past: minimum_tables)
   end
 
   def test_will_not_drop_more_than_minimum

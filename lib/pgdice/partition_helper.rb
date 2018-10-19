@@ -20,10 +20,10 @@ module PgDice
 
     def partition_table!(table_name, params = {})
       table = approved_tables.fetch(table_name)
-      all_params = table.to_h.merge(params)
+      all_params = table.smash(params)
       validation_helper.validate_parameters(all_params)
 
-      logger.info { "Preparing database for table: #{table}" }
+      logger.info { "Preparing database for table: #{table}. Using parameters: #{all_params}" }
 
       prep_and_fill(all_params)
       swap_and_fill(all_params)
