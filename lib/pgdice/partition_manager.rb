@@ -41,32 +41,32 @@ module PgDice
 
     # Grabs only tables that start with the base_table_name and end in numbers
     def list_partitions(table_name, params = {})
-      params = approved_tables.smash(table_name, params)
-      older_than = params[:older_than]
+      table = approved_tables.fetch(table_name)
+      all_params = table.smash(params)
+      older_than = all_params[:older_than]
 
-      validation.validate_parameters(params)
+      validation.validate_parameters(all_params)
 
-      logger.info { "Fetching partition tables with params: #{params}" }
+      logger.info { "Fetching partition tables with params: #{all_params}" }
 
-      sql = build_partition_table_fetch_sql(params)
+      sql = build_partition_table_fetch_sql(all_params)
 
       partition_tables = database_connection.execute(sql).values.flatten
-      logger.debug { "Table: #{params[:schema]}.#{table_name} has partition_tables: #{partition_tables}" }
+      logger.debug { "Table: #{table.full_name} has partition_tables: #{partition_tables}" }
       if older_than
-        filtered_partitions = filter_partitions(partition_tables, table_name, older_than)
+        partition_tables = filter_partitions(partition_tables, table_name, older_than)
         logger.debug do
-          "Filtered partitions for table: #{params[:schema]}.#{table_name} and "\
-            "older_than: #{older_than} are: #{filtered_partitions}"
+          "Filtered partitions for table: #{table.full_name} and older_than: #{older_than} are: #{partition_tables}"
         end
       end
       partition_tables
     end
 
     def list_droppable_tables(table_name, params = {})
-      params = approved_tables.smash(table_name, params)
-      batch_size = params.fetch(:table_drop_batch_size, table_drop_batch_size)
-      older_than = params.fetch(:older_than).to_date
-      minimum_tables = params.fetch(:past)
+      all_params = approved_tables.smash(table_name, params)
+      batch_size = all_params.fetch(:table_drop_batch_size, table_drop_batch_size)
+      older_than = all_params.fetch(:older_than).to_date
+      minimum_tables = all_params[:past]
       current_date = Date.today.to_date
 
       logger.debug do

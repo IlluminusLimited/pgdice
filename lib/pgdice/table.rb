@@ -34,6 +34,10 @@ module PgDice
       table_name
     end
 
+    def full_name
+      "#{schema}.#{name}"
+    end
+
     def to_h
       { table_name: table_name,
         past: past,
