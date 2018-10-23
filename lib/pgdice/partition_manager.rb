@@ -32,12 +32,7 @@ module PgDice
 
       validation.validate_parameters(all_params)
       old_partitions = list_droppable_tables(table_name, all_params)
-      logger.info { "Partitions to be deleted are: #{old_partitions}" }
-
-      old_partitions.each do |old_partition|
-        @configuration.table_dropper.call(old_partition, logger)
-      end
-      old_partitions
+      handle_partition_dropping(old_partitions)
     end
 
     # Grabs only tables that start with the base_table_name and end in numbers
@@ -53,25 +48,27 @@ module PgDice
       sql = build_partition_table_fetch_sql(all_params)
 
       partition_tables = database_connection.execute(sql).values.flatten
-      logger.debug { "Table: #{table.full_name} has partition_tables: #{partition_tables}" }
-      if older_than
-        partition_tables = filter_partitions(partition_tables, table_name, older_than)
-        logger.debug do
-          "Filtered partitions for table: #{table.full_name} and older_than: #{older_than} are: #{partition_tables}"
-        end
-      end
-      partition_tables
+      handle_returned_partitions(table, partition_tables, older_than)
     end
 
     def list_droppable_tables(table_name, params = {})
-      all_params = approved_tables.smash(table_name, params)
+      table = approved_tables.fetch(table_name)
+      all_params = table.smash(params)
       batch_size = all_params.fetch(:table_drop_batch_size, table_drop_batch_size)
       older_than = all_params.fetch(:older_than).to_date
       minimum_tables = all_params[:past]
       current_date = Date.today.to_date
 
+      validate_dates(minimum_tables, table, current_date, older_than)
+
+      process_droppable_tables(older_than, current_date, batch_size, minimum_tables, table)
+    end
+
+    private
+
+    def validate_dates(minimum_tables, table, current_date, older_than)
       logger.debug do
-        "Checking if the minimum_table_threshold of #{minimum_tables} tables for base_table: #{table_name} "\
+        "Checking if the minimum_table_threshold of #{minimum_tables} tables for base_table: #{table.name} "\
         "will not be exceeded. Looking back from: #{current_date}"
       end
 
@@ -79,17 +76,22 @@ module PgDice
         raise ArgumentError, "Cannot list tables that are not older than the current date: #{current_date}"
       end
 
-      eligible_partitions = list_partitions(table_name, older_than: current_date)
-      selected_partitions = filter_partitions(eligible_partitions, table_name, older_than)
-      tables_to_drop = batch_size > selected_partitions.size ? selected_partitions.size : batch_size
-      tables_to_drop = (eligible_partitions.size - tables_to_drop) < minimum_tables ? tables_to_drop - minimum_tables : tables_to_drop
-      tables_to_drop = tables_to_drop.abs
+      true
+    end
 
-      if (eligible_partitions.size - tables_to_drop) < minimum_tables
+    def process_droppable_tables(older_than, current_date, batch_size, minimum_tables, table)
+      eligible_partitions = list_partitions(table.name, older_than: current_date)
+      selected_partitions = filter_partitions(eligible_partitions, table.name, older_than)
+      tables_to_drop = calculate_tables_to_drop(batch_size, minimum_tables, eligible_partitions, selected_partitions)
+      remaining_partitions = eligible_partitions.size - tables_to_drop
+      select_tables_to_drop(remaining_partitions, minimum_tables, tables_to_drop, table, selected_partitions)
+    end
+
+    def select_tables_to_drop(remaining_partitions, minimum_tables, tables_to_drop, table, selected_partitions)
+      if remaining_partitions < minimum_tables
         logger.warn do
-          "Attempt to drop #{tables_to_drop} tables from #{table_name} would result in "\
-"#{eligible_partitions.size - tables_to_drop} remaining tables which exceeds the "\
-"minimum_table_threshold of #{minimum_tables}. Table dropping will not occur."
+          "Attempt to drop #{tables_to_drop} tables from #{table.full_name} would result in "\
+"#{remaining_partitions} remaining tables which violates the minimum past of #{minimum_tables}. Not dropping tables."
         end
         return []
       end
@@ -98,7 +100,37 @@ module PgDice
       droppable_tables
     end
 
-    private
+    def handle_returned_partitions(table, partition_tables, older_than)
+      logger.debug { "Table: #{table} has partition_tables: #{partition_tables}" }
+      if older_than
+        partition_tables = filter_partitions(partition_tables, table.name, older_than)
+        logger.debug do
+          "Filtered partitions for table: #{table.full_name} and older_than: #{older_than} are: #{partition_tables}"
+        end
+      end
+      partition_tables
+    end
+
+    def handle_partition_dropping(old_partitions)
+      logger.info { "Partitions to be deleted are: #{old_partitions}" }
+
+      old_partitions.each do |old_partition|
+        @configuration.table_dropper.call(old_partition, logger)
+      end
+      old_partitions
+    end
+
+    def calculate_tables_to_drop(batch_size, minimum_tables, eligible_partitions, selected_partitions)
+      expected_tables_to_drop = batch_size > selected_partitions.size ? selected_partitions.size : batch_size
+      remaining_partitions = eligible_partitions.size - expected_tables_to_drop
+
+      tables_to_drop = if remaining_partitions < minimum_tables
+                         expected_tables_to_drop - minimum_tables
+                       else
+                         expected_tables_to_drop
+                       end
+      tables_to_drop.abs
+    end
 
     def filter_partitions(partition_tables, base_table_name, partitions_older_than_date)
       partition_tables.select do |partition_name|

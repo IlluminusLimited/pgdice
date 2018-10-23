@@ -11,3 +11,4 @@ approved_tables:
   future: 2
   column_name: created_at
   period: year
+  table_drop_batch_size: 20 #optionally override batch size for this table

@@ -22,12 +22,8 @@ module PgDice
 
       all_params = table.smash(params.merge!(period: period))
       validate_parameters(all_params)
-
       logger.debug { "Running asserts on table: #{table} with params: #{all_params}" }
-
-      assert_future_tables(table.name, params[:future], period) if params[:future]
-      assert_past_tables(table.name, params[:past], period) if params[:past]
-      true
+      run_asserts(table, period, params)
     end
 
     def validate_parameters(params)
@@ -39,6 +35,12 @@ module PgDice
     end
 
     private
+
+    def run_asserts(table, period, params)
+      assert_future_tables(table.name, params[:future], period) if params[:future]
+      assert_past_tables(table.name, params[:past], period) if params[:past]
+      true
+    end
 
     def resolve_period(params)
       validate_period(params) if params[:period]
@@ -103,7 +105,7 @@ module PgDice
     end
 
     def build_assert_sql(table_name, table_count, period, direction)
-      add_or_subtract = { future: '+', past: '-' }.fetch(direction, '+')
+      add_or_subtract = { future: '+', past: '-' }.fetch(direction, '-')
       <<~SQL
         SELECT 1
         FROM pg_catalog.pg_class pg_class
