@@ -115,6 +115,7 @@ module PgDice
       @table_dropper = PgDice::TableDropper.new(self)
     end
 
+    # Converts configuration yaml file to an ApprovedTables object
     class ApprovedTablesLoader
       def initialize(approved_tables_file)
         @file = approved_tables_file
