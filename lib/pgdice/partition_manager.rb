@@ -20,18 +20,19 @@ module PgDice
 
     def add_new_partitions(table_name, params = {})
       all_params = approved_tables.smash(table_name, params)
-      logger.info { "add_new_partitions has been called with params: #{all_params}" }
+      logger.debug { "add_new_partitions has been called with params: #{all_params}" }
       validation.validate_parameters(all_params)
       pg_slice_manager.add_partitions(all_params)
     end
 
     def drop_old_partitions(table_name, params = {})
       all_params = approved_tables.smash(table_name, params)
-      logger.info { "drop_old_partitions has been called with params: #{all_params}" }
+      all_params[:older_than] = Date.today.to_date
+      logger.debug { "drop_old_partitions has been called with params: #{all_params}" }
 
       validation.validate_parameters(all_params)
       old_partitions = list_droppable_tables(table_name, all_params)
-      logger.warn { "Partitions to be deleted are: #{old_partitions}" }
+      logger.info { "Partitions to be deleted are: #{old_partitions}" }
 
       old_partitions.each do |old_partition|
         @configuration.table_dropper.call(old_partition, logger)
@@ -81,7 +82,8 @@ module PgDice
       eligible_partitions = list_partitions(table_name, older_than: current_date)
       selected_partitions = filter_partitions(eligible_partitions, table_name, older_than)
       tables_to_drop = batch_size > selected_partitions.size ? selected_partitions.size : batch_size
-      tables_to_drop = (eligible_partitions.size - tables_to_drop) < minimum_tables ? tables_to_drop - minimum_tables + 1 : tables_to_drop
+      tables_to_drop = (eligible_partitions.size - tables_to_drop) < minimum_tables ? tables_to_drop - minimum_tables : tables_to_drop
+      tables_to_drop = tables_to_drop.abs
 
       if (eligible_partitions.size - tables_to_drop) < minimum_tables
         logger.warn do
