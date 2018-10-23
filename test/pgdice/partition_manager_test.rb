@@ -56,7 +56,6 @@ class PartitionManagerTest < Minitest::Test
     assert PgDice.validation.assert_tables(table_name, past: 2)
   end
 
-
   def test_old_partitions_can_be_dropped
     partition_helper.partition_table!(table_name, past: 2)
 
