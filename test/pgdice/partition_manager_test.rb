@@ -56,11 +56,13 @@ class PartitionManagerTest < Minitest::Test
     assert PgDice.validation.assert_tables(table_name, past: 2)
   end
 
+
   def test_old_partitions_can_be_dropped
     partition_helper.partition_table!(table_name, past: 2)
 
-    assert_equal 2, @partition_manager.drop_old_partitions(table_name).size
-    assert PgDice.validation.assert_tables(table_name, past: 0)
+    # The minimum partitions required on this table is 1
+    assert_equal 1, @partition_manager.drop_old_partitions(table_name).size
+    assert PgDice.validation.assert_tables(table_name, past: 1)
   end
 
   def test_drop_old_partitions_uses_batch_size

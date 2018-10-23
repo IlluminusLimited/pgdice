@@ -76,7 +76,7 @@ module PgDice
       end
 
       if older_than > current_date
-        raise ArgumentError, "Cannot drop tables that are not older than the current date: #{current_date}"
+        raise ArgumentError, "Cannot list tables that are not older than the current date: #{current_date}"
       end
 
       eligible_partitions = list_partitions(table_name, older_than: current_date)
