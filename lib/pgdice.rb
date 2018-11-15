@@ -53,14 +53,6 @@ module PgDice
     end
   end
 
-  #   # Rubocop is stupid
-  #   class MinimumTableCountExceededError < InsufficientPastTablesError
-  #     def initialize(table_name, tables_to_drop, minimum_tables, current_tables)
-  #       super(table_name, "Attempt to drop #{tables_to_drop} from #{table_name} would result in "\
-  # "#{current_tables - tables_to_drop} which is exceeds the minimum_table_threshold of #{minimum_tables}.")
-  #     end
-  #   end
-
   # Rubocop is stupid
   class CustomValidationError < ValidationError
     def initialize(params, validators, error = nil)
