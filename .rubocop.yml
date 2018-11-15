@@ -4,3 +4,8 @@ Metrics/LineLength:
 Metrics/BlockLength:
   Exclude:
     - pgdice.gemspec
+
+# TODO: Evaluate if this is an acceptable parameter list. It's a constructor after all.
+Metrics/ParameterLists:
+  Exclude:
+    - lib/pgdice/table.rb
