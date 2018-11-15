@@ -13,6 +13,7 @@ module PgDice
     def initialize(configuration = PgDice::Configuration.new, opts = {})
       @configuration = configuration
       @logger = opts[:logger]
+      @current_date_provider = opts[:current_date_provider] ||= proc { Date.today.to_date }
       @validation = PgDice::Validation.new(configuration)
       @pg_slice_manager = PgDice::PgSliceManager.new(configuration)
       @database_connection = PgDice::DatabaseConnection.new(configuration)
@@ -27,7 +28,7 @@ module PgDice
 
     def drop_old_partitions(table_name, params = {})
       all_params = approved_tables.smash(table_name, params)
-      all_params[:older_than] = Date.today.to_date
+      all_params[:older_than] = @current_date_provider.call
       logger.debug { "drop_old_partitions has been called with params: #{all_params}" }
 
       validation.validate_parameters(all_params)
@@ -57,11 +58,10 @@ module PgDice
       batch_size = all_params.fetch(:table_drop_batch_size, table_drop_batch_size)
       older_than = all_params.fetch(:older_than).to_date
       minimum_tables = all_params[:past]
-      current_date = Date.today.to_date
 
-      validate_dates(minimum_tables, table, current_date, older_than)
+      validate_dates(minimum_tables, table, @current_date_provider.call, older_than)
 
-      process_droppable_tables(older_than, current_date, batch_size, minimum_tables, table)
+      process_droppable_tables(older_than, @current_date_provider.call, batch_size, minimum_tables, table)
     end
 
     private

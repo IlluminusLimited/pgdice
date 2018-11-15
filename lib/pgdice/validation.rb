@@ -135,9 +135,7 @@ module PgDice
     end
 
     def build_table_comment_sql(table_name, schema)
-      <<~SQL
-        SELECT obj_description('#{schema}.#{table_name}'::REGCLASS) AS comment
-      SQL
+      "SELECT obj_description('#{schema}.#{table_name}'::REGCLASS) AS comment"
     end
   end
 end

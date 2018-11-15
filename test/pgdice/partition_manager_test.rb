@@ -106,6 +106,13 @@ class PartitionManagerTest < Minitest::Test
     assert_empty PgDice.partition_manager.list_droppable_tables(table_name, older_than: today)
   end
 
+  def test_old_tables_dropped_in_future
+    PgDice.partition_helper.partition_table!(table_name, past: 2, future: 3)
+    assert_equal 2, PgDice::PartitionManager.new(PgDice.configuration,
+                                                 current_date_provider: proc { tomorrow.to_date })
+                                            .list_droppable_tables(table_name, older_than: tomorrow).size
+  end
+
   private
 
   def batch_size_and_minimum_tables
@@ -116,6 +123,10 @@ class PartitionManagerTest < Minitest::Test
 
   def today
     Time.now.utc
+  end
+
+  def tomorrow
+    today + 1 * 24 * 60 * 60
   end
 
   def yesterday
