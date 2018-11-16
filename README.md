@@ -58,8 +58,11 @@ PgDice.configure do |config|
   #   which may not give you the result you want.
   config.logger = Sidekiq.logger
   config.database_url = ENV['PGDICE_DATABASE_URL'] # postgresql://[user[:password]@][host][:port][/dbname][?param1=value1&...]
-  # Comma separated values work well for approved_tables: 'comments,posts' Or just use an array of strings
-  config.approved_tables = ENV['PGDICE_APPROVED_TABLES']&.split(',')
+  
+  config.approved_tables = PgDice::ApprovedTables.new(
+    PgDice::Table.new(table_name: 'comments', past: 1),
+    PgDice::Table.new(table_name: 'posts', past: 10)
+  )
 end
 ```
 

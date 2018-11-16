@@ -27,13 +27,14 @@ module PgDice
                 :dry_run,
                 :table_drop_batch_size,
                 :database_connection,
-                :pg_connection
+                :pg_connection,
+                :config_file,
+                :config_file_loader
 
     attr_accessor :table_dropper,
                   :pg_slice_manager,
                   :partition_manager,
-                  :partition_helper,
-                  :config_loader
+                  :partition_helper
 
     def initialize(existing_config = nil)
       DEFAULT_VALUES.each do |key, value|
@@ -76,6 +77,15 @@ module PgDice
     def approved_tables
       return @approved_tables if @approved_tables.is_a?(PgDice::ApprovedTables)
 
+      if @approved_tables.nil?
+        raise PgDice::InvalidConfigurationError, 'approved_tables must be an instance of PgDice::ApprovedTables!'
+      end
+
+      if File.exist?(@config_file) && @approved_tables.empty?
+        ConfigurationFileLoader.new.call(self)
+        return approved_tables
+      end
+
       raise PgDice::InvalidConfigurationError, 'approved_tables must be an instance of PgDice::ApprovedTables!'
     end
 
@@ -113,26 +123,6 @@ module PgDice
       @database_connection = PgDice::DatabaseConnection.new(self)
       @partition_manager = PgDice::PartitionManager.new(self)
       @table_dropper = PgDice::TableDropper.new(self)
-    end
-
-    # Converts configuration yaml file to an ApprovedTables object
-    class ApprovedTablesLoader
-      def initialize(approved_tables_file)
-        @file = approved_tables_file
-      end
-
-      def call(configuration = PgDice::Configuration.new)
-        unless File.exist?(@file)
-          raise ArgumentError,
-                "File: #{@file} could not be found or does not exist. Is this the correct configuration file?"
-        end
-
-        approved_tables_hash = YAML.safe_load(ERB.new(IO.read(@file)).result)
-        approved_tables_hash['approved_tables'].each do |hash|
-          configuration.approved_tables << PgDice::Table.from_hash(hash)
-        end
-        configuration
-      end
     end
   end
 end
