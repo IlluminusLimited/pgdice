@@ -53,18 +53,29 @@ module PgDice
     end
 
     def list_droppable_tables(table_name, params = {})
+      table, batch_size, older_than, minimum_tables, current_date = populate_variables(table_name, params)
+
+      logger.debug do
+        "Checking if the minimum_table_threshold of #{minimum_tables} tables for base_table: #{table.name} "\
+        "will not be exceeded. Looking back from: #{current_date}"
+      end
+
+      validation.validate_dates(current_date, older_than)
+
+      process_droppable_tables(older_than, current_date, batch_size, minimum_tables, table)
+    end
+
+    private
+
+    def populate_variables(table_name, params)
       table = approved_tables.fetch(table_name)
       all_params = table.smash(params)
       batch_size = all_params.fetch(:table_drop_batch_size, table_drop_batch_size)
       older_than = all_params.fetch(:older_than).to_date
       minimum_tables = all_params[:past]
       current_date = @current_date_provider.call
-      validation.validate_dates(minimum_tables, table, current_date, older_than)
-
-      process_droppable_tables(older_than, current_date, batch_size, minimum_tables, table)
+      [table, batch_size, older_than, minimum_tables, current_date]
     end
-
-    private
 
     def process_droppable_tables(older_than, current_date, batch_size, minimum_tables, table)
       eligible_partitions = list_partitions(table.name, older_than: current_date)

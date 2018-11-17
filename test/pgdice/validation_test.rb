@@ -50,4 +50,10 @@ class ValidationTest < Minitest::Test
     # Check errors can be caught at top level
     assert_raises(PgDice::Error) { PgDice.validation.validate_parameters(table_name: 'bob') }
   end
+
+  def test_older_than_must_be_less_than_current_date
+    assert_raises(ArgumentError) do
+      PgDice.validation.validate_dates(yesterday, today)
+    end
+  end
 end

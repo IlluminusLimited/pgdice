@@ -98,5 +98,17 @@ module Minitest
     def assert_past_tables_error(&block)
       assert_raises(PgDice::InsufficientPastTablesError) { block.yield }
     end
+
+    def today
+      Time.now.utc
+    end
+
+    def tomorrow
+      today + 1 * 24 * 60 * 60
+    end
+
+    def yesterday
+      today - 1 * 24 * 60 * 60
+    end
   end
 end

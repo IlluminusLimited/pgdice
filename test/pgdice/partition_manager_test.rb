@@ -120,16 +120,4 @@ class PartitionManagerTest < Minitest::Test
     minimum_tables = PgDice.configuration.approved_tables[table_name].past
     [batch_size, minimum_tables]
   end
-
-  def today
-    Time.now.utc
-  end
-
-  def tomorrow
-    today + 1 * 24 * 60 * 60
-  end
-
-  def yesterday
-    today - 1 * 24 * 60 * 60
-  end
 end
