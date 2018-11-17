@@ -16,7 +16,6 @@ module PgDice
     DEFAULT_VALUES ||= { logger: Logger.new(STDOUT),
                          database_url: nil,
                          additional_validators: [],
-                         approved_tables: [],
                          dry_run: false,
                          table_drop_batch_size: 7 }.freeze
 
@@ -68,14 +67,10 @@ module PgDice
       raise PgDice::InvalidConfigurationError, 'additional_validators must be an Array!'
     end
 
-    def approved_tables
-      return @approved_tables if @approved_tables.is_a?(PgDice::ApprovedTables)
+    def approved_tables(lazy_load: true)
+      return @approved_tables if @approved_tables.is_a?(PgDice::ApprovedTables) || !lazy_load
 
-      if @approved_tables.nil?
-        raise PgDice::InvalidConfigurationError, 'approved_tables must be an instance of PgDice::ApprovedTables!'
-      end
-
-      if @approved_tables.empty?
+      if @approved_tables.nil? || @approved_tables.empty?
         config_file_loader.call(self)
         return approved_tables
       end

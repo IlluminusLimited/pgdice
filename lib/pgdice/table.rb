@@ -3,6 +3,7 @@
 module PgDice
   # Object to represent a table's configuration in the context of PgDice.
   class Table
+    include Comparable
     attr_reader :table_name
     attr_accessor :past, :future, :column_name, :period, :schema
 
@@ -51,12 +52,21 @@ module PgDice
       "#{schema}.#{name}: <past: #{past}, future: #{future}, column_name: #{column_name}, period: #{period}>"
     end
 
+    def smash(override_parameters)
+      to_h.merge!(override_parameters)
+    end
+
     def ==(other)
       to_h == other.to_h
     end
 
-    def smash(override_parameters)
-      to_h.merge!(override_parameters)
+    def <=>(other)
+      table_name <=> other.table_name
+    end
+
+    # Get expected size of this configured table (past + present + future table counts)
+    def size
+      past + future + 1
     end
 
     def self.from_hash(hash)

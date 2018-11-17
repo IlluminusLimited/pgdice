@@ -6,7 +6,7 @@ module PgDice
     attr_reader :tables
     extend Forwardable
 
-    def_delegators :@tables, :size
+    def_delegators :@tables, :size, :empty?
 
     def initialize(*args)
       raise ArgumentError, 'Objects must be a PgDice::Table!' unless args.all? { |item| item.is_a?(PgDice::Table) }
@@ -46,6 +46,10 @@ module PgDice
 
     def smash(table_name, override_parameters)
       fetch(table_name).smash(override_parameters)
+    end
+
+    def ==(other)
+      tables.sort == other.tables.sort
     end
   end
 end

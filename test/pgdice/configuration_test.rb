@@ -75,6 +75,8 @@ class ConfigurationTest < Minitest::Test
   #   assert PgDice::Configuration.new(approved_tables_loader: approved_tables_config)
   # end
 
+  def test_config_file_loader_is_called; end
+
   private
 
   def assert_not_configured(&block)

@@ -1,12 +1,11 @@
 approved_tables:
 - table_name: comments
-  past: 90
-  future: 14
+  past: 1
+  future: 0
   column_name: created_at
   period: day
 - table_name: posts
-  past: 2
-  future: 2
+  past: 10
+  future: 0
   column_name: created_at
-  period: year
-  table_drop_batch_size: 20 #optionally override batch size for this table
+  period: day # day, month, year
