@@ -14,20 +14,20 @@ module PgDice
       raise ArgumentError, 'Objects must be a PgDice::Table!' unless tables.all? { |item| item.is_a?(PgDice::Table) }
     end
 
-    def [](key)
+    def [](arg)
+      key = check_string_args(arg)
       tables.select { |table| table.name == key }.first
     end
 
-    def include?(key)
-      raise ArgumentError, 'key must be a String' unless key.is_a?(String)
+    def include?(arg)
+      key = check_string_args(arg)
       return true if self.[](key)
 
       false
     end
 
-    def fetch(key)
-      raise ArgumentError, 'key must be a String' unless key.is_a?(String)
-
+    def fetch(arg)
+      key = check_string_args(arg)
       found_table = self.[](key)
       raise PgDice::IllegalTableError, "Table name: '#{key}' is not in the list of approved tables!" unless found_table
 
@@ -50,6 +50,14 @@ module PgDice
 
     def ==(other)
       tables.sort == other.tables.sort
+    end
+
+    private
+
+    def check_string_args(key)
+      raise ArgumentError, 'key must be a String' unless key.is_a?(String)
+
+      key
     end
   end
 end
