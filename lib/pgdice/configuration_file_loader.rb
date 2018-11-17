@@ -9,23 +9,24 @@ module PgDice
     end
 
     def call(config = PgDice::Configuration.new)
-      unless File.exist?(config_file)
-        raise PgDice::Error::ConfigurationError,
-              "File: #{config_file} could not be found or does not exist. Is this the correct file path?"
-      end
+      config_file = config.config_file || @config_file
+      validate_file(config_file)
 
       config.approved_tables = @config_loader.call(config_file)
                                              .fetch('approved_tables')
                                              .reduce(tables(config)) do |tables, hash|
-                                               tables << PgDice::Table.from_hash(hash)
-                                             end
+        tables << PgDice::Table.from_hash(hash)
+      end
       config
     end
 
     private
 
-    def config_file
-      config.config_file || @config_file
+    def validate_file(config_file)
+      unless File.exist?(config_file)
+        raise PgDice::ConfigurationError,
+              "File: '#{config_file}' could not be found or does not exist. Is this the correct file path?"
+      end
     end
 
     def tables(config)

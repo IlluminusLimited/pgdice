@@ -28,13 +28,13 @@ module PgDice
                 :table_drop_batch_size,
                 :database_connection,
                 :pg_connection,
-                :config_file,
                 :config_file_loader
 
     attr_accessor :table_dropper,
                   :pg_slice_manager,
                   :partition_manager,
-                  :partition_helper
+                  :partition_helper,
+                  :config_file
 
     def initialize(existing_config = nil)
       DEFAULT_VALUES.each do |key, value|
@@ -68,12 +68,6 @@ module PgDice
       raise PgDice::InvalidConfigurationError, 'additional_validators must be an Array!'
     end
 
-    def config_file
-      return @config_file unless @config_file.nil?
-
-      raise PgDice::InvalidConfigurationError, 'config_file must be present'
-    end
-
     def approved_tables
       return @approved_tables if @approved_tables.is_a?(PgDice::ApprovedTables)
 
@@ -81,12 +75,16 @@ module PgDice
         raise PgDice::InvalidConfigurationError, 'approved_tables must be an instance of PgDice::ApprovedTables!'
       end
 
-      if File.exist?(@config_file) && @approved_tables.empty?
-        ConfigurationFileLoader.new.call(self)
+      if @approved_tables.empty?
+        config_file_loader.call(self)
         return approved_tables
       end
 
       raise PgDice::InvalidConfigurationError, 'approved_tables must be an instance of PgDice::ApprovedTables!'
+    end
+
+    def config_file_loader
+      @config_file_loader ||= ConfigurationFileLoader.new
     end
 
     def dry_run

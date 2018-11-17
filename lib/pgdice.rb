@@ -19,6 +19,7 @@ require 'pgdice/pg_slice_manager'
 require 'pgdice/partition_manager'
 require 'pgdice/partition_helper'
 require 'pgdice/database_connection'
+require 'pgdice/configuration_file_loader'
 
 # This is a stupid comment
 module PgDice
