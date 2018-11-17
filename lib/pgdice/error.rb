@@ -42,25 +42,6 @@ module PgDice
     end
   end
 
-  # Error thrown if your custom validation evaluates to false
-  class CustomValidationError < ValidationError
-    def initialize(params, validators, error = nil)
-      error_message = "Custom validation failed with params: #{params}. "
-      error_message += "Caused by error: #{error} " if error
-      error_message += "Validators: #{validators.map { |validator| source_location(validator) }.flatten}"
-      super(error_message)
-    end
-
-    private
-
-    # Helps users know what went wrong in their custom validators
-    def source_location(proc)
-      return proc.source_location if proc.respond_to?(:source_location)
-
-      proc.to_s
-    end
-  end
-
   # Generic configuration error
   class ConfigurationError < Error
   end
