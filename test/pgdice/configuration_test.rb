@@ -54,24 +54,22 @@ class ConfigurationTest < Minitest::Test
     assert_invalid_config { @configuration.pg_connection }
   end
 
-  # def test_approved_tables_config_initializes_new_obj
-  #   approved_tables_config = lambda do |_|
-  #     unless File.exist?(@file)
-  #       raise ArgumentError,
-  #             "File: #{@file} could not be found or does not exist. Is this the correct configuration file?"
-  #     end
-  #
-  #     approved_tables_hash = YAML.safe_load(ERB.new(IO.read(@file)).result)
-  #     approved_tables_hash[:approved_tables].each do |hash|
-  #       configuration.approved_tables << PgDice::Table.from_hash(hash)
-  #     end
-  #     configuration
-  #   end
-  #
-  #   assert PgDice::Configuration.new(approved_tables_loader: approved_tables_config)
-  # end
+  def test_config_file_loader_is_called_if_approved_tables_is_nil
+    @configuration.approved_tables = nil
+    assert_raises(PgDice::InvalidConfigurationError) do
+      @configuration.approved_tables
+    end
+  end
 
-  def test_config_file_loader_is_called; end
+  def test_config_file_loader_is_called
+    table = { 'approved_tables' => [] }
+    @configuration.approved_tables = []
+    @configuration.config_file_loader = PgDice::ConfigurationFileLoader.new(@configuration,
+                                                                            file_validator: proc { true },
+                                                                            config_loader: proc { table })
+
+    assert @configuration.approved_tables
+  end
 
   private
 

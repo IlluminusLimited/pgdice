@@ -63,5 +63,8 @@ module PgDice
 
   # Error thrown if the config file specified does not exist.
   class MissingConfigurationFileError < ConfigurationError
+    def initialize(config_file)
+      super("File: '#{config_file}' could not be found or does not exist. Is this the correct file path?")
+    end
   end
 end
