@@ -18,8 +18,8 @@ where logging and clear exception messages are crucial.
 There are some features in this gem which allow you to drop database tables. 
 
 If you choose to use this software without a __tested and working__ backup and restore strategy in place then you 
-are a fool and will pay the price for your negligence. This software comes with no warranty 
-or any guarantees, implied or otherwise. By using this software you agree that the creator, 
+are a fool and will pay the price for your negligence. THIS SOFTWARE IS PROVIDED "AS IS",
+WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. By using this software you agree that the creator, 
 maintainers and any affiliated parties CANNOT BE HELD LIABLE FOR DATA LOSS OR LOSSES OF ANY KIND.
 
 See the [LICENSE](LICENSE) for more information.
