@@ -93,7 +93,7 @@ class PartitionManagerTest < Minitest::Test
   def test_cannot_drop_more_than_minimum_tables
     table_name = 'posts'
     PgDice.partition_helper.partition_table!(table_name, past: 10)
-    assert_empty PgDice.partition_manager.list_droppable_tables(table_name, older_than: today)
+    assert_empty PgDice.partition_manager.list_droppable_partitions(table_name, older_than: today)
     assert_empty PgDice.partition_manager.drop_old_partitions(table_name)
   ensure
     partition_helper.undo_partitioning('posts')
@@ -103,14 +103,14 @@ class PartitionManagerTest < Minitest::Test
   # Thus there should be no droppable tables if looking older than yesterday.
   def test_list_droppable_tables
     PgDice.partition_helper.partition_table!(table_name, past: 1)
-    assert_empty PgDice.partition_manager.list_droppable_tables(table_name, older_than: today)
+    assert_empty PgDice.partition_manager.list_droppable_partitions(table_name, older_than: today)
   end
 
   def test_old_tables_dropped_in_future
     PgDice.partition_helper.partition_table!(table_name, past: 2, future: 3)
     assert_equal 2, PgDice::PartitionManager.new(PgDice.configuration,
                                                  current_date_provider: proc { tomorrow.to_date })
-                                            .list_droppable_tables(table_name, older_than: tomorrow).size
+                                            .list_droppable_partitions(table_name, older_than: tomorrow).size
   end
 
   private

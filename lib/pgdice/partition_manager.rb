@@ -34,7 +34,7 @@ module PgDice
       logger.debug { "drop_old_partitions has been called with params: #{all_params}" }
 
       validation.validate_parameters(all_params)
-      old_partitions = list_droppable_tables(table_name, all_params)
+      old_partitions = list_droppable_partitions(table_name, all_params)
       handle_partition_dropping(old_partitions)
     end
 
@@ -54,7 +54,7 @@ module PgDice
       handle_returned_partitions(table, partition_tables, older_than)
     end
 
-    def list_droppable_tables(table_name, params = {})
+    def list_droppable_partitions(table_name, params = {})
       table, batch_size, older_than, minimum_tables, current_date = populate_variables(table_name, params)
 
       logger.debug do

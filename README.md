@@ -159,7 +159,7 @@ For more information on what's going on in the background see
 
 
 ```ruby
-PgDice.partition_helper.partition_table!(table_name: 'comments', 
+PgDice.partition_helper.partition_table!('comments', 
                                             past: 30, 
                                             future: 30, 
                                             column_name: 'created_at', 
@@ -170,7 +170,7 @@ If you mess up (again you shouldn't use this in production). These two methods a
 that work with partitions.
 
 ```ruby
-PgDice.partition_helper.undo_partitioning!(table_name: 'comments')
+PgDice.partition_helper.undo_partitioning!('comments')
 ```
 
 #### Notes on `partition_table!`
@@ -188,7 +188,7 @@ that will return a truthy value or `false` if there is a failure.
 If you have existing tables that need to periodically have more tables added you can run:
 
 ```ruby
-PgDice.partition_manager.add_new_partitions(table_name: 'comments', future: 30)
+PgDice.partition_manager.add_new_partitions('comments', future: 30)
 ```
 
 ##### Notes on `add_new_partitions`
@@ -203,12 +203,12 @@ Sometimes you just want to know what's out there and if there are tables ready t
 
 To list all eligible tables for dropping you can run:
 ```ruby
-PgDice.partition_manager.list_old_partitions(table_name: 'comments', older_than: Time.now.utc - 90*24*60*60)
+PgDice.partition_manager.list_old_partitions('comments', older_than: Time.now.utc - 90*24*60*60)
 ```
 
 If you have `active_support` you could do:
 ```ruby
-PgDice.partition_manager.list_old_partitions(table_name: 'comments', older_than: 90.days.ago)
+PgDice.partition_manager.list_old_partitions('comments', older_than: 90.days.ago)
 ```
 
 ##### Notes on `list_old_partitions`
