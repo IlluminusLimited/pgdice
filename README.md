@@ -58,7 +58,10 @@ PgDice.configure do |config|
   #   which may not give you the result you want.
   config.logger = Sidekiq.logger
   config.database_url = ENV['PGDICE_DATABASE_URL'] # postgresql://[user[:password]@][host][:port][/dbname][?param1=value1&...]
-  
+ 
+  # Set a config file or build the tables manually
+  config.config_file = Rails.root.join('config', 'pgdice.yml') # If you are using rails, else provide the absolute path.
+  # and/or
   config.approved_tables = PgDice::ApprovedTables.new(
     PgDice::Table.new(table_name: 'comments', past: 1),
     PgDice::Table.new(table_name: 'posts', past: 10)
@@ -75,19 +78,13 @@ end
 - `logger` - Optional: The logger to use.
   - Defaults to `STDOUT`.
 
-- `approved_tables` - Optional: The list of tables to allow modification on.
-  - If you want to manipulate database tables with this gem you're going to need to provide the 
-   table name for all of the partitions you wish to manage.
-    - Example: if you want to manage the `comments` table (partitioned or not)
-    then  the value would be `['comments']`
+- `approved_tables` - Optional: (but not really) The tables to allow modification on.
+  - If you want to manipulate database tables with this gem you're going to need to provide this data.
+    - See the [Approved Tables Configuration](#approved-tables-configuration) section for more.
 
 - `dry_run` - Optional: Boolean value to control whether changes are executed on the database.
   - You can set it to either `true` or `false`. 
     - `true` will make PgDice log out the commands but not execute them.
-
-- `older_than` - Optional: Time object used to scope the queries on droppable tables. 
-  - Defaults to 90 days ago.
-    - This is calculated when the gem is first required.
 
 - `table_drop_batch_size` - Optional: Maximum number of tables you can drop in one `drop_old_tables` call. 
   - Defaults to 7.
@@ -118,6 +115,10 @@ All of the following parameters are optional.
 - `partition_helper` - You can supply your own [PartitionHelper](lib/pgdice/partition_helper.rb) if you like.
   - I'm not sure why you would do this.
  
+### Approved Tables Configuration
+
+
+
  
 ### Converting existing tables to partitioned tables
 

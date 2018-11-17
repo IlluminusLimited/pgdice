@@ -28,7 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'pg', '~> 1.1.0', '>= 1.1.0'
   spec.add_runtime_dependency 'pgslice', '0.4.5'
 
-  spec.add_development_dependency 'activesupport', '~> 5.0.0', '>= 5.0.0'
   spec.add_development_dependency 'bundler', '~> 1.16', '>= 1.16'
   spec.add_development_dependency 'coveralls', '~> 0.8.22', '>= 0.8.22'
   spec.add_development_dependency 'guard', '~> 2.14.2', '>= 2.14.2'

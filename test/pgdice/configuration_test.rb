@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'test_helper'
-require 'active_support/time'
 
 class ConfigurationTest < Minitest::Test
   def setup
