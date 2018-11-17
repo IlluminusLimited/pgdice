@@ -59,25 +59,12 @@ module PgDice
       older_than = all_params.fetch(:older_than).to_date
       minimum_tables = all_params[:past]
 
-      validate_dates(minimum_tables, table, @current_date_provider.call, older_than)
+      validation.validate_dates(minimum_tables, table, @current_date_provider.call, older_than)
 
       process_droppable_tables(older_than, @current_date_provider.call, batch_size, minimum_tables, table)
     end
 
     private
-
-    def validate_dates(minimum_tables, table, current_date, older_than)
-      logger.debug do
-        "Checking if the minimum_table_threshold of #{minimum_tables} tables for base_table: #{table.name} "\
-        "will not be exceeded. Looking back from: #{current_date}"
-      end
-
-      if older_than > current_date
-        raise ArgumentError, "Cannot list tables that are not older than the current date: #{current_date}"
-      end
-
-      true
-    end
 
     def process_droppable_tables(older_than, current_date, batch_size, minimum_tables, table)
       eligible_partitions = list_partitions(table.name, older_than: current_date)
