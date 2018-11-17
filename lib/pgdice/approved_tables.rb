@@ -9,9 +9,9 @@ module PgDice
     def_delegators :@tables, :size, :empty?
 
     def initialize(*args)
-      raise ArgumentError, 'Objects must be a PgDice::Table!' unless args.all? { |item| item.is_a?(PgDice::Table) }
-
       @tables = args
+
+      raise ArgumentError, 'Objects must be a PgDice::Table!' unless tables.all? { |item| item.is_a?(PgDice::Table) }
     end
 
     def [](key)

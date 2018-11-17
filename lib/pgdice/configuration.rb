@@ -15,13 +15,11 @@ module PgDice
   class Configuration
     DEFAULT_VALUES ||= { logger: Logger.new(STDOUT),
                          database_url: nil,
-                         additional_validators: [],
                          dry_run: false,
                          table_drop_batch_size: 7 }.freeze
 
     attr_writer :logger,
                 :database_url,
-                :additional_validators,
                 :approved_tables,
                 :dry_run,
                 :table_drop_batch_size,
@@ -61,17 +59,11 @@ module PgDice
       raise PgDice::InvalidConfigurationError, 'database_connection must be present!'
     end
 
-    def additional_validators
-      return @additional_validators if @additional_validators.is_a?(Array)
-
-      raise PgDice::InvalidConfigurationError, 'additional_validators must be an Array!'
-    end
-
     def approved_tables(lazy_load: true)
       return @approved_tables if @approved_tables.is_a?(PgDice::ApprovedTables) || !lazy_load
 
       if @approved_tables.nil? || @approved_tables.empty?
-        config_file_loader.call(self)
+        config_file_loader.call
         return approved_tables
       end
 
@@ -79,7 +71,7 @@ module PgDice
     end
 
     def config_file_loader
-      @config_file_loader ||= ConfigurationFileLoader.new
+      @config_file_loader ||= ConfigurationFileLoader.new(self)
     end
 
     def dry_run

@@ -97,12 +97,6 @@ end
 
 All of the following parameters are optional.
 
-- `additional_validators` - A list of validators to run before performing table manipulation operations.
-  - This can accept an array of `proc` or `lambda` type predicates. 
-    - Each predicate will be passed the `params` hash and a `logger`. 
-    - These predicates are called before doing things like dropping tables and adding tables. 
-
-
 - `table_dropper` - This defaults to [TableDropper](lib/pgdice/table_dropper.rb) which has a `lambda`-like interface. 
   - An example use-case would be calling out to your backup system to confirm the table is backed up.
     - This mechanism will be passed the `table_to_drop` and a `logger`.

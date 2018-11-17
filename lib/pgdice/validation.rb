@@ -5,7 +5,7 @@ module PgDice
   class Validation
     include PgDice::Loggable
     extend Forwardable
-    def_delegators :@configuration, :additional_validators, :database_connection, :approved_tables
+    def_delegators :@configuration, :database_connection, :approved_tables
 
     def initialize(configuration = PgDice::Configuration.new, params = {})
       @configuration = configuration
@@ -30,7 +30,6 @@ module PgDice
       validate_table_name(params)
       validate_period(params)
 
-      run_additional_validators(params)
       true
     end
 
@@ -54,14 +53,6 @@ module PgDice
       end
       validate_period(period: period)
       period
-    end
-
-    def run_additional_validators(params)
-      return true if additional_validators.all? { |validator| validator.call(params, logger) }
-
-      raise PgDice::CustomValidationError.new(params, additional_validators)
-    rescue StandardError => error
-      raise PgDice::CustomValidationError.new(params, additional_validators, error)
     end
 
     def validate_table_name(params)

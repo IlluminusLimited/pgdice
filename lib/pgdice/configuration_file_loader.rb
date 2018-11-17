@@ -3,21 +3,24 @@
 module PgDice
   #  ConfigurationFileLoader is a class used to load the PgDice configuration file
   class ConfigurationFileLoader
-    def initialize(opts = {})
-      @config_file = opts[:config_file]
+    extend Forwardable
+
+    def_delegators :@config, :config_file
+
+    def initialize(config = PgDice::Configuration.new, opts = {})
+      @config = config
       @config_loader = opts[:config_loader] ||= ->(file) { YAML.safe_load(ERB.new(IO.read(file)).result) }
     end
 
-    def call(config = PgDice::Configuration.new)
-      @config_file ||= config.config_file
-      validate_file(@config_file)
+    def call
+      validate_file(config_file)
 
-      config.approved_tables = @config_loader.call(@config_file)
-                                             .fetch('approved_tables')
-                                             .reduce(tables(config)) do |tables, hash|
+      @config.approved_tables = @config_loader.call(config_file)
+                                              .fetch('approved_tables')
+                                              .reduce(tables(@config)) do |tables, hash|
         tables << PgDice::Table.from_hash(hash)
       end
-      config
+      @config
     end
 
     private
