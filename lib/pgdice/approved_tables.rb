@@ -9,7 +9,7 @@ module PgDice
     def_delegators :@tables, :size, :empty?
 
     def initialize(*args)
-      @tables = args
+      @tables = args.flatten.compact
 
       raise ArgumentError, 'Objects must be a PgDice::Table!' unless tables.all? { |item| item.is_a?(PgDice::Table) }
     end

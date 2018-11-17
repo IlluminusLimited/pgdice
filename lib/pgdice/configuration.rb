@@ -37,7 +37,7 @@ module PgDice
       DEFAULT_VALUES.each do |key, value|
         initialize_value(key, value, existing_config)
       end
-
+      @approved_tables = PgDice::ApprovedTables.new(existing_config&.approved_tables(lazy_load: false)&.tables)
       initialize_objects
     end
 
