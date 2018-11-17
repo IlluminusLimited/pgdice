@@ -7,7 +7,7 @@ module PgDice
     attr_reader :table_name
     attr_accessor :past, :future, :column_name, :period, :schema
 
-    def initialize(table_name:, past: 90, future: 0, column_name: 'created_at', period: 'day', schema: 'public')
+    def initialize(table_name:, past: 90, future: 1, column_name: 'created_at', period: 'day', schema: 'public')
       raise ArgumentError, 'table_name must be a string' unless table_name.is_a?(String)
 
       @table_name = table_name

@@ -63,8 +63,8 @@ PgDice.configure do |config|
   config.config_file = Rails.root.join('config', 'pgdice.yml') # If you are using rails, else provide the absolute path.
   # and/or
   config.approved_tables = PgDice::ApprovedTables.new(
-    PgDice::Table.new(table_name: 'comments', past: 1),
-    PgDice::Table.new(table_name: 'posts', past: 10)
+    PgDice::Table.new(table_name: 'comments', past: 90, future: 7, period: 'day'),
+    PgDice::Table.new(table_name: 'posts', past: 6, future: 2, period: 'month')
   )
 end
 ```
@@ -92,7 +92,7 @@ end
 
 #### Advanced Configuration Parameters
 
-All of the following parameters are optional.
+All of the following parameters are optional and honestly you probably will never need to mess with these.
 
 - `table_dropper` - This defaults to [TableDropper](lib/pgdice/table_dropper.rb) which has a `lambda`-like interface. 
   - An example use-case would be calling out to your backup system to confirm the table is backed up.
@@ -117,8 +117,32 @@ All of the following parameters are optional.
  
 ### Approved Tables Configuration
 
+In order to maintain the correct number of partitions over time you must configure a 
+[PgDice::Table](lib/pgdice/table.rb).
 
+An example configuration file has been provided at [config.yml](examples/config.yml) if you would rather
+declare your `approved_tables` in yaml.
 
+If you want to declare your [PgDice::ApprovedTables](lib/pgdice/approved_tables.rb) in your configuration
+block instead, you can build them like so:
+
+```ruby
+require 'pgdice'
+PgDice.configure do |config|
+  config.approved_tables = PgDice::ApprovedTables.new(
+    PgDice::Table.new(table_name: 'comments', # Table name for the (un)partitioned table
+                      past: 90, # The minimum number of tables to keep before dropping older tables.
+                      future: 7, # Number of future tables to always have.
+                      period: 'day', # day, month, year
+                      column_name: 'created_at', # Whatever column you'd like to partition on.
+                      schema: 'public'), # Schema that this table belongs to.
+    PgDice::Table.new(table_name: 'posts', past: 10) # Minimum configuration (only 1 future partition by default).
+  )
+end
+```
+
+It is possible to use both the configuration block and a file if you so choose. 
+The block will take precedence over the values in the file.
  
 ### Converting existing tables to partitioned tables
 
