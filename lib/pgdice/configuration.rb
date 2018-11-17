@@ -5,9 +5,10 @@ module PgDice
   class << self
     attr_accessor :configuration
 
-    def configure
+    def configure(validate_configuration: true)
       self.configuration ||= PgDice::Configuration.new
       yield(configuration)
+      configuration.validate! if validate_configuration
     end
   end
 
@@ -41,6 +42,15 @@ module PgDice
       initialize_objects
     end
 
+    def validate!
+      logger
+      database_url
+      database_connection
+      approved_tables
+      pg_connection
+      table_drop_batch_size
+    end
+
     def logger
       return @logger unless @logger.nil?
 
@@ -70,14 +80,12 @@ module PgDice
       raise PgDice::InvalidConfigurationError, 'approved_tables must be an instance of PgDice::ApprovedTables!'
     end
 
-    def config_file_loader
-      @config_file_loader ||= ConfigurationFileLoader.new(self)
-    end
+    # Lazily initialized
+    def pg_connection
+      @pg_connection ||= PG::Connection.new(database_url)
+      return @pg_connection if @pg_connection.respond_to?(:exec)
 
-    def dry_run
-      return @dry_run if [true, false].include?(@dry_run)
-
-      raise PgDice::InvalidConfigurationError, 'dry_run must be either true or false!'
+      raise PgDice::InvalidConfigurationError, 'pg_connection must be present!'
     end
 
     def table_drop_batch_size
@@ -86,12 +94,14 @@ module PgDice
       raise PgDice::InvalidConfigurationError, 'table_drop_batch_size must be a non-negative Integer!'
     end
 
-    # Lazily initialized
-    def pg_connection
-      @pg_connection ||= PG::Connection.new(database_url)
-      return @pg_connection if @pg_connection.respond_to?(:exec)
+    def dry_run
+      return @dry_run if [true, false].include?(@dry_run)
 
-      raise PgDice::InvalidConfigurationError, 'pg_connection must be present!'
+      raise PgDice::InvalidConfigurationError, 'dry_run must be either true or false!'
+    end
+
+    def config_file_loader
+      @config_file_loader ||= ConfigurationFileLoader.new(self)
     end
 
     def deep_clone

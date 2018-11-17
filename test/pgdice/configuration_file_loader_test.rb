@@ -38,4 +38,17 @@ class ConfigurationFileLoaderTest < Minitest::Test
 
     assert_equal config.approved_tables, loaded_config.approved_tables
   end
+
+  def test_combine_with_existing_approved_tables
+    @config.config_file = File.expand_path('../../examples/config.yml', File.dirname(__FILE__))
+
+    loader = PgDice::ConfigurationFileLoader.new(@config)
+
+    @config.approved_tables = PgDice::ApprovedTables.new(
+      PgDice::Table.new(table_name: 'bob', past: 1)
+    )
+    loaded_config = loader.call
+
+    assert_equal 3, loaded_config.approved_tables.size
+  end
 end
