@@ -44,6 +44,7 @@ module PgDice
 
     def validate!
       logger
+      logger.debug {"Validate has been called!"}
       database_url
       database_connection
       approved_tables
