@@ -38,8 +38,9 @@ class ConfigurationTest < Minitest::Test
     assert_invalid_config { @configuration.additional_validators }
   end
 
-  def test_nil_approved_tables_throws
+  def test_nil_approved_tables_throws_if_config_file_unset
     @configuration.approved_tables = nil
+    @configuration.config_file = nil
     assert_invalid_config { @configuration.approved_tables }
   end
 

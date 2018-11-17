@@ -9,10 +9,10 @@ module PgDice
     end
 
     def call(config = PgDice::Configuration.new)
-      config_file = config.config_file ||= @config_file
-      validate_file(config_file)
+      @config_file ||= config.config_file
+      validate_file(@config_file)
 
-      config.approved_tables = @config_loader.call(config_file)
+      config.approved_tables = @config_loader.call(@config_file)
                                              .fetch('approved_tables')
                                              .reduce(tables(config)) do |tables, hash|
         tables << PgDice::Table.from_hash(hash)
@@ -23,8 +23,13 @@ module PgDice
     private
 
     def validate_file(config_file)
-      unless config_file.present? && File.exist?(config_file)
-        raise PgDice::ConfigurationError,
+      if config_file.nil?
+        raise PgDice::InvalidConfigurationError,
+              'Cannot read in nil configuration file! You must set config_file if you leave approved_tables nil!'
+      end
+
+      unless File.exist?(config_file)
+        raise PgDice::MissingConfigurationFileError,
               "File: '#{config_file}' could not be found or does not exist. Is this the correct file path?"
       end
       true

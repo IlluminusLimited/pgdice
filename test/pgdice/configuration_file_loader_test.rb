@@ -3,8 +3,20 @@
 require 'test_helper'
 
 class ConfigurationFileLoaderTest < Minitest::Test
-  def setup
-    @table = PgDice::Table.new(table_name: 'comments', past: 1, future: 0, period: 'day')
+  def test_throws_if_config_file_nil
+    loader = PgDice::ConfigurationFileLoader.new
+
+    assert_raises(PgDice::InvalidConfigurationError) do
+      loader.call
+    end
+  end
+
+  def test_throws_if_config_file_missing
+    loader = PgDice::ConfigurationFileLoader.new(config_file: 'this_file_is_a_lie')
+
+    assert_raises(PgDice::MissingConfigurationFileError) do
+      loader.call
+    end
   end
 
   def test_example_config_file_loads

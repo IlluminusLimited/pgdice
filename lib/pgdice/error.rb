@@ -79,4 +79,8 @@ module PgDice
       super("PgDice is not configured properly. #{message}")
     end
   end
+
+  # Error thrown if the config file specified does not exist.
+  class MissingConfigurationFileError < ConfigurationError
+  end
 end
