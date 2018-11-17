@@ -5,19 +5,17 @@ module PgDice
   class ConfigurationFileLoader
     extend Forwardable
 
-    def_delegators :@config, :config_file
+    def_delegators :@config, :config_file, :logger
 
     def initialize(config = PgDice::Configuration.new, opts = {})
       @config = config
       @file_validator = opts[:file_validator] ||= lambda do |config_file|
-        if config_file.nil?
-          raise PgDice::InvalidConfigurationError,
-                'Cannot read in nil configuration file! You must set config_file if you leave approved_tables nil!'
-        end
-
-        raise PgDice::MissingConfigurationFileError, config_file unless File.exist?(config_file)
+        validate_file(config_file)
       end
-      @config_loader = opts[:config_loader] ||= ->(file) { YAML.safe_load(ERB.new(IO.read(file)).result) }
+      @config_loader = opts[:config_loader] ||= lambda do |file|
+        logger.debug { "Loading PgDice configuration file: '#{config_file}'" }
+        YAML.safe_load(ERB.new(IO.read(file)).result)
+      end
     end
 
     def call
@@ -32,6 +30,15 @@ module PgDice
     end
 
     private
+
+    def validate_file(config_file)
+      if config_file.nil?
+        raise PgDice::InvalidConfigurationError,
+              'Cannot read in nil configuration file! You must set config_file if you leave approved_tables nil!'
+      end
+
+      raise PgDice::MissingConfigurationFileError, config_file unless File.exist?(config_file)
+    end
 
     def tables(config)
       if config.approved_tables(lazy_load: false).is_a?(PgDice::ApprovedTables)
