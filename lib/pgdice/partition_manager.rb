@@ -58,10 +58,10 @@ module PgDice
       batch_size = all_params.fetch(:table_drop_batch_size, table_drop_batch_size)
       older_than = all_params.fetch(:older_than).to_date
       minimum_tables = all_params[:past]
+      current_date = @current_date_provider.call
+      validation.validate_dates(minimum_tables, table, current_date, older_than)
 
-      validation.validate_dates(minimum_tables, table, @current_date_provider.call, older_than)
-
-      process_droppable_tables(older_than, @current_date_provider.call, batch_size, minimum_tables, table)
+      process_droppable_tables(older_than, current_date, batch_size, minimum_tables, table)
     end
 
     private
