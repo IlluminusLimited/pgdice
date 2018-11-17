@@ -42,7 +42,7 @@ jobs:
           mkdir -p /tmp/test-results
           TEST_FILES="$(circleci tests glob "test/**/*_test.rb" | circleci tests split --split-by=timings)"
 
-          bundle exec rake test
+          bundle exec rake rubocop test
           ./tmp/cc-test-reporter format-coverage -t simplecov -o tmp/coverage/codeclimate.pgdice.json tmp/coverage/pgdice/.resultset.json
 
     - store_test_results:
