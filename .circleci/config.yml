@@ -12,7 +12,7 @@ defaults: &defaults
       DATABASE_USERNAME: pgdice
       PGDICE_LOG_TARGET: STDOUT
 
-  - image: circleci/postgres:10.4-alpine-ram
+  - image: circleci/postgres:10.6-alpine-ram
     environment:
       POSTGRES_USER: pgdice
       POSTGRES_DB: pgdice_test
