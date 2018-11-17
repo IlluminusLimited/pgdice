@@ -136,7 +136,7 @@ PgDice.configure do |config|
                       period: 'day', # day, month, year
                       column_name: 'created_at', # Whatever column you'd like to partition on.
                       schema: 'public'), # Schema that this table belongs to.
-    PgDice::Table.new(table_name: 'posts', past: 10) # Minimum configuration (only 1 future partition by default).
+    PgDice::Table.new(table_name: 'posts') # Minimum configuration (90 past, 7 future, 'day' period).
   )
 end
 ```
