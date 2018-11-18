@@ -72,7 +72,9 @@ module PgDice
 
     def approved_tables(eager_load: false)
       return @approved_tables if eager_load
-      raise PgDice::InvalidConfigurationError, 'approved_tables must be an instance of PgDice::ApprovedTables!' unless @approved_tables.respond_to?(:empty?)
+      unless @approved_tables.respond_to?(:empty?)
+        raise PgDice::InvalidConfigurationError, 'approved_tables must be an instance of PgDice::ApprovedTables!'
+      end
 
       if !config_file_loader.file_loaded? && config_file.present?
         config_file_loader.load_file

@@ -5,6 +5,9 @@ require 'test_helper'
 class ConfigurationFileLoaderTest < Minitest::Test
   def setup
     @config = PgDice.configuration.deep_clone
+    @fancy_config = PgDice::Configuration.new
+    @fancy_config.logger = @config.logger
+    @fancy_config.config_file = File.expand_path('../../examples/config.yml', File.dirname(__FILE__))
   end
 
   def test_throws_if_config_file_nil
@@ -25,11 +28,7 @@ class ConfigurationFileLoaderTest < Minitest::Test
   end
 
   def test_example_config_file_loads
-    config = PgDice::Configuration.new
-    config.logger = @config.logger
-    config.config_file = File.expand_path('../../examples/config.yml', File.dirname(__FILE__))
-
-    loader = PgDice::ConfigurationFileLoader.new(config)
+    loader = PgDice::ConfigurationFileLoader.new(@fancy_config)
 
     approved_tables = PgDice::ApprovedTables.new(
       PgDice::Table.new(table_name: 'comments', past: 1, future: 0),
