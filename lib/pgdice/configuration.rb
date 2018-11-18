@@ -38,13 +38,13 @@ module PgDice
       DEFAULT_VALUES.each do |key, value|
         initialize_value(key, value, existing_config)
       end
-      @approved_tables = PgDice::ApprovedTables.new(existing_config&.approved_tables(lazy_load: false)&.tables)
+      @approved_tables = PgDice::ApprovedTables.new(existing_config&.approved_tables(eager_load: true)&.tables)
       initialize_objects
     end
 
     def validate!
       logger
-      logger.debug {"Validate has been called!"}
+      logger.debug { 'Validate has been called!' }
       database_url
       database_connection
       approved_tables
@@ -70,15 +70,16 @@ module PgDice
       raise PgDice::InvalidConfigurationError, 'database_connection must be present!'
     end
 
-    def approved_tables(lazy_load: true)
-      return @approved_tables if @approved_tables.is_a?(PgDice::ApprovedTables) || !lazy_load
+    def approved_tables(eager_load: false)
+      return @approved_tables if eager_load
+      raise PgDice::InvalidConfigurationError, 'approved_tables must be an instance of PgDice::ApprovedTables!' unless @approved_tables.respond_to?(:empty?)
 
-      if @approved_tables.nil? || @approved_tables.empty?
-        config_file_loader.call
-        return approved_tables
+      if !config_file_loader.file_loaded? && config_file.present?
+        config_file_loader.load_file
+        @approved_tables
       end
 
-      raise PgDice::InvalidConfigurationError, 'approved_tables must be an instance of PgDice::ApprovedTables!'
+      @approved_tables
     end
 
     # Lazily initialized

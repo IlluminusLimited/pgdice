@@ -23,7 +23,7 @@ module PgDice
       all_params = table.smash(params.merge!(period: period))
       validate_parameters(all_params)
       logger.debug { "Running asserts on table: #{table} with params: #{all_params}" }
-      run_asserts(table, period, params)
+      run_asserts(table.name, period, params)
     end
 
     def validate_parameters(params)
@@ -43,9 +43,9 @@ module PgDice
 
     private
 
-    def run_asserts(table, period, params)
-      assert_future_tables(table.name, params[:future], period) if params[:future]
-      assert_past_tables(table.name, params[:past], period) if params[:past]
+    def run_asserts(table_name, period, params)
+      assert_future_tables(table_name, params[:future], period) if params[:future]
+      assert_past_tables(table_name, params[:past], period) if params[:past]
       true
     end
 

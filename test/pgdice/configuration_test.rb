@@ -54,6 +54,7 @@ class ConfigurationTest < Minitest::Test
   end
 
   def test_config_file_loader_is_called_if_approved_tables_is_nil
+    @configuration.config_file = nil
     @configuration.approved_tables = nil
     assert_raises(PgDice::InvalidConfigurationError) do
       @configuration.approved_tables
@@ -70,8 +71,8 @@ class ConfigurationTest < Minitest::Test
     assert @configuration.approved_tables
   end
 
-  def test_blow_up_eagerly_if_approved_tables_are_not_set_up
-    @configuration.approved_tables = nil
+  def test_blow_up_if_approved_tables_are_not_set_up
+    @configuration.approved_tables = []
     @configuration.config_file = 'git_rekt'
     assert_raises(PgDice::MissingConfigurationFileError) do
       @configuration.validate!

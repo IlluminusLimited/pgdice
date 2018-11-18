@@ -11,7 +11,7 @@ class ConfigurationFileLoaderTest < Minitest::Test
     loader = PgDice::ConfigurationFileLoader.new(@config)
 
     assert_raises(PgDice::InvalidConfigurationError) do
-      loader.call
+      loader.load_file
     end
   end
 
@@ -20,7 +20,7 @@ class ConfigurationFileLoaderTest < Minitest::Test
     loader = PgDice::ConfigurationFileLoader.new(@config)
 
     assert_raises(PgDice::MissingConfigurationFileError) do
-      loader.call
+      loader.load_file
     end
   end
 
@@ -35,7 +35,8 @@ class ConfigurationFileLoaderTest < Minitest::Test
       PgDice::Table.new(table_name: 'comments', past: 1, future: 0),
       PgDice::Table.new(table_name: 'posts', past: 10, future: 0)
     )
-    loaded_config = loader.call
+    loader.load_file
+    loaded_config = loader.config
 
     assert_equal approved_tables, loaded_config.approved_tables
   end
@@ -48,15 +49,20 @@ class ConfigurationFileLoaderTest < Minitest::Test
     @config.approved_tables = PgDice::ApprovedTables.new(
       PgDice::Table.new(table_name: 'bob', past: 1)
     )
-    loaded_config = loader.call
+    loader.load_file
+    loaded_config = loader.config
 
-    expected_tables = PgDice::ApprovedTables.new(
+    assert_equal 3, loaded_config.approved_tables.size
+    assert_equal expected_tables, loaded_config.approved_tables
+  end
+
+  private
+
+  def expected_tables
+    PgDice::ApprovedTables.new(
       PgDice::Table.new(table_name: 'comments', past: 1, future: 0),
       PgDice::Table.new(table_name: 'posts', past: 10, future: 0),
       PgDice::Table.new(table_name: 'bob', past: 1)
     )
-
-    assert_equal 3, loaded_config.approved_tables.size
-    assert_equal expected_tables, loaded_config.approved_tables
   end
 end

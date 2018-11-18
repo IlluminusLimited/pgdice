@@ -58,7 +58,7 @@ module Minitest
         SELECT NOW(), NOW() FROM generate_series(1, 10000) n;
     SQL
 
-    PgDice.configure do |config|
+    PgDice.configure(validate_configuration: false) do |config|
       log_target = ENV['PGDICE_LOG_TARGET'] || 'pgdice.log'
       config.logger = Logger.new(log_target)
 
@@ -71,9 +71,10 @@ module Minitest
 
       config.database_url = "postgres://#{login}#{host}/pgdice_test"
       config.approved_tables = PgDice::ApprovedTables.new(
-        PgDice::Table.new(table_name: 'comments', past: 1),
-        PgDice::Table.new(table_name: 'posts', past: 10)
+        PgDice::Table.new(table_name: 'comments', past: 1, future: 0),
+        PgDice::Table.new(table_name: 'posts', past: 10, future: 0)
       )
+      config.config_file_loader = PgDice::ConfigurationFileLoader.new(config, file_loaded: true)
     end
     PgDice.configuration.logger.info { 'Starting tests' }
 
@@ -100,7 +101,7 @@ module Minitest
     end
 
     def today
-      Time.now.utc
+      Time.now
     end
 
     def tomorrow

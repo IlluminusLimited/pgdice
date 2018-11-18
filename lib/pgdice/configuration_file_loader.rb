@@ -5,6 +5,8 @@ module PgDice
   class ConfigurationFileLoader
     extend Forwardable
 
+    attr_reader :config
+
     def_delegators :@config, :config_file, :logger
 
     def initialize(config = PgDice::Configuration.new, opts = {})
@@ -16,9 +18,14 @@ module PgDice
         logger.debug { "Loading PgDice configuration file: '#{config_file}'" }
         YAML.safe_load(ERB.new(IO.read(file)).result)
       end
+      @file_loaded = opts[:file_loaded]
     end
 
-    def call
+    def load_file
+      return if @file_loaded
+
+      @file_loaded = true
+
       @file_validator.call(config_file)
 
       @config.approved_tables = @config_loader.call(config_file)
@@ -26,7 +33,10 @@ module PgDice
                                               .reduce(tables(@config)) do |tables, hash|
         tables << PgDice::Table.from_hash(hash)
       end
-      @config
+    end
+
+    def file_loaded?
+      @file_loaded
     end
 
     private
@@ -41,8 +51,8 @@ module PgDice
     end
 
     def tables(config)
-      if config.approved_tables(lazy_load: false).is_a?(PgDice::ApprovedTables)
-        return config.approved_tables(lazy_load: false)
+      if config.approved_tables(eager_load: true).is_a?(PgDice::ApprovedTables)
+        return config.approved_tables(eager_load: true)
       end
 
       PgDice::ApprovedTables.new
