@@ -24,6 +24,5 @@ module PgDice
       def batched_tables(tables, batch_size)
         tables.first(batch_size)
       end
-
   end
 end
