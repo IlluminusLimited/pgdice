@@ -5,12 +5,20 @@ module PgDice
   # Simple class used to provide a mechanism that users can hook into if they want to override this
   # default behavior for dropping a table.
   class TableDropper
-    def initialize(configuration = PgDice::Configuration.new)
+    include PgDice::Loggable
+
+    def initialize(configuration = PgDice::Configuration.new, opts = {})
       @configuration = configuration
+      @logger = opts[:logger]
     end
 
-    def call(table_to_drop, _logger)
-      @configuration.database_connection.execute(drop_partition(table_to_drop))
+    def call(old_partitions)
+      logger.info { "Partitions to be deleted are: #{old_partitions}" }
+
+      old_partitions.each do |old_partition|
+        @configuration.database_connection.execute(drop_partition(old_partition))
+      end
+      old_partitions
     end
 
     private
