@@ -17,13 +17,13 @@ module PgDice
       @logger = opts[:logger]
       @current_date_provider = opts[:current_date_provider] ||= proc { Time.now.utc.to_date }
       @validation = PgDice::Validation.new(configuration)
-      @partition_lister = opts[:partition_lister] ||= ->(all_params) do
+      @partition_lister = opts[:partition_lister] ||= lambda do |all_params|
         PgDice::PartitionLister.new(database_connection: database_connection).call(all_params)
       end
-      @partition_adder = opts[:partition_adder] ||= ->(all_params) do
+      @partition_adder = opts[:partition_adder] ||= lambda do |all_params|
         PgDice::PgSliceManager.new(@configuration).add_partitions(all_params)
       end
-      @partition_dropper = opts[:partition_dropper] ||= ->(all_params) do
+      @partition_dropper = opts[:partition_dropper] ||= lambda do |all_params|
         old_partitions = list_droppable_partitions(all_params[:table_name], all_params)
         @configuration.table_dropper.call(old_partitions)
       end
@@ -65,7 +65,6 @@ module PgDice
       logger.debug { "Batched partitions eligible for dropping are: #{droppable_tables}" }
       droppable_tables
     end
-
 
     private
 

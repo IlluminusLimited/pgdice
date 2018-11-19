@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Entry point for PartitionManager
 module PgDice
   #  PartitionLister is used to list partitions
@@ -14,9 +16,7 @@ module PgDice
       sql = build_partition_table_fetch_sql(all_params)
       partition_tables = database_connection.execute(sql).values.flatten
       older_than = all_params[:older_than]
-      if older_than
-        partition_tables = tables_older_than(partition_tables, older_than)
-      end
+      partition_tables = tables_older_than(partition_tables, older_than) if older_than
       partition_tables
     end
 
