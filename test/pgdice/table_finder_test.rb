@@ -23,6 +23,16 @@ class TableFinderTest < Minitest::Test
     assert_equal %w(comments_20181020 comments_20181021), results
   end
 
+  def test_batched_tables
+    results = PgDice::TableFinder.new.batched_tables(generate_tables, 3)
+    assert_equal %w(comments_20181020 comments_20181021 comments_20181022), results
+  end
+
+  def test_batched_tables_large_batch_size
+    results = PgDice::TableFinder.new.batched_tables(generate_tables, 10)
+    assert_equal generate_tables, results
+  end
+
 
   private
 

@@ -16,8 +16,8 @@ module PgDice
       tables_older_than.first(tables_to_grab)
     end
 
-    def tables_to_grab(eligible_tables_count, minimum_tables)
-      tables_to_grab = eligible_tables_count - minimum_tables
+    def tables_to_grab(eligible_tables, minimum_tables)
+      tables_to_grab = eligible_tables - minimum_tables
       tables_to_grab.positive? ? tables_to_grab : 0
     end
 
@@ -26,6 +26,10 @@ module PgDice
         partition_created_at_time = Date.parse(partition_name)
         partition_created_at_time < older_than.to_date
       end
+    end
+
+    def batched_tables(tables, batch_size)
+      tables.first(batch_size)
     end
 
 
