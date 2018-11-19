@@ -80,7 +80,7 @@ module PgDice
     def droppable_partitions(all_params)
       current_date = @current_date_provider.call
 
-      older_than = all_params.fetch(:older_than, Time.now.utc).to_date
+      older_than = all_params.fetch(:older_than, current_date).to_date
       minimum_tables = all_params.fetch(:past)
 
       logger.debug do
