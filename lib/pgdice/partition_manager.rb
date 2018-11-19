@@ -8,7 +8,7 @@ module PgDice
     include PgDice::TableFinder
     extend Forwardable
 
-    def_delegators :@configuration, :batch_size, :approved_tables, :database_connection
+    def_delegators :@configuration, :approved_tables, :database_connection
 
     attr_reader :validation
 
@@ -60,11 +60,8 @@ module PgDice
 
     def list_batched_droppable_partitions(table_name, params = {})
       all_params = approved_tables.smash(table_name, params)
-      batch_size = all_params.fetch(:batch_size, @configuration.batch_size)
       validation.validate_parameters(all_params)
-
-      selected_partitions = droppable_partitions(all_params)
-      droppable_tables = batched_tables(selected_partitions, batch_size)
+      droppable_tables = batched_droppable_partitions(all_params)
       logger.debug { "Batched partitions eligible for dropping are: #{droppable_tables}" }
       droppable_tables
     end
@@ -78,17 +75,9 @@ module PgDice
     end
 
     def droppable_partitions(all_params)
-      current_date = @current_date_provider.call
-
-      older_than = all_params.fetch(:older_than, current_date).to_date
+      older_than = @current_date_provider.call
       minimum_tables = all_params.fetch(:past)
 
-      logger.debug do
-        "Checking if the minimum_table_threshold of #{minimum_tables} tables for base_table: #{all_params[:table_name]} "\
-        "will not be exceeded. Looking back from: #{current_date}"
-      end
-
-      validation.validate_dates(current_date, older_than)
       eligible_partitions = partitions(all_params)
 
       droppable_tables = find_droppable_partitions(eligible_partitions, older_than, minimum_tables)
@@ -96,5 +85,10 @@ module PgDice
       droppable_tables
     end
 
+    def batched_droppable_partitions(all_params)
+      batch_size = all_params.fetch(:batch_size, @configuration.batch_size)
+      selected_partitions = droppable_partitions(all_params)
+      batched_tables(selected_partitions, batch_size)
+    end
   end
 end
