@@ -16,7 +16,7 @@ module PgDice
     def execute(query)
       logger.debug { "DatabaseConnection to execute query: #{query}" }
       if dry_run
-        PgDicePgResponse.new
+        PgDice::PgResponse.new
       else
         pg_connection.exec(query)
       end
@@ -24,7 +24,7 @@ module PgDice
   end
 
   # Null-object pattern for PG::Result since that object isn't straightforward to initialize
-  class PgDicePgResponse
+  class PgResponse
     def values
       []
     end
