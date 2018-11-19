@@ -81,7 +81,7 @@ module PgDice
       eligible_partitions = partitions(all_params)
 
       droppable_tables = find_droppable_partitions(eligible_partitions, older_than, minimum_tables)
-      logger.debug { "Partitions eligible for dropping are: #{droppable_tables}" }
+      logger.debug { "Partitions eligible for dropping older than: #{older_than} are: #{droppable_tables}" }
       droppable_tables
     end
 
