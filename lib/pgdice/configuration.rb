@@ -17,13 +17,13 @@ module PgDice
     DEFAULT_VALUES ||= { logger: Logger.new(STDOUT),
                          database_url: nil,
                          dry_run: false,
-                         table_drop_batch_size: 7 }.freeze
+                         batch_size: 7 }.freeze
 
     attr_writer :logger,
                 :database_url,
                 :approved_tables,
                 :dry_run,
-                :table_drop_batch_size,
+                :batch_size,
                 :database_connection,
                 :pg_connection,
                 :config_file_loader
@@ -49,7 +49,7 @@ module PgDice
       database_connection
       approved_tables
       pg_connection
-      table_drop_batch_size
+      batch_size
     end
 
     def logger
@@ -92,10 +92,10 @@ module PgDice
       raise PgDice::InvalidConfigurationError, 'pg_connection must be present!'
     end
 
-    def table_drop_batch_size
-      return @table_drop_batch_size.to_i if @table_drop_batch_size.to_i >= 0
+    def batch_size
+      return @batch_size.to_i if @batch_size.to_i >= 0
 
-      raise PgDice::InvalidConfigurationError, 'table_drop_batch_size must be a non-negative Integer!'
+      raise PgDice::InvalidConfigurationError, 'batch_size must be a non-negative Integer!'
     end
 
     def dry_run

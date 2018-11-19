@@ -86,7 +86,7 @@ end
   - You can set it to either `true` or `false`. 
     - `true` will make PgDice log out the commands but not execute them.
 
-- `table_drop_batch_size` - Optional: Maximum number of tables you can drop in one `drop_old_tables` call. 
+- `batch_size` - Optional: Maximum number of tables you can drop in one `drop_old_tables` call. 
   - Defaults to 7.
 
 

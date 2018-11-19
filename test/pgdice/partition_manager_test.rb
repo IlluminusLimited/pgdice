@@ -101,9 +101,10 @@ class PartitionManagerTest < Minitest::Test
 
   # Comments table is configured to have a minimum_table_threshold of 1 table
   # Thus there should be no droppable tables if looking older than yesterday.
-  def test_list_droppable_tables
-    PgDice.partition_helper.partition_table!(table_name, past: 1)
-    assert_empty PgDice.partition_manager.list_droppable_partitions(table_name, older_than: today)
+  def test_list_droppable_partitions
+    PgDice.partition_helper.partition_table!(table_name, past: 30)
+    droppable_partitions = PgDice.partition_manager.list_droppable_partitions(table_name, older_than: today)
+    assert_equal 29, droppable_partitions.size, 'Droppable partitions should include all tables past the minimum table threshold which should be set to 1 for comments table'
   end
 
   def test_old_tables_dropped_in_future
@@ -116,7 +117,7 @@ class PartitionManagerTest < Minitest::Test
   private
 
   def batch_size_and_minimum_tables
-    batch_size = PgDice.configuration.table_drop_batch_size
+    batch_size = PgDice.configuration.batch_size
     minimum_tables = PgDice.configuration.approved_tables[table_name].past
     [batch_size, minimum_tables]
   end

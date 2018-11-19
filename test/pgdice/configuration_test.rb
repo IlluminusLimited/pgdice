@@ -43,9 +43,9 @@ class ConfigurationTest < Minitest::Test
     assert_invalid_config { @configuration.dry_run }
   end
 
-  def test_invalid_table_drop_batch_size_throws
-    @configuration.table_drop_batch_size = -1
-    assert_invalid_config { @configuration.table_drop_batch_size }
+  def test_invalid_batch_size_throws
+    @configuration.batch_size = -1
+    assert_invalid_config { @configuration.batch_size }
   end
 
   def test_invalid_pg_connection_throws

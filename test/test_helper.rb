@@ -101,7 +101,7 @@ module Minitest
     end
 
     def today
-      Time.now
+      Time.now.utc
     end
 
     def tomorrow
