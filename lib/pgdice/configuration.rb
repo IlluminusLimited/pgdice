@@ -28,9 +28,7 @@ module PgDice
                 :pg_connection,
                 :config_file_loader
 
-    attr_accessor :pg_slice_manager,
-                  :partition_manager,
-                  :partition_helper,
+    attr_accessor :partition_helper,
                   :config_file
 
     def initialize(existing_config = nil)
@@ -107,6 +105,10 @@ module PgDice
       @config_file_loader ||= ConfigurationFileLoader.new(self)
     end
 
+    def partition_manager
+      @partition_manager_factory.call
+    end
+
     def deep_clone
       PgDice::Configuration.new(self)
     end
@@ -119,7 +121,7 @@ module PgDice
 
     def initialize_objects
       @database_connection = PgDice::DatabaseConnection.new(self)
-      @partition_manager = PgDice::PartitionManager.new(self)
+      @partition_manager_factory = PgDice::PartitionManagerFactory.new(self)
     end
   end
 end

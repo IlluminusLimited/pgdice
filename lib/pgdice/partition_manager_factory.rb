@@ -6,16 +6,14 @@ module PgDice
   class PartitionManagerFactory
     extend Forwardable
 
-    def_delegators :@configuration, :batch_size, :approved_tables, :database_connection
-
+    def_delegators :@configuration, :batch_size, :approved_tables, :database_connection, :database_url
 
     def initialize(configuration = PgDice::Configuration.new, opts = {})
       @configuration = configuration
-      @validation_factory = opts[:validation_factory] ||= PgDice::ValidationFactory.new(@configuration)
-      @pg_slice_factory = opts[:pg_slice_factory] ||= pg_slice_factory
+      @validation_factory = opts[:validation_factory] ||= validation_factory
+      @partition_adder_factory = opts[:partition_adder_factory] ||= partition_adder_factory
       @partition_lister_factory = opts[:partition_lister_factory] ||= partition_lister_factory
       @partition_dropper_factory = opts[:partition_dropper_factory] ||= partition_dropper_factory
-      @partition_adder_factory = opts[:partition_adder_factory] ||= partition_adder_factory
     end
 
     def call
@@ -38,7 +36,7 @@ module PgDice
     end
 
     def partition_adder_factory
-      pg_slice_factory
+      proc { PgDice::PgSliceManager.new(logger: logger, database_url: database_url, dry_run: dry_run) }
     end
 
     def partition_lister_factory
@@ -47,10 +45,6 @@ module PgDice
 
     def partition_dropper_factory
       proc { PgDice::TableDropper.new(logger: logger, database_connection: database_connection) }
-    end
-
-    def pg_slice_factory
-      proc { PgDice::PgSliceManager.new(logger: logger, database_url: database_url, dry_run: dry_run) }
     end
   end
 end
