@@ -6,15 +6,9 @@ module PgDice
   class PartitionManagerFactory
     def initialize(configuration, opts = {})
       @configuration = configuration
-      @logger_factory = opts[:logger_factory] ||= proc { @configuration.logger }
-      @batch_size_factory = opts[:batch_size_factory] ||= proc { @configuration.batch_size }
-      @approved_tables_factory = opts[:approved_tables_factory] ||= proc { @configuration.approved_tables }
-      @validation_factory = opts[:validation_factory] ||= PgDice::ValidationFactory.new(configuration)
-      @partition_adder_factory = opts[:partition_adder_factory] ||= partition_adder_factory
-      @partition_lister_factory = opts[:partition_lister_factory] ||= PgDice::PartitionListerFactory.new(configuration)
-      @partition_dropper_factory =
-        opts[:partition_dropper_factory] ||= PgDice::PartitionDropperFactory.new(configuration)
-      @current_date_provider = opts[:current_date_provider] ||= proc { Time.now.utc.to_date }
+      initialize_simple_factories(opts)
+      initialize_complex_factories(opts)
+      initialize_values(opts)
     end
 
     def call
@@ -29,6 +23,24 @@ module PgDice
     end
 
     private
+
+    def initialize_simple_factories(opts)
+      @logger_factory = opts[:logger_factory] ||= proc { @configuration.logger }
+      @batch_size_factory = opts[:batch_size_factory] ||= proc { @configuration.batch_size }
+      @approved_tables_factory = opts[:approved_tables_factory] ||= proc { @configuration.approved_tables }
+    end
+
+    def initialize_complex_factories(opts)
+      @validation_factory = opts[:validation_factory] ||= PgDice::ValidationFactory.new(@configuration)
+      @partition_adder_factory = opts[:partition_adder_factory] ||= partition_adder_factory
+      @partition_lister_factory = opts[:partition_lister_factory] ||= PgDice::PartitionListerFactory.new(@configuration)
+      @partition_dropper_factory =
+        opts[:partition_dropper_factory] ||= PgDice::PartitionDropperFactory.new(@configuration)
+    end
+
+    def initialize_values(opts)
+      @current_date_provider = opts[:current_date_provider] ||= proc { Time.now.utc.to_date }
+    end
 
     def partition_adder_factory
       proc do
