@@ -28,8 +28,7 @@ module PgDice
                 :pg_connection,
                 :config_file_loader
 
-    attr_accessor :table_dropper,
-                  :pg_slice_manager,
+    attr_accessor :pg_slice_manager,
                   :partition_manager,
                   :partition_helper,
                   :config_file
@@ -121,7 +120,6 @@ module PgDice
     def initialize_objects
       @database_connection = PgDice::DatabaseConnection.new(self)
       @partition_manager = PgDice::PartitionManager.new(self)
-      @table_dropper = PgDice::TableDropper.new(self)
     end
   end
 end

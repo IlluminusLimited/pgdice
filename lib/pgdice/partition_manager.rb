@@ -16,17 +16,16 @@ module PgDice
       @configuration = configuration
       @logger = opts[:logger]
       @batch_size = opts[:batch_size] ||= @configuration.batch_size
-      @current_date_provider = opts[:current_date_provider] ||= proc { Time.now.utc.to_date }
       @validation = opts[:validation] ||= PgDice::Validation.new(configuration)
+      @current_date_provider = opts[:current_date_provider] ||= proc { Time.now.utc.to_date }
+      @table_dropper_supplier = opts[:table_dropper] ||= proc do
+        PgDice::TableDropper.new(logger, @configuration.database_connection)
+      end
       @partition_lister = opts[:partition_lister] ||= lambda do |all_params|
         PgDice::PartitionLister.new(database_connection: database_connection).call(all_params)
       end
       @partition_adder = opts[:partition_adder] ||= lambda do |all_params|
         PgDice::PgSliceManager.new(@configuration).add_partitions(all_params)
-      end
-      @partition_dropper = opts[:partition_dropper] ||= lambda do |all_params|
-        old_partitions = batched_droppable_partitions(all_params)
-        @configuration.table_dropper.call(old_partitions)
       end
     end
 
@@ -43,7 +42,7 @@ module PgDice
       logger.debug { "drop_old_partitions has been called with params: #{all_params}" }
 
       validation.validate_parameters(all_params)
-      @partition_dropper.call(all_params)
+      drop_partitions(all_params)
     end
 
     # Grabs only tables that start with the base_table_name and end in numbers
@@ -89,6 +88,11 @@ module PgDice
       batch_size = all_params.fetch(:batch_size, @batch_size)
       selected_partitions = droppable_partitions(all_params)
       batched_tables(selected_partitions, batch_size)
+    end
+
+    def drop_partitions(all_params)
+      old_partitions = batched_droppable_partitions(all_params)
+      @table_dropper.call(old_partitions)
     end
   end
 end

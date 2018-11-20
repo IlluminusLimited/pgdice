@@ -3,13 +3,12 @@
 module PgDice
   # Collection of utilities that provide ways for users to ensure things are working properly
   class Validation
-    include PgDice::Loggable
-    extend Forwardable
-    def_delegators :@configuration, :database_connection, :approved_tables
+    attr_reader :logger, :database_connection, :approved_tables
 
-    def initialize(configuration = PgDice::Configuration.new, params = {})
-      @configuration = configuration
+    def initialize(logger, database_connection, approved_tables)
       @logger = params[:logger]
+      @database_connection = database_connection
+      @approved_tables = approved_tables
     end
 
     def assert_tables(table_name, params)

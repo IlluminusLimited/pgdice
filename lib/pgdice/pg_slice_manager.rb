@@ -5,12 +5,12 @@ module PgDice
   # PgSliceManager is a wrapper around PgSlice
   class PgSliceManager
     include PgDice::Loggable
-    extend Forwardable
-    def_delegators :@configuration, :database_url, :dry_run
 
     def initialize(configuration = PgDice::Configuration.new, opts = {})
       @configuration = configuration
       @logger = opts[:logger]
+      @dry_run_supplier = opts[:dry_run_supplier] ||= proc {@configuration.dry_run}
+      @database_url_supplier = opts[:database_url_supplier] ||= proc { @configuration.database_url}
     end
 
     def prep(params = {})
@@ -107,8 +107,8 @@ module PgDice
       $stdout.flush
       $stderr.flush
       command = "pgslice #{argument_string} "
-      command += '--dry-run true ' if dry_run
-      command += "--url #{database_url}"
+      command += '--dry-run true ' if @dry_run_supplier.call
+      command += "--url #{@database_url_supplier.call}"
       command
     end
 

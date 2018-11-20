@@ -3,27 +3,6 @@
 require 'test_helper'
 
 class PartitionManagerTest < Minitest::Test
-  def setup
-    @partition_manager = PgDice.partition_manager
-  end
-
-  def teardown
-    partition_helper.undo_partitioning(table_name)
-  end
-
-  def test_drop_tables_uses_batches
-    call_count = 0
-    dummy_dropper = proc do |partitions|
-      call_count += partitions.size
-    end
-    PgDice::PartitionManager.new(PgDice.configuration,
-                                 current_date_provider: proc { Date.parse('20181025') },
-                                 table_dropper: dummy_dropper,
-                                 partition_lister: proc { generate_tables })
-        .drop_old_partitions('comments')
-    assert_equal 5, call_count
-  end
-
   def test_list_droppable_partitions_excludes_minimum
     manager = PgDice::PartitionManager.new(PgDice.configuration,
                                            batch_size: 4,
