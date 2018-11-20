@@ -3,16 +3,28 @@
 require 'test_helper'
 
 class PartitionListerTest < Minitest::Test
-  def test_old_partitions_can_be_listed
-    lister = PgDice::PartitionLister.new(query_executor: ->(_sql) { generate_tables })
-    response = lister.call(table_name: 'comments', older_than: Date.parse('20181022'))
-    assert_equal %w[comments_20181020 comments_20181021], response
+  def test_generate_list_sql_works
+    dropper = PgDice::PartitionLister.new(query_executor: lambda do |sql|
+      assert_equal expected_sql, squish(sql)
+      generate_tables
+    end)
+    assert_equal generate_tables, dropper.call(table_name: 'comments', schema: 'public')
   end
 
   private
 
+  def expected_sql
+    expected = <<~SQL
+      SELECT tablename
+      FROM pg_tables
+      WHERE schemaname = 'public'
+        AND tablename ~ '^comments_\\d+$'
+      ORDER BY tablename
+    SQL
+    squish(expected)
+  end
+
   def generate_tables
-    %w[comments_20181020 comments_20181021 comments_20181022 comments_20181023 comments_20181024
-       comments_20181025 comments_20181026 comments_20181027 comments_20181028 comments_20181029]
+    %w[comments_20181020 comments_20181021]
   end
 end

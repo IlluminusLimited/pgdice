@@ -5,10 +5,11 @@ module PgDice
   class Validation
     attr_reader :logger, :database_connection, :approved_tables
 
-    def initialize(logger:, database_connection:, approved_tables:)
+    def initialize(logger:, partition_lister:, database_connection:, approved_tables:)
       @logger = logger
       @database_connection = database_connection
       @approved_tables = approved_tables
+      @partition_lister = partition_lister
     end
 
     def assert_tables(table_name, params)
@@ -22,6 +23,7 @@ module PgDice
       all_params = table.smash(params.merge!(period: period))
       validate_parameters(all_params)
       logger.debug { "Running asserts on table: #{table} with params: #{all_params}" }
+      partitions = @partition_lister.call(all_params)
       run_asserts(table.name, period, params)
     end
 

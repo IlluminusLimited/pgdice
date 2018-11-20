@@ -4,8 +4,6 @@
 module PgDice
   #  PartitionLister is used to list partitions
   class PartitionLister
-    include PgDice::TableFinder
-
     attr_reader :query_executor
 
     def initialize(query_executor:)
@@ -14,10 +12,7 @@ module PgDice
 
     def call(all_params)
       sql = build_partition_table_fetch_sql(all_params)
-      partition_tables = query_executor.call(sql)
-      older_than = all_params[:older_than]
-      partition_tables = tables_older_than(partition_tables, older_than) if older_than
-      partition_tables
+      query_executor.call(sql)
     end
 
     private
