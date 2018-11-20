@@ -27,11 +27,6 @@ class ConfigurationTest < Minitest::Test
     assert_invalid_config { @configuration.database_url }
   end
 
-  def test_nil_database_connection_throws
-    @configuration.database_connection = nil
-    assert_invalid_config { @configuration.database_connection }
-  end
-
   def test_nil_approved_tables_throws_if_config_file_unset
     @configuration.approved_tables = nil
     @configuration.config_file = nil

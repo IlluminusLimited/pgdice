@@ -24,7 +24,6 @@ module PgDice
                 :approved_tables,
                 :dry_run,
                 :batch_size,
-                :database_connection,
                 :pg_connection,
                 :config_file_loader
 
@@ -58,12 +57,6 @@ module PgDice
       return @database_url unless @database_url.nil?
 
       raise PgDice::InvalidConfigurationError, 'database_url must be present!'
-    end
-
-    def database_connection
-      return @database_connection unless @database_connection.nil?
-
-      raise PgDice::InvalidConfigurationError, 'database_connection must be present!'
     end
 
     def approved_tables(eager_load: false)
@@ -116,6 +109,10 @@ module PgDice
       @validation_factory.call
     end
 
+    def database_connection
+      @database_connection_factory.call
+    end
+
     def deep_clone
       PgDice::Configuration.new(self)
     end
@@ -127,10 +124,10 @@ module PgDice
     end
 
     def initialize_objects
-      @database_connection = PgDice::DatabaseConnection.new(self)
       @partition_manager_factory = PgDice::PartitionManagerFactory.new(self)
       @partition_helper_factory = PgDice::PartitionHelperFactory.new(self)
       @validation_factory = PgDice::ValidationFactory.new(self)
+      @database_connection_factory = PgDice::DatabaseConnectionFactory.new(self)
     end
   end
 end

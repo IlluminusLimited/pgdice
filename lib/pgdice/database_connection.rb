@@ -4,22 +4,22 @@
 module PgDice
   # Wrapper class around database connection handlers
   class DatabaseConnection
-    include PgDice::Loggable
-    extend Forwardable
-    def_delegators :@configuration, :dry_run, :pg_connection
+    attr_reader :logger, :query_executor, :dry_run
 
-    def initialize(configuration = PgDice::Configuration.new, opts = {})
-      @configuration = configuration
-      @logger = opts[:logger]
+    def initialize(logger:, query_executor:, dry_run: false)
+      @logger = logger
+      @dry_run = dry_run
+      @query_executor = query_executor
     end
 
     def execute(query)
-      logger.debug { "DatabaseConnection to execute query: #{query}" }
       if dry_run
-        PgDice::PgResponse.new
-      else
-        pg_connection.exec(query)
+        logger.debug { "DatabaseConnection skipping query since dry_run is \"true.\" Query: #{query}" }
+        return PgDice::PgResponse.new
       end
+
+      logger.debug { "DatabaseConnection to execute query: #{query}" }
+      query_executor.call(query)
     end
   end
 
