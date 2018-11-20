@@ -8,7 +8,7 @@ module PgDice
 
     def_delegators :@configuration, :logger, :database_url, :dry_run
 
-    def initialize(configuration = PgDice::Configuration.new)
+    def initialize(configuration)
       @configuration = configuration
     end
 

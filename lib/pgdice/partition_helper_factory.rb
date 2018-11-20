@@ -6,7 +6,7 @@ module PgDice
   class PartitionHelperFactory
     extend Forwardable
 
-    def_delegators :@configuration, :batch_size, :approved_tables, :database_connection, :database_url
+    def_delegators :@configuration, :logger
 
     def initialize(configuration = PgDice::Configuration.new, opts = {})
       @configuration = configuration

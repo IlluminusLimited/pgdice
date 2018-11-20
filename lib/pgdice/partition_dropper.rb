@@ -4,7 +4,7 @@
 module PgDice
   # Simple class used to provide a mechanism that users can hook into if they want to override this
   # default behavior for dropping a table.
-  class TableDropper
+  class PartitionDropper
     attr_reader :logger, :database_connection
 
     def initialize(logger:, database_connection:)
