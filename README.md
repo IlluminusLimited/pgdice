@@ -53,10 +53,7 @@ This is an example config from a project using `Sidekiq`
 require 'pgdice'
 PgDice.configure do |config|
   # This defaults to STDOUT if you don't specify a logger
-  # Make sure your logger is initialized correctly before setting this.
-  # If you make a pgdice.rb initializer in rails, it will be run before sidekiq.rb 
-  #   which may not give you the result you want.
-  config.logger = Sidekiq.logger
+  config.logger_factory = proc { Sidekiq.logger }
   config.database_url = ENV['PGDICE_DATABASE_URL'] # postgresql://[user[:password]@][host][:port][/dbname][?param1=value1&...]
  
   # Set a config file or build the tables manually
@@ -75,8 +72,11 @@ end
 - `database_url` - Required: The postgres database url to connect to. 
   - This is required since `pgslice` requires a postgres `url`.
 
-- `logger` - Optional: The logger to use.
-  - Defaults to `STDOUT`.
+- `logger_factory` - Optional: A factory that will return a logger to use.
+  - Defaults to `proc { Logger.new(STDOUT) }`
+
+- `logger` - Optional: The logger to use. 
+  - If unspecified will be lazily initialized via `logger_factory`
 
 - `approved_tables` - Optional: (but not really) The tables to allow modification on.
   - If you want to manipulate database tables with this gem you're going to need to provide this data.
@@ -86,7 +86,7 @@ end
   - You can set it to either `true` or `false`. 
     - `true` will make PgDice log out the commands but not execute them.
 
-- `batch_size` - Optional: Maximum number of tables you can drop in one `drop_old_tables` call. 
+- `batch_size` - Optional: Maximum number of tables you can drop in one `drop_old_partitions` call. 
   - Defaults to 7.
 
 
@@ -94,26 +94,11 @@ end
 
 All of the following parameters are optional and honestly you probably will never need to mess with these.
 
-- `table_dropper` - This defaults to [TableDropper](lib/pgdice/table_dropper.rb) which has a `lambda`-like interface. 
-  - An example use-case would be calling out to your backup system to confirm the table is backed up.
-    - This mechanism will be passed the `table_to_drop` and a `logger`.
-
 - `pg_connection` - This is a `PG::Connection` object used for the database queries made from `pgdice`.
   - By default it will be initialized from the `database_url` if left `nil`. 
   - Keep in mind the dependency `pgslice` will still establish its own connection using the `database_url` 
   so this feature may not be very useful if you are trying to only use one connection for this utility.
- 
-- `database_connection` - You can supply your own [DatabaseConnection](lib/pgdice/database_connection.rb) if you like.
-  - I'm not sure why you would do this.
- 
-- `pg_slice_manager` - This is an internal wrapper around `pgslice`. [PgSliceManager](lib/pgdice/pg_slice_manager.rb)
-  - This configuration lets you provide your own if you wish. I'm not sure why you would do this.
- 
-- `partition_manager` - You can supply your own [PartitionManager](lib/pgdice/partition_manager.rb) if you like.
-  - I'm not sure why you would do this.
-  
-- `partition_helper` - You can supply your own [PartitionHelper](lib/pgdice/partition_helper.rb) if you like.
-  - I'm not sure why you would do this.
+
  
 ### Approved Tables Configuration
 

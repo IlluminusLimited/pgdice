@@ -60,7 +60,7 @@ module Minitest
 
     PgDice.configure(validate_configuration: false) do |config|
       log_target = ENV['PGDICE_LOG_TARGET'] || 'pgdice.log'
-      config.logger = Logger.new(log_target)
+      config.logger_factory = proc { Logger.new(log_target) }
 
       username = ENV['DATABASE_USERNAME']
       password = ENV['DATABASE_PASSWORD']

@@ -17,9 +17,9 @@ class ConfigurationTest < Minitest::Test
     PgDice.configuration = configuration
   end
 
-  def test_nil_logger_throws
-    @configuration.logger = nil
-    assert_invalid_config { @configuration.logger }
+  def test_nil_logger_factory_throws
+    @configuration.logger_factory = nil
+    assert_invalid_config { @configuration.logger_factory }
   end
 
   def test_nil_database_url_throws
@@ -72,6 +72,18 @@ class ConfigurationTest < Minitest::Test
     assert_raises(PgDice::MissingConfigurationFileError) do
       @configuration.validate!
     end
+  end
+
+  def test_nil_logger_calls_logger_factory
+    call_count = 0
+    dummy_factory = proc do
+      call_count += 1
+    end
+
+    @configuration.logger = nil
+    @configuration.logger_factory = dummy_factory
+    @configuration.logger
+    assert_equal 1, call_count, 'Logger factory should be called to initialize logger'
   end
 
   private

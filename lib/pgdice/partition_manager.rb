@@ -6,7 +6,8 @@ module PgDice
   class PartitionManager
     include PgDice::TableFinder
 
-    attr_reader :logger, :batch_size, :validation, :approved_tables, :partition_adder, :partition_lister, :partition_dropper, :current_date_provider
+    attr_reader :logger, :batch_size, :validation, :approved_tables, :partition_adder,
+                :partition_lister, :partition_dropper, :current_date_provider
 
     def initialize(opts = {})
       @logger = opts.fetch(:logger)

@@ -14,12 +14,13 @@ module PgDice
 
   # Configuration class which holds all configurable values
   class Configuration
-    DEFAULT_VALUES ||= { logger: Logger.new(STDOUT),
+    DEFAULT_VALUES ||= { logger_factory: proc { Logger.new(STDOUT) },
                          database_url: nil,
                          dry_run: false,
                          batch_size: 7 }.freeze
 
     attr_writer :logger,
+                :logger_factory,
                 :database_url,
                 :approved_tables,
                 :dry_run,
@@ -38,8 +39,7 @@ module PgDice
     end
 
     def validate!
-      logger
-      logger.debug { 'Validate has been called!' }
+      logger_factory
       database_url
       database_connection
       approved_tables
@@ -47,10 +47,10 @@ module PgDice
       batch_size
     end
 
-    def logger
-      return @logger unless @logger.nil?
+    def logger_factory
+      return @logger_factory if @logger_factory.respond_to?(:call)
 
-      raise PgDice::InvalidConfigurationError, 'logger must be present!'
+      raise PgDice::InvalidConfigurationError, 'logger_factory must be present!'
     end
 
     def database_url
@@ -95,6 +95,10 @@ module PgDice
 
     def config_file_loader
       @config_file_loader ||= ConfigurationFileLoader.new(self)
+    end
+
+    def logger
+      @logger ||= logger_factory.call
     end
 
     def partition_manager
