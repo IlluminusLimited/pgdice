@@ -10,7 +10,7 @@ module PgDice
 
     def initialize(configuration = PgDice::Configuration.new, opts = {})
       @configuration = configuration
-      @validation_factory = opts[:validation_factory] ||= validation_factory
+      @validation_factory = opts[:validation_factory] ||= PgDice::ValidationFactory.new(configuration)
       @partition_adder_factory = opts[:partition_adder_factory] ||= partition_adder_factory
       @partition_lister_factory = opts[:partition_lister_factory] ||= partition_lister_factory
       @partition_dropper_factory = opts[:partition_dropper_factory] ||= partition_dropper_factory
@@ -25,14 +25,6 @@ module PgDice
                                    partition_adder: @partition_adder_factory.call)
 
 
-    end
-
-    def validation_factory
-      proc do
-        PgDice::Validation.new(logger: logger,
-                               database_connection: database_connection,
-                               approved_tables: approved_tables)
-      end
     end
 
     def partition_adder_factory
