@@ -7,7 +7,7 @@ module PgDice
   class TableDropper
     attr_reader :logger, database_connection
 
-    def initialize(logger, database_connection)
+    def initialize(logger:, database_connection:)
       @logger = logger
       @database_connection = database_connection
     end

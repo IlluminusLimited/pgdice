@@ -6,46 +6,28 @@ module PgDice
   class PartitionManager
     include PgDice::TableFinder
 
-    attr_reader :validation
+    attr_reader :logger, :batch_size, :validation, :partition_adder, :partition_lister, :partition_dropper, :current_date_provider
 
-    def initialize(configuration = PgDice::Configuration.new, opts = {})
-      @configuration = configuration
-      @logger = opts[:logger]
-      @batch_size = opts[:batch_size] ||= @configuration.batch_size
-      @validation = opts[:validation] ||= PgDice::Validation.new(@configuration.logger, @configuration.database_connection,@configuration.approved_tables )
-      @current_date_provider = opts[:current_date_provider] ||= proc { Time.now.utc.to_date }
-      @table_dropper_supplier = opts[:table_dropper] ||= proc do
-        PgDice::TableDropper.new(logger, @configuration.database_connection)
-      end
-      @partition_lister = opts[:partition_lister] ||= lambda do |all_params|
-        PgDice::PartitionLister.new(database_connection: database_connection).call(all_params)
-      end
-      @partition_adder = opts[:partition_adder] ||= lambda do |all_params|
-        PgDice::PgSliceManager.new(@configuration).add_partitions(all_params)
-      end
-
-
-
-      @logger = opts[:logger]
-      @batch_size = opts[:batch_size]
-      @validation = opts[:validation]
-      @table_dropper = opts[:table_dropper]
-      @table_adder = opts[:table_adder]
-      @partition_lister = opts[:partition_lister]
-      @current_date_provider = opts[:current_date_provider] ||= proc { Time.now.utc.to_date }
-
+    def initialize(opts = {})
+      @logger = opts.fetch(:logger)
+      @batch_size = opts.fetch(:batch_size)
+      @validation = opts.fetch(:validation)
+      @partition_adder = opts.fetch(:partition_adder)
+      @partition_lister = opts.fetch(:partition_lister)
+      @partition_dropper = opts.fetch(:partition_dropper)
+      @current_date_provider = opts.fetch(:current_date_provider, proc { Time.now.utc.to_date })
     end
 
     def add_new_partitions(table_name, params = {})
       all_params = approved_tables.smash(table_name, params)
       logger.debug { "add_new_partitions has been called with params: #{all_params}" }
       validation.validate_parameters(all_params)
-      @partition_adder.call(all_params)
+      partition_adder.call(all_params)
     end
 
     def drop_old_partitions(table_name, params = {})
       all_params = approved_tables.smash(table_name, params)
-      all_params[:older_than] = @current_date_provider.call
+      all_params[:older_than] = current_date_provider.call
       logger.debug { "drop_old_partitions has been called with params: #{all_params}" }
 
       validation.validate_parameters(all_params)
@@ -77,11 +59,11 @@ module PgDice
 
     def partitions(all_params)
       logger.info { "Fetching partition tables with params: #{all_params}" }
-      @partition_lister.call(all_params)
+      partition_lister.call(all_params)
     end
 
     def droppable_partitions(all_params)
-      older_than = @current_date_provider.call
+      older_than = current_date_provider.call
       minimum_tables = all_params.fetch(:past)
 
       eligible_partitions = partitions(all_params)
@@ -92,14 +74,14 @@ module PgDice
     end
 
     def batched_droppable_partitions(all_params)
-      batch_size = all_params.fetch(:batch_size, @batch_size)
+      max_tables_to_drop_at_once = all_params.fetch(:batch_size, batch_size)
       selected_partitions = droppable_partitions(all_params)
-      batched_tables(selected_partitions, batch_size)
+      batched_tables(selected_partitions, max_tables_to_drop_at_once)
     end
 
     def drop_partitions(all_params)
       old_partitions = batched_droppable_partitions(all_params)
-      @table_dropper.call(old_partitions)
+      partition_dropper.call(old_partitions)
     end
   end
 end

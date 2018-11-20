@@ -5,8 +5,8 @@ module PgDice
   class Validation
     attr_reader :logger, :database_connection, :approved_tables
 
-    def initialize(logger, database_connection, approved_tables)
-      @logger = params[:logger]
+    def initialize(logger:, database_connection:, approved_tables:)
+      @logger = logger
       @database_connection = database_connection
       @approved_tables = approved_tables
     end

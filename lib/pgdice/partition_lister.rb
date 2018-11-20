@@ -8,7 +8,7 @@ module PgDice
 
     attr_reader :database_connection
 
-    def initialize(database_connection: PgDice::Configuration.new.database_connection)
+    def initialize(database_connection:)
       @database_connection = database_connection
     end
 
