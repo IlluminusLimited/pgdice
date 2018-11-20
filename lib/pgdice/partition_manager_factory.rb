@@ -14,6 +14,7 @@ module PgDice
       @partition_adder_factory = opts[:partition_adder_factory] ||= partition_adder_factory
       @partition_lister_factory = opts[:partition_lister_factory] ||= PgDice::PartitionListerFactory.new(configuration)
       @partition_dropper_factory = opts[:partition_dropper_factory] ||= PgDice::PartitionDropperFactory.new(configuration)
+      @current_date_provider = opts[:current_date_provider] ||=  proc { Time.now.utc.to_date }
     end
 
     def call
@@ -23,7 +24,8 @@ module PgDice
                                    validation: @validation_factory.call,
                                    partition_adder: @partition_adder_factory.call,
                                    partition_lister: @partition_lister_factory.call,
-                                   partition_dropper: @partition_dropper_factory.call)
+                                   partition_dropper: @partition_dropper_factory.call,
+                                   current_date_provider: @current_date_provider)
     end
 
     private
