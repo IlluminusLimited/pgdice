@@ -8,12 +8,15 @@ module PgDice
 
     def_delegators :@configuration, :database_connection
 
-    def initialize(configuration)
+    def initialize(configuration, opts = {})
       @configuration = configuration
+      @query_executor = opts[:query_executor] ||= lambda do |sql|
+        database_connection.execute(sql).values.flatten
+      end
     end
 
     def call
-      PgDice::PartitionLister.new(database_connection: database_connection)
+      PgDice::PartitionLister.new(query_executor: @query_executor)
     end
   end
 end

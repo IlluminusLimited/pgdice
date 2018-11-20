@@ -39,13 +39,6 @@ class FunctionalityTest < Minitest::Test
     end
   end
 
-  def test_old_partitions_can_be_listed
-    partition_helper.partition_table!(table_name, past: 2, future: 1)
-
-    assert_equal 2, @partition_manager.list_partitions(table_name, older_than: today).size
-    assert PgDice.validation.assert_tables(table_name, past: 2, future: 1)
-  end
-
   def test_drop_old_partitions_can_be_dry_run
     configuration = PgDice.configuration.deep_clone
     configuration.dry_run = true
@@ -78,18 +71,6 @@ class FunctionalityTest < Minitest::Test
     assert PgDice.validation.assert_tables(table_name, past: 1)
   end
 
-  def test_add_future_partitions_checks_allowed_tables
-    assert_raises(PgDice::IllegalTableError) do
-      @partition_manager.add_new_partitions('bob')
-    end
-  end
-
-  def test_drop_old_partitions_checks_allowed_tables
-    assert_raises(PgDice::IllegalTableError) do
-      @partition_manager.drop_old_partitions('bob')
-    end
-  end
-
   def test_cannot_drop_more_than_minimum_tables
     table_name = 'posts'
     PgDice.partition_helper.partition_table!(table_name, past: 10)
@@ -102,9 +83,10 @@ class FunctionalityTest < Minitest::Test
   # Comments table is configured to have a minimum_table_threshold of 1 table
   # Thus there should be no droppable tables if looking older than yesterday.
   def test_list_droppable_partitions
-    PgDice.partition_helper.partition_table!(table_name, past: 30)
+    PgDice.partition_helper.partition_table!(table_name, past: 10)
     droppable_partitions = PgDice.partition_manager.list_droppable_partitions(table_name, older_than: today)
-    assert_equal 29, droppable_partitions.size, 'Droppable partitions should include all tables past the minimum table threshold which should be set to 1 for comments table'
+    assert_equal 9, droppable_partitions.size, 'Droppable partitions should include all tables past the '\
+      'minimum table threshold which should be set to 1 for comments table'
   end
 
   def test_old_tables_dropped_in_future

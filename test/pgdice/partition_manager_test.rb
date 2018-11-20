@@ -3,42 +3,60 @@
 require 'test_helper'
 
 class PartitionManagerTest < Minitest::Test
+  def setup
+    dummy_dropper = setup_tattletale
+    @partition_manager = PgDice::PartitionManagerFactory.new(PgDice.configuration,
+                                                             batch_size_factory: proc { 4 },
+                                                             current_date_provider: proc { Date.parse('20181028') },
+                                                             partition_lister_factory: proc { proc { @tables } },
+                                                             partition_dropper_factory: proc { dummy_dropper }).call
+  end
+
+  def setup_tattletale
+    @tables = generate_tables
+    @call_count = 0
+    proc do |partitions|
+      @tables.shift(partitions.size)
+      @call_count += partitions.size
+    end
+  end
+
   def test_list_droppable_partitions_excludes_minimum
-    manager = PgDice::PartitionManagerFactory.new(PgDice.configuration,
-                                                  batch_size_factory: proc { 4 },
-                                                  current_date_provider: proc { Date.parse('20181028') },
-                                                  partition_lister_factory: proc { proc { generate_tables } }).call
-    assert_equal 7, manager.list_droppable_partitions('comments').size,
+    assert_equal 7, @partition_manager.list_droppable_partitions('comments').size,
                  'With 8 past partitions and 1 minimum required 7 should be returned'
   end
 
+  # Given 10 total tables
+  # 8 past tables
+  # batch size of 4
+  # minimum tables of 1
+  # we should iterate 2 times,
+  # first itertation should drop 4
+  # second should drop 3
+  # 1 past tables should remain
   def test_iterative_delete
-    # Given 10 total tables
-    # 8 past tables
-    # batch size of 4
-    # minimum tables of 1
-    # we should iterate 2 times,
-    # first itertation should drop 4
-    # second should drop 3
-    # 1 past tables should remain
-
-    tables = generate_tables
-    call_count = 0
-    dummy_dropper = proc do |partitions|
-      tables.shift(partitions.size)
-      call_count += partitions.size
-    end
-    manager = PgDice::PartitionManagerFactory.new(PgDice.configuration,
-                                                  batch_size_factory: proc { 4 },
-                                                  current_date_provider: proc { Date.parse('20181028') },
-                                                  partition_lister_factory: proc { proc { tables } },
-                                                  partition_dropper_factory: proc { dummy_dropper }).call
-
-    manager.drop_old_partitions('comments')
-    assert_equal 4, call_count, 'The first drop call should purge 4 tables'
-    manager.drop_old_partitions('comments')
-    assert_equal 7, call_count, 'The second drop call should purge the remaining 3 tables'
+    @partition_manager.drop_old_partitions('comments')
+    assert_equal 4, @call_count, 'The first drop call should purge 4 tables'
+    @partition_manager.drop_old_partitions('comments')
+    assert_equal 7, @call_count, 'The second drop call should purge the remaining 3 tables'
   end
+
+  def test_add_new_partitions_checks_allowed_tables
+    assert_raises(PgDice::IllegalTableError) do
+      @partition_manager.add_new_partitions('bob')
+    end
+  end
+
+  def test_drop_old_partitions_checks_allowed_tables
+    assert_raises(PgDice::IllegalTableError) do
+      @partition_manager.drop_old_partitions('bob')
+    end
+  end
+
+  # def test_old_partitions_can_be_listed
+  #   response = @partition_manager.list_partitions('comments', older_than: Date.parse('20181022'))
+  #   assert_equal 2, response.size
+  # end
 
   private
 
