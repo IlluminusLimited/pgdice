@@ -41,19 +41,19 @@ module PgDice
     def partition_manager
       raise PgDice::NotConfiguredError, 'partition_manager' unless configuration
 
-      @partition_manager ||= PgDice::PartitionManagerFactory.new(configuration).call
+      configuration.partition_manager
     end
 
     def partition_helper
       raise PgDice::NotConfiguredError, 'partition_helper' unless configuration
 
-      @partition_helper ||= PgDice::PartitionHelperFactory.new(configuration).call
+      configuration.partition_helper
     end
 
     def validation
       raise PgDice::NotConfiguredError, 'validation' unless configuration
 
-      @validation ||= PgDice::ValidationFactory.new(configuration).call
+      configuration.validation
     end
   end
 end

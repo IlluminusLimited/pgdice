@@ -28,8 +28,7 @@ module PgDice
                 :pg_connection,
                 :config_file_loader
 
-    attr_accessor :partition_helper,
-                  :config_file
+    attr_accessor :config_file
 
     def initialize(existing_config = nil)
       DEFAULT_VALUES.each do |key, value|
@@ -109,6 +108,14 @@ module PgDice
       @partition_manager_factory.call
     end
 
+    def partition_helper
+      @partition_helper_factory.call
+    end
+
+    def validation
+      @validation_factory.call
+    end
+
     def deep_clone
       PgDice::Configuration.new(self)
     end
@@ -122,6 +129,8 @@ module PgDice
     def initialize_objects
       @database_connection = PgDice::DatabaseConnection.new(self)
       @partition_manager_factory = PgDice::PartitionManagerFactory.new(self)
+      @partition_helper_factory = PgDice::PartitionHelperFactory.new(self)
+      @validation_factory = PgDice::ValidationFactory.new(self)
     end
   end
 end
