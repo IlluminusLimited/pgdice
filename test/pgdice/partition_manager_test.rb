@@ -53,11 +53,6 @@ class PartitionManagerTest < Minitest::Test
     end
   end
 
-  # def test_old_partitions_can_be_listed
-  #   response = @partition_manager.list_partitions('comments', older_than: Date.parse('20181022'))
-  #   assert_equal 2, response.size
-  # end
-
   private
 
   def generate_tables

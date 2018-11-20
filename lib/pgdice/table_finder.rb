@@ -14,15 +14,23 @@ module PgDice
       tables_to_grab.positive? ? tables_to_grab : 0
     end
 
-    def tables_older_than(tables, older_than)
-      tables.select do |partition_name|
-        partition_created_at_time = Date.parse(partition_name)
-        partition_created_at_time < older_than.to_date
-      end
-    end
-
     def batched_tables(tables, batch_size)
       tables.first(batch_size)
+    end
+
+    def tables_older_than(tables, older_than)
+      table_tester(tables, ->(partition_created_at_time) { partition_created_at_time < older_than.to_date })
+    end
+
+    def tables_newer_than(tables, newer_than)
+      table_tester(tables, ->(partition_created_at_time) { partition_created_at_time > newer_than.to_date })
+    end
+
+    def table_tester(tables, predicate)
+      tables.select do |partition_name|
+        partition_created_at_time = Date.parse(partition_name)
+        predicate.call(partition_created_at_time)
+      end
     end
   end
 end

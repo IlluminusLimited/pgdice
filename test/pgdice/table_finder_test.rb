@@ -24,6 +24,11 @@ class TableFinderTest < Minitest::Test
     assert_equal %w[comments_20181020 comments_20181021], results
   end
 
+  def test_tables_newer_than
+    results = tables_newer_than(generate_tables, Date.parse('20181024'))
+    assert_equal %w[comments_20181025 comments_20181026], results
+  end
+
   def test_batched_tables
     results = batched_tables(generate_tables, 3)
     assert_equal %w[comments_20181020 comments_20181021 comments_20181022], results
