@@ -81,7 +81,7 @@ module Minitest
     PgDice.configuration.database_connection.execute(@sql)
 
     def logger
-      @logger ||= PgDice.configuration
+      @logger ||= PgDice.configuration.logger
     end
 
     def table_name

@@ -6,8 +6,12 @@ class PartitionManagerTest < Minitest::Test
   def test_list_droppable_partitions_excludes_minimum
     manager = PgDice::PartitionManager.new(logger: logger,
                                            batch_size: 4,
+                                           validation: PgDice::ValidationFactory.new(PgDice.configuration).call,
+                                           approved_tables: PgDice.configuration.approved_tables,
                                            current_date_provider: proc { Date.parse('20181028') },
-                                           partition_lister: proc { generate_tables })
+                                           partition_lister: proc { generate_tables },
+                                           partition_dropper: proc {},
+                                           partition_adder: proc {})
     assert_equal 7, manager.list_droppable_partitions('comments').size,
                  'With 8 past partitions and 1 minimum required 7 should be returned'
   end
@@ -30,11 +34,14 @@ class PartitionManagerTest < Minitest::Test
     end
     manager = PgDice::PartitionManager.new(logger: logger,
                                            batch_size: 4,
+                                           validation: PgDice::ValidationFactory.new(PgDice.configuration).call,
+                                           approved_tables: PgDice.configuration.approved_tables,
                                            current_date_provider: proc { Date.parse('20181028') },
+                                           partition_adder: proc {},
                                            partition_lister: proc { tables },
-                                           partition_dropper: proc { dummy_dropper })
+                                           partition_dropper: dummy_dropper)
     manager.drop_old_partitions('comments')
-    assert_equal 4, call_count, 'The first drop call should only purge 4 tables'
+    assert_equal 4, call_count, 'The first drop call should purge 4 tables'
     manager.drop_old_partitions('comments')
     assert_equal 7, call_count, 'The second drop call should purge the remaining 3 tables'
   end
