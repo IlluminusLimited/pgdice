@@ -22,6 +22,7 @@ require 'pgdice/partition_manager'
 require 'pgdice/partition_helper'
 require 'pgdice/database_connection'
 require 'pgdice/configuration_file_loader'
+require 'pgdice/partition_manager_factory'
 
 # This is a stupid comment
 module PgDice
