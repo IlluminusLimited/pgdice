@@ -11,50 +11,19 @@ class FunctionalityTest < Minitest::Test
     partition_helper.undo_partitioning(table_name)
   end
 
-  def test_future_partitions_can_be_added
-    partition_helper.partition_table!(table_name)
-
-    future_tables = 2
-
-    assert @partition_manager.add_new_partitions(table_name, future: future_tables)
-
-    assert PgDice.validation.assert_tables(table_name, future: future_tables)
-  end
-
-  def test_future_partitions_can_be_dry_run
-    configuration = PgDice.configuration.deep_clone
-    configuration.dry_run = true
-    partition_helper.partition_table!(table_name)
-
-    future_tables = 2
-
-    assert configuration.partition_manager.add_new_partitions(table_name, future: future_tables)
-
-    assert PgDice.validation.assert_tables(table_name, future: 0, past: 0)
-  end
-
   def test_future_partitions_blows_up_on_unpartitioned_table
     assert_raises(PgDice::PgSliceError) do
       @partition_manager.add_new_partitions(table_name, future: 2)
     end
   end
 
-  def test_drop_old_partitions_can_be_dry_run
+  def test_can_be_dry_run
     configuration = PgDice.configuration.deep_clone
     configuration.dry_run = true
-
     partition_helper.partition_table!(table_name, past: 2)
 
-    assert_equal 0, configuration.partition_manager.drop_old_partitions(table_name).size
-    assert PgDice.validation.assert_tables(table_name, past: 2)
-  end
-
-  def test_old_partitions_can_be_dropped
-    partition_helper.partition_table!(table_name, past: 2)
-
-    # The minimum partitions required on this table is 1
-    assert_equal 1, @partition_manager.drop_old_partitions(table_name).size
-    assert PgDice.validation.assert_tables(table_name, past: 1)
+    assert_dry_future(configuration)
+    assert_dry_past(configuration)
   end
 
   def test_drop_old_partitions_uses_batch_size
@@ -71,36 +40,9 @@ class FunctionalityTest < Minitest::Test
     assert PgDice.validation.assert_tables(table_name, past: 1)
   end
 
-  def test_cannot_drop_more_than_minimum_tables
-    table_name = 'posts'
-    PgDice.partition_helper.partition_table!(table_name, past: 10)
-    assert_empty PgDice.partition_manager.list_droppable_partitions(table_name, older_than: today)
-    assert_empty PgDice.partition_manager.drop_old_partitions(table_name)
-  ensure
-    partition_helper.undo_partitioning('posts')
-  end
-
-  # Comments table is configured to have a minimum_table_threshold of 1 table
-  # Thus there should be no droppable tables if looking older than yesterday.
-  def test_list_droppable_partitions
-    PgDice.partition_helper.partition_table!(table_name, past: 10)
-    droppable_partitions = PgDice.partition_manager.list_droppable_partitions(table_name, older_than: today)
-    assert_equal 9, droppable_partitions.size, 'Droppable partitions should include all tables past the '\
-      'minimum table threshold which should be set to 1 for comments table'
-  end
-
-  def test_old_tables_dropped_in_future
-    PgDice.partition_helper.partition_table!(table_name, past: 2, future: 3)
-    assert_equal 2, PgDice::PartitionManagerFactory.new(PgDice.configuration,
-                                                        current_date_provider: proc { tomorrow.to_date })
-      .call
-                                                   .list_droppable_partitions(table_name, older_than: tomorrow).size
-  end
-
   def test_works_year_tables
     table_name = 'posts'
-    PgDice.partition_helper.partition_table!(table_name, past: 1, future: 0, period: :year)
-    PgDice.partition_manager.add_new_partitions(table_name, past: 2, future: 2, period: :year)
+    PgDice.partition_helper.partition_table!(table_name, past: 2, future: 2, period: :year)
 
     PgDice.validation.assert_tables(table_name, future: 2, past: 2)
 
@@ -112,8 +54,7 @@ class FunctionalityTest < Minitest::Test
 
   def test_works_month_tables
     table_name = 'posts'
-    PgDice.partition_helper.partition_table!(table_name, past: 1, future: 0, period: :month)
-    PgDice.partition_manager.add_new_partitions(table_name, future: 2, past: 2, period: :month)
+    PgDice.partition_helper.partition_table!(table_name, past: 2, future: 2, period: :month)
 
     PgDice.validation.assert_tables(table_name, future: 2, past: 2)
 
@@ -124,6 +65,16 @@ class FunctionalityTest < Minitest::Test
   end
 
   private
+
+  def assert_dry_future(configuration)
+    configuration.partition_manager.add_new_partitions(table_name, future: 4)
+    assert PgDice.validation.assert_tables(table_name, future: 0, past: 2)
+  end
+
+  def assert_dry_past(configuration)
+    assert_equal 0, configuration.partition_manager.drop_old_partitions(table_name).size
+    assert PgDice.validation.assert_tables(table_name, future: 0, past: 2)
+  end
 
   def batch_size_and_minimum_tables
     batch_size = PgDice.configuration.batch_size
