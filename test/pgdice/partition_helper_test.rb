@@ -11,31 +11,6 @@ class PartitionHelperTest < Minitest::Test
     assert partition_helper.partition_table!(table_name, fill: true)
   end
 
-  def test_works_year_tables
-    table_name = 'posts'
-    PgDice.partition_helper.partition_table!(table_name, past: 1, future: 0, period: :year)
-    PgDice.partition_manager.add_new_partitions(table_name, past: 2, future: 2, period: :year)
-
-    PgDice.validation.assert_tables(table_name, future: 2, past: 2)
-
-    assert_future_tables_error { PgDice.validation.assert_tables(table_name, future: 3) }
-    assert_past_tables_error { PgDice.validation.assert_tables(table_name, past: 3) }
-  ensure
-    partition_helper.undo_partitioning('posts')
-  end
-
-  def test_works_month_tables
-    table_name = 'posts'
-    PgDice.partition_helper.partition_table!(table_name, past: 1, future: 0, period: :month)
-    PgDice.partition_manager.add_new_partitions(table_name, future: 2, past: 2, period: :month)
-
-    PgDice.validation.assert_tables(table_name, future: 2, past: 2)
-
-    assert_future_tables_error { PgDice.validation.assert_tables(table_name, future: 3) }
-    assert_past_tables_error { PgDice.validation.assert_tables(table_name, past: 3) }
-  ensure
-    partition_helper.undo_partitioning('posts')
-  end
 
   def test_partition_table_checks_allowed_tables
     assert_raises(PgDice::IllegalTableError) do
