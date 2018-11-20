@@ -3,14 +3,64 @@
 require 'test_helper'
 
 class PartitionManagerTest < Minitest::Test
-  # def setup
-  #   @partition_manager = PgDice.partition_manager
-  # end
-  #
-  # def teardown
-  #   partition_helper.undo_partitioning(table_name)
-  # end
-  #
+  def setup
+    @partition_manager = PgDice.partition_manager
+  end
+
+  def teardown
+    partition_helper.undo_partitioning(table_name)
+  end
+
+  def test_drop_tables_uses_batches
+    call_count = 0
+    dummy_dropper = proc do |partitions|
+      call_count += partitions.size
+    end
+    PgDice::PartitionManager.new(PgDice.configuration,
+                                 current_date_provider: proc { Date.parse('20181025') },
+                                 table_dropper: dummy_dropper,
+                                 partition_lister: proc { generate_tables })
+        .drop_old_partitions('comments')
+    assert_equal 5, call_count
+  end
+
+  def test_list_droppable_partitions_excludes_minimum
+    manager = PgDice::PartitionManager.new(PgDice.configuration,
+                                           batch_size: 4,
+                                           current_date_provider: proc { Date.parse('20181028') },
+                                           partition_lister: proc { generate_tables })
+    assert_equal 7, manager.list_droppable_partitions('comments').size,
+                 'With 8 past partitions and 1 minimum required 7 should be returned'
+  end
+
+  def test_iterative_delete
+    # Given 10 total tables
+    # 8 past tables
+    # batch size of 4
+    # minimum tables of 1
+    # we should iterate 2 times,
+    # first itertation should drop 4
+    # second should drop 3
+    # 1 past tables should remain
+
+    tables = generate_tables
+    call_count = 0
+    dummy_dropper = proc do |partitions|
+      tables.shift(partitions.size)
+      call_count += partitions.size
+    end
+    configuration = PgDice.configuration.deep_clone
+    configuration.table_dropper = dummy_dropper
+    manager = PgDice::PartitionManager.new(configuration,
+                                               batch_size: 4,
+                                               current_date_provider: proc { Date.parse('20181028') },
+                                               partition_lister: proc { tables })
+    manager.drop_old_partitions('comments')
+    assert_equal 4, call_count, 'The first drop call should only purge 4 tables'
+    manager.drop_old_partitions('comments')
+    assert_equal 7, call_count, 'The second drop call should purge the remaining 3 tables'
+  end
+
   # def test_future_partitions_can_be_added
   #   partition_helper.partition_table!(table_name)
   #
@@ -121,4 +171,11 @@ class PartitionManagerTest < Minitest::Test
   #   minimum_tables = PgDice.configuration.approved_tables[table_name].past
   #   [batch_size, minimum_tables]
   # end
+
+  private
+
+  def generate_tables
+    %w[comments_20181020 comments_20181021 comments_20181022 comments_20181023 comments_20181024
+       comments_20181025 comments_20181026 comments_20181027 comments_20181028 comments_20181029]
+  end
 end

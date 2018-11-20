@@ -9,8 +9,13 @@ class TableFinderTest < Minitest::Test
     assert_equal ['comments_20181020'], results
   end
 
+  def test_tables_to_grab_returns_all_eligible_if_greater_than_all
+    results = tables_to_grab(5, 4, 2)
+    assert_equal 4, results
+  end
+
   def test_tables_to_grab_returns_0_on_negative_math
-    results = tables_to_grab(1, 2)
+    results = tables_to_grab(2, 1, 2)
     assert_equal 0, results
   end
 
@@ -37,6 +42,7 @@ class TableFinderTest < Minitest::Test
   private
 
   def generate_tables
-    %w[comments_20181020 comments_20181021 comments_20181022 comments_20181023 comments_20181024 comments_20181025 comments_20181026]
+    %w[comments_20181020 comments_20181021 comments_20181022 comments_20181023 comments_20181024
+       comments_20181025 comments_20181026]
   end
 end
