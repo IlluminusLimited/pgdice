@@ -107,8 +107,7 @@ module PgDice
       $stderr.flush
       command = "pgslice #{argument_string} "
       command += '--dry-run true ' if dry_run
-      command += "--url #{database_url}"
-      command
+      command + "--url #{database_url}"
     end
 
     def log_result(stdout, stderr, status)

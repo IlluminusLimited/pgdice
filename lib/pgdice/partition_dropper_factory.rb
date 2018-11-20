@@ -8,12 +8,13 @@ module PgDice
 
     def_delegators :@configuration, :logger, :database_connection
 
-    def initialize(configuration)
+    def initialize(configuration, opts = {})
       @configuration = configuration
+      @query_executor = opts[:query_executor] ||= ->(sql) { database_connection.execute(sql) }
     end
 
     def call
-      PgDice::PartitionDropper.new(logger: logger, database_connection: database_connection)
+      PgDice::PartitionDropper.new(logger: logger, query_executor: @query_executor)
     end
   end
 end

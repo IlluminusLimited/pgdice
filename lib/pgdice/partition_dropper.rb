@@ -5,30 +5,28 @@ module PgDice
   # Simple class used to provide a mechanism that users can hook into if they want to override this
   # default behavior for dropping a table.
   class PartitionDropper
-    attr_reader :logger, :database_connection
+    attr_reader :logger, :query_executor
 
-    def initialize(logger:, database_connection:)
+    def initialize(logger:, query_executor:)
       @logger = logger
-      @database_connection = database_connection
+      @query_executor = query_executor
     end
 
     def call(old_partitions)
       logger.info { "Partitions to be deleted are: #{old_partitions}" }
 
-      old_partitions.each do |old_partition|
-        database_connection.execute(drop_partition(old_partition))
-      end
+      query_executor.call(generate_drop_sql(old_partitions))
+
       old_partitions
     end
 
     private
 
-    def drop_partition(table_name)
-      <<~SQL
-        BEGIN;
-          DROP TABLE IF EXISTS #{table_name} CASCADE;
-        COMMIT;
-      SQL
+    def generate_drop_sql(old_partitions)
+      sql_query = old_partitions.reduce("BEGIN;\n") do |sql, table_name|
+        sql + "DROP TABLE IF EXISTS #{table_name} CASCADE;\n"
+      end
+      sql_query + "COMMIT;\n"
     end
   end
 end
