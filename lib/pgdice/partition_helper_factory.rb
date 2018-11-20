@@ -20,7 +20,5 @@ module PgDice
                                   validation: @validation_factory.call,
                                   pg_slice_manager: @pg_slice_manager_factory.call)
     end
-
-
   end
 end

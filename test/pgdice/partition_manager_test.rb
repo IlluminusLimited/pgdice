@@ -7,8 +7,7 @@ class PartitionManagerTest < Minitest::Test
     manager = PgDice::PartitionManagerFactory.new(PgDice.configuration,
                                                   batch_size_factory: proc { 4 },
                                                   current_date_provider: proc { Date.parse('20181028') },
-                                                  partition_lister_factory: proc { proc { generate_tables } },
-    ).call
+                                                  partition_lister_factory: proc { proc { generate_tables } }).call
     assert_equal 7, manager.list_droppable_partitions('comments').size,
                  'With 8 past partitions and 1 minimum required 7 should be returned'
   end

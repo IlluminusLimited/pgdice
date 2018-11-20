@@ -1,6 +1,7 @@
+# frozen_string_literal: true
+
 module PgDice
   class ValidationFactory
-
     def initialize(configuration)
       @configuration = configuration
     end

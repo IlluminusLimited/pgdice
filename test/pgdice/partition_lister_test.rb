@@ -3,5 +3,4 @@
 require 'test_helper'
 
 class PartitionListerTest < Minitest::Test
-
 end

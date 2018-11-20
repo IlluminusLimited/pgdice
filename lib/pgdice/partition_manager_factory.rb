@@ -4,7 +4,6 @@
 module PgDice
   #  PartitionManagerFactory is a class used to build PartitionManagers
   class PartitionManagerFactory
-
     def initialize(configuration, opts = {})
       @configuration = configuration
       @logger_factory = opts[:logger_factory] ||= proc { @configuration.logger }
@@ -14,7 +13,7 @@ module PgDice
       @partition_adder_factory = opts[:partition_adder_factory] ||= partition_adder_factory
       @partition_lister_factory = opts[:partition_lister_factory] ||= PgDice::PartitionListerFactory.new(configuration)
       @partition_dropper_factory = opts[:partition_dropper_factory] ||= PgDice::PartitionDropperFactory.new(configuration)
-      @current_date_provider = opts[:current_date_provider] ||=  proc { Time.now.utc.to_date }
+      @current_date_provider = opts[:current_date_provider] ||= proc { Time.now.utc.to_date }
     end
 
     def call
@@ -33,7 +32,7 @@ module PgDice
     def partition_adder_factory
       proc do
         pg_slice_manager = PgDice::PgSliceManagerFactory.new(@configuration).call
-        lambda { |all_params| pg_slice_manager.add_partitions(all_params) }
+        ->(all_params) { pg_slice_manager.add_partitions(all_params) }
       end
     end
   end

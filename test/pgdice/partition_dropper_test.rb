@@ -3,5 +3,4 @@
 require 'test_helper'
 
 class PartitionDropperTest < Minitest::Test
-
 end

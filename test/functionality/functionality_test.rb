@@ -111,8 +111,8 @@ class FunctionalityTest < Minitest::Test
     PgDice.partition_helper.partition_table!(table_name, past: 2, future: 3)
     assert_equal 2, PgDice::PartitionManagerFactory.new(PgDice.configuration,
                                                         current_date_provider: proc { tomorrow.to_date })
-                        .call
-                        .list_droppable_partitions(table_name, older_than: tomorrow).size
+      .call
+                                                   .list_droppable_partitions(table_name, older_than: tomorrow).size
   end
 
   def test_works_year_tables
