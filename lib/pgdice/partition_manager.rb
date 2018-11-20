@@ -4,11 +4,7 @@
 module PgDice
   #  PartitionManager is a class used to fulfill high-level tasks for partitioning
   class PartitionManager
-    include PgDice::Loggable
     include PgDice::TableFinder
-    extend Forwardable
-
-    def_delegators :@configuration, :approved_tables, :database_connection
 
     attr_reader :validation
 
@@ -16,7 +12,7 @@ module PgDice
       @configuration = configuration
       @logger = opts[:logger]
       @batch_size = opts[:batch_size] ||= @configuration.batch_size
-      @validation = opts[:validation] ||= PgDice::Validation.new(configuration)
+      @validation = opts[:validation] ||= PgDice::Validation.new(@configuration.logger, @configuration.database_connection,@configuration.approved_tables )
       @current_date_provider = opts[:current_date_provider] ||= proc { Time.now.utc.to_date }
       @table_dropper_supplier = opts[:table_dropper] ||= proc do
         PgDice::TableDropper.new(logger, @configuration.database_connection)
@@ -27,6 +23,17 @@ module PgDice
       @partition_adder = opts[:partition_adder] ||= lambda do |all_params|
         PgDice::PgSliceManager.new(@configuration).add_partitions(all_params)
       end
+
+
+
+      @logger = opts[:logger]
+      @batch_size = opts[:batch_size]
+      @validation = opts[:validation]
+      @table_dropper = opts[:table_dropper]
+      @table_adder = opts[:table_adder]
+      @partition_lister = opts[:partition_lister]
+      @current_date_provider = opts[:current_date_provider] ||= proc { Time.now.utc.to_date }
+
     end
 
     def add_new_partitions(table_name, params = {})
