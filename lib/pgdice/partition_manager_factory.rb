@@ -6,7 +6,7 @@ module PgDice
   class PartitionManagerFactory
     extend Forwardable
 
-    def_delegators :@configuration, :logger, :batch_size
+    def_delegators :@configuration, :logger, :batch_size, :approved_tables
 
     def initialize(configuration, opts = {})
       @configuration = configuration
@@ -19,6 +19,7 @@ module PgDice
     def call
       PgDice::PartitionManager.new(logger: logger,
                                    batch_size: batch_size,
+                                   approved_tables: approved_tables,
                                    validation: @validation_factory.call,
                                    partition_adder: @partition_adder_factory.call,
                                    partition_lister: @partition_lister_factory.call,

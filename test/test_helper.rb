@@ -80,6 +80,10 @@ module Minitest
 
     PgDice.configuration.database_connection.execute(@sql)
 
+    def logger
+      @logger ||= PgDice.configuration
+    end
+
     def table_name
       @table_name ||= 'comments'
     end

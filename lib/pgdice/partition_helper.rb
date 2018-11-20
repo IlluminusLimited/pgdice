@@ -4,11 +4,12 @@
 module PgDice
   # Helps do high-level tasks like getting tables partitioned
   class PartitionHelper
-    attr_reader :logger, :validation, :pg_slice_manager
+    attr_reader :logger, :approved_tables, :validation, :pg_slice_manager
 
-    def initialize(logger:, validation:, pg_slice_manager:)
+    def initialize(logger:, approved_tables:, validation:, pg_slice_manager:)
       @logger = logger
       @validation = validation
+      @approved_tables = approved_tables
       @pg_slice_manager = pg_slice_manager
     end
 

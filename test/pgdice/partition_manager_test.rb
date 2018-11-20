@@ -4,7 +4,7 @@ require 'test_helper'
 
 class PartitionManagerTest < Minitest::Test
   def test_list_droppable_partitions_excludes_minimum
-    manager = PgDice::PartitionManager.new(PgDice.configuration,
+    manager = PgDice::PartitionManager.new(logger: logger,
                                            batch_size: 4,
                                            current_date_provider: proc { Date.parse('20181028') },
                                            partition_lister: proc { generate_tables })
@@ -28,12 +28,11 @@ class PartitionManagerTest < Minitest::Test
       tables.shift(partitions.size)
       call_count += partitions.size
     end
-    configuration = PgDice.configuration.deep_clone
-    configuration.table_dropper = dummy_dropper
-    manager = PgDice::PartitionManager.new(configuration,
-                                               batch_size: 4,
-                                               current_date_provider: proc { Date.parse('20181028') },
-                                               partition_lister: proc { tables })
+    manager = PgDice::PartitionManager.new(logger: logger,
+                                           batch_size: 4,
+                                           current_date_provider: proc { Date.parse('20181028') },
+                                           partition_lister: proc { tables },
+                                           partition_dropper: proc { dummy_dropper })
     manager.drop_old_partitions('comments')
     assert_equal 4, call_count, 'The first drop call should only purge 4 tables'
     manager.drop_old_partitions('comments')
