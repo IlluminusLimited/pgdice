@@ -4,27 +4,33 @@
 module PgDice
   # Wrapper class around database connection handlers
   class DatabaseConnection
-    include PgDice::Loggable
-    extend Forwardable
-    def_delegators :@configuration, :dry_run, :pg_connection
+    include PgDice::LogHelper
 
-    def initialize(configuration = PgDice::Configuration.new, opts = {})
-      @configuration = configuration
-      @logger = opts[:logger]
+    attr_reader :logger, :query_executor, :dry_run
+
+    def initialize(logger:, query_executor:, dry_run: false)
+      @logger = logger
+      @dry_run = dry_run
+      @query_executor = query_executor
     end
 
     def execute(query)
+      query = squish(query)
+
+      if blank?(query) || dry_run
+        logger.debug { "DatabaseConnection skipping query. Query: '#{query}'. Dry run: #{dry_run}" }
+        return PgDice::PgResponse.new
+      end
+
       logger.debug { "DatabaseConnection to execute query: #{query}" }
-      if dry_run
-        PgDicePgResponse.new
-      else
-        pg_connection.exec(query)
+      PgDice::LogHelper.log_duration('Executing query', logger) do
+        query_executor.call(query)
       end
     end
   end
 
   # Null-object pattern for PG::Result since that object isn't straightforward to initialize
-  class PgDicePgResponse
+  class PgResponse
     def values
       []
     end

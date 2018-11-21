@@ -12,7 +12,7 @@ defaults: &defaults
       DATABASE_USERNAME: pgdice
       PGDICE_LOG_TARGET: STDOUT
 
-  - image: circleci/postgres:10.4-alpine-ram
+  - image: circleci/postgres:10.6-alpine-ram
     environment:
       POSTGRES_USER: pgdice
       POSTGRES_DB: pgdice_test
@@ -42,7 +42,7 @@ jobs:
           mkdir -p /tmp/test-results
           TEST_FILES="$(circleci tests glob "test/**/*_test.rb" | circleci tests split --split-by=timings)"
 
-          bundle exec rake test
+          bundle exec rake rubocop test
           ./tmp/cc-test-reporter format-coverage -t simplecov -o tmp/coverage/codeclimate.pgdice.json tmp/coverage/pgdice/.resultset.json
 
     - store_test_results:

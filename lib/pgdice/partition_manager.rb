@@ -4,85 +4,87 @@
 module PgDice
   #  PartitionManager is a class used to fulfill high-level tasks for partitioning
   class PartitionManager
-    include PgDice::Loggable
-    extend Forwardable
-    def_delegators :@configuration, :older_than, :table_drop_batch_size
+    include PgDice::TableFinder
 
-    attr_reader :validation, :pg_slice_manager, :database_connection
+    attr_reader :logger, :batch_size, :validation, :approved_tables, :partition_adder,
+                :partition_lister, :partition_dropper, :current_date_provider
 
-    def initialize(configuration = PgDice::Configuration.new, opts = {})
-      @configuration = configuration
-      @logger = opts[:logger]
-      @validation = PgDice::Validation.new(configuration)
-      @pg_slice_manager = PgDice::PgSliceManager.new(configuration)
-      @database_connection = PgDice::DatabaseConnection.new(configuration)
+    def initialize(opts = {})
+      @logger = opts.fetch(:logger)
+      @batch_size = opts.fetch(:batch_size)
+      @validation = opts.fetch(:validation)
+      @approved_tables = opts.fetch(:approved_tables)
+      @partition_adder = opts.fetch(:partition_adder)
+      @partition_lister = opts.fetch(:partition_lister)
+      @partition_dropper = opts.fetch(:partition_dropper)
+      @current_date_provider = opts.fetch(:current_date_provider, proc { Time.now.utc.to_date })
     end
 
-    def add_new_partitions(params = {})
-      logger.info { "add_new_partitions has been called with params: #{params}" }
-
-      validation.validate_parameters(params)
-      pg_slice_manager.add_partitions(params)
+    def add_new_partitions(table_name, params = {})
+      all_params = approved_tables.smash(table_name, params)
+      logger.debug { "add_new_partitions has been called with params: #{all_params}" }
+      validation.validate_parameters(all_params)
+      partition_adder.call(all_params)
     end
 
-    def drop_old_partitions(params = {})
-      logger.info { "drop_old_partitions has been called with params: #{params}" }
+    def drop_old_partitions(table_name, params = {})
+      all_params = approved_tables.smash(table_name, params)
+      all_params[:older_than] = current_date_provider.call
+      logger.debug { "drop_old_partitions has been called with params: #{all_params}" }
 
-      validation.validate_parameters(params)
-      old_partitions = list_old_partitions(params)
-      logger.warn { "Partitions to be deleted are: #{old_partitions}" }
-
-      old_partitions.each do |old_partition|
-        @configuration.table_dropper.call(old_partition, logger)
-      end
-      old_partitions
-    end
-
-    def list_old_partitions(params = {})
-      params[:older_than] ||= older_than
-      logger.info { "Listing old partitions with params: #{params}" }
-
-      validation.validate_parameters(params)
-
-      partition_tables = fetch_partition_tables(params)
-
-      filter_partitions(partition_tables, params[:table_name], params[:older_than])
+      validation.validate_parameters(all_params)
+      drop_partitions(all_params)
     end
 
     # Grabs only tables that start with the base_table_name and end in numbers
-    def fetch_partition_tables(params = {})
-      schema = params[:schema] ||= 'public'
-      logger.info { "Fetching partition tables with params: #{params}" }
+    def list_partitions(table_name, params = {})
+      all_params = approved_tables.smash(table_name, params)
+      validation.validate_parameters(all_params)
+      partitions(all_params)
+    end
 
-      sql = build_partition_table_fetch_sql(params)
+    def list_droppable_partitions(table_name, params = {})
+      all_params = approved_tables.smash(table_name, params)
+      validation.validate_parameters(all_params)
+      droppable_partitions(all_params)
+    end
 
-      partition_tables = database_connection.execute(sql).values.flatten
-      logger.debug { "Table: #{schema}.#{params[:table_name]} has partition_tables: #{partition_tables}" }
-      partition_tables
+    def list_batched_droppable_partitions(table_name, params = {})
+      all_params = approved_tables.smash(table_name, params)
+      validation.validate_parameters(all_params)
+      droppable_tables = batched_droppable_partitions(all_params)
+      logger.debug { "Batched partitions eligible for dropping are: #{droppable_tables}" }
+      droppable_tables
     end
 
     private
 
-    def filter_partitions(partition_tables, base_table_name, partitions_older_than_time)
-      partition_tables.select do |partition_name|
-        partition_created_at_date = Date.parse(partition_name.gsub(/#{base_table_name}_/, '')).to_time
-        partition_created_at_date < partitions_older_than_time
-      end
+    def partitions(all_params)
+      logger.info { "Fetching partition tables with params: #{all_params}" }
+      partition_lister.call(all_params)
     end
 
-    def build_partition_table_fetch_sql(params = {})
-      schema = params.fetch(:schema)
-      base_table_name = params.fetch(:table_name)
-      limit = params.fetch(:limit, table_drop_batch_size)
+    def droppable_partitions(all_params)
+      older_than = current_date_provider.call
+      minimum_tables = all_params.fetch(:past)
+      period = all_params.fetch(:period)
 
-      <<~SQL
-        SELECT tablename
-        FROM pg_tables
-        WHERE schemaname = '#{schema}'
-          AND tablename ~ '^#{base_table_name}_\\d+$'
-        ORDER BY tablename
-        LIMIT #{limit}
-      SQL
+      eligible_partitions = partitions(all_params)
+
+      droppable_tables = find_droppable_partitions(eligible_partitions, older_than, minimum_tables, period)
+      logger.debug { "Partitions eligible for dropping older than: #{older_than} are: #{droppable_tables}" }
+      droppable_tables
+    end
+
+    def batched_droppable_partitions(all_params)
+      max_tables_to_drop_at_once = all_params.fetch(:batch_size, batch_size)
+      selected_partitions = droppable_partitions(all_params)
+      batched_tables(selected_partitions, max_tables_to_drop_at_once)
+    end
+
+    def drop_partitions(all_params)
+      old_partitions = batched_droppable_partitions(all_params)
+      partition_dropper.call(old_partitions)
     end
   end
 end

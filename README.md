@@ -18,8 +18,8 @@ where logging and clear exception messages are crucial.
 There are some features in this gem which allow you to drop database tables. 
 
 If you choose to use this software without a __tested and working__ backup and restore strategy in place then you 
-are a fool and will pay the price for your negligence. This software comes with no warranty 
-or any guarantees, implied or otherwise. By using this software you agree that the creator, 
+are a fool and will pay the price for your negligence. THIS SOFTWARE IS PROVIDED "AS IS",
+WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. By using this software you agree that the creator, 
 maintainers and any affiliated parties CANNOT BE HELD LIABLE FOR DATA LOSS OR LOSSES OF ANY KIND.
 
 See the [LICENSE](LICENSE) for more information.
@@ -53,13 +53,16 @@ This is an example config from a project using `Sidekiq`
 require 'pgdice'
 PgDice.configure do |config|
   # This defaults to STDOUT if you don't specify a logger
-  # Make sure your logger is initialized correctly before setting this.
-  # If you make a pgdice.rb initializer in rails, it will be run before sidekiq.rb 
-  #   which may not give you the result you want.
-  config.logger = Sidekiq.logger
+  config.logger_factory = proc { Sidekiq.logger }
   config.database_url = ENV['PGDICE_DATABASE_URL'] # postgresql://[user[:password]@][host][:port][/dbname][?param1=value1&...]
-  # Comma separated values work well for approved_tables: 'comments,posts' Or just use an array of strings
-  config.approved_tables = ENV['PGDICE_APPROVED_TABLES']&.split(',')
+ 
+  # Set a config file or build the tables manually
+  config.config_file = Rails.root.join('config', 'pgdice.yml') # If you are using rails, else provide the absolute path.
+  # and/or
+  config.approved_tables = PgDice::ApprovedTables.new(
+    PgDice::Table.new(table_name: 'comments', past: 90, future: 7, period: 'day'),
+    PgDice::Table.new(table_name: 'posts', past: 6, future: 2, period: 'month')
+  )
 end
 ```
 
@@ -69,58 +72,61 @@ end
 - `database_url` - Required: The postgres database url to connect to. 
   - This is required since `pgslice` requires a postgres `url`.
 
-- `logger` - Optional: The logger to use.
-  - Defaults to `STDOUT`.
+- `logger_factory` - Optional: A factory that will return a logger to use.
+  - Defaults to `proc { Logger.new(STDOUT) }`
 
-- `approved_tables` - Optional: The list of tables to allow modification on.
-  - If you want to manipulate database tables with this gem you're going to need to provide the 
-   table name for all of the partitions you wish to manage.
-    - Example: if you want to manage the `comments` table (partitioned or not)
-    then  the value would be `['comments']`
+- `approved_tables` - Optional: (but not really) The tables to allow modification on.
+  - If you want to manipulate database tables with this gem you're going to need to provide this data.
+    - See the [Approved Tables Configuration](#approved-tables-configuration) section for more.
 
 - `dry_run` - Optional: Boolean value to control whether changes are executed on the database.
   - You can set it to either `true` or `false`. 
     - `true` will make PgDice log out the commands but not execute them.
 
-- `older_than` - Optional: Time object used to scope the queries on droppable tables. 
-  - Defaults to 90 days ago.
-    - This is calculated when the gem is first required.
-
-- `table_drop_batch_size` - Optional: Maximum number of tables you can drop in one `drop_old_tables` call. 
+- `batch_size` - Optional: Maximum number of tables you can drop in one `drop_old_partitions` call. 
   - Defaults to 7.
 
 
 #### Advanced Configuration Parameters
 
-All of the following parameters are optional.
-
-- `additional_validators` - A list of validators to run before performing table manipulation operations.
-  - This can accept an array of `proc` or `lambda` type predicates. 
-    - Each predicate will be passed the `params` hash and a `logger`. 
-    - These predicates are called before doing things like dropping tables and adding tables. 
-
-
-- `table_dropper` - This defaults to [TableDropper](lib/pgdice/table_dropper.rb) which has a `lambda`-like interface. 
-  - An example use-case would be calling out to your backup system to confirm the table is backed up.
-    - This mechanism will be passed the `table_to_drop` and a `logger`.
+All of the following parameters are optional and honestly you probably will never need to mess with these.
 
 - `pg_connection` - This is a `PG::Connection` object used for the database queries made from `pgdice`.
   - By default it will be initialized from the `database_url` if left `nil`. 
   - Keep in mind the dependency `pgslice` will still establish its own connection using the `database_url` 
   so this feature may not be very useful if you are trying to only use one connection for this utility.
+
  
-- `database_connection` - You can supply your own [DatabaseConnection](lib/pgdice/database_connection.rb) if you like.
-  - I'm not sure why you would do this.
- 
-- `pg_slice_manager` - This is an internal wrapper around `pgslice`. [PgSliceManager](lib/pgdice/pg_slice_manager.rb)
-  - This configuration lets you provide your own if you wish. I'm not sure why you would do this.
- 
-- `partition_manager` - You can supply your own [PartitionManager](lib/pgdice/partition_manager.rb) if you like.
-  - I'm not sure why you would do this.
-  
-- `partition_helper` - You can supply your own [PartitionHelper](lib/pgdice/partition_helper.rb) if you like.
-  - I'm not sure why you would do this.
- 
+### Approved Tables Configuration
+
+In order to maintain the correct number of partitions over time you must configure a 
+[PgDice::Table](lib/pgdice/table.rb).
+
+An example configuration file has been provided at [config.yml](examples/config.yml) if you would rather
+declare your `approved_tables` in yaml.
+
+#### Alternative Approved Tables Configuration 
+
+If you want to declare your [PgDice::ApprovedTables](lib/pgdice/approved_tables.rb) in your configuration
+block instead, you can build them like so:
+
+```ruby
+require 'pgdice'
+PgDice.configure do |config|
+  config.approved_tables = PgDice::ApprovedTables.new(
+    PgDice::Table.new(table_name: 'comments', # Table name for the (un)partitioned table
+                      past: 90, # The minimum number of tables to keep before dropping older tables.
+                      future: 7, # Number of future tables to always have.
+                      period: 'day', # day, month, year
+                      column_name: 'created_at', # Whatever column you'd like to partition on.
+                      schema: 'public'), # Schema that this table belongs to.
+    PgDice::Table.new(table_name: 'posts') # Minimum configuration (90 past, 7 future, 'day' period).
+  )
+end
+```
+
+It is possible to use both the configuration block and a file if you so choose. 
+The block will take precedence over the values in the file.
  
 ### Converting existing tables to partitioned tables
 
@@ -137,21 +143,23 @@ For more information on what's going on in the background see
 
 
 ```ruby
-PgDice.partition_helper.partition_table!(table_name: 'comments', 
-                                            past: 30, 
-                                            future: 30, 
-                                            column_name: 'created_at', 
-                                            period: :day)
+PgDice.partition_helper.partition_table('comments')
 ```
 
 If you mess up (again you shouldn't use this in production). These two methods are useful for writing tests
 that work with partitions.
 
+#### Notes on partition_table
+
+- You can override values configured in the `PgDice::Table` by passing them in as a hash. 
+  - For example if you wanted to create `30` future tables instead of the configured `7` for the `comments` table
+  you could pass in `future: 30`.
+
 ```ruby
-PgDice.partition_helper.undo_partitioning!(table_name: 'comments')
+PgDice.partition_helper.undo_partitioning!('comments')
 ```
 
-#### Notes on `partition_table!`
+#### Notes on `partition_table`
 
 - In `partition_helper` there are versions of the methods that will throw exceptions (ending in `!`) and others 
 that will return a truthy value or `false` if there is a failure.
@@ -166,34 +174,28 @@ that will return a truthy value or `false` if there is a failure.
 If you have existing tables that need to periodically have more tables added you can run:
 
 ```ruby
-PgDice.partition_manager.add_new_partitions(table_name: 'comments', future: 30)
+PgDice.partition_manager.add_new_partitions('comments')
 ```
 
 ##### Notes on `add_new_partitions`
 
-- The above command would add 30 new tables and their associated indexes all based on the `period` that the
+- The above command would add `7` new tables and their associated indexes all based on the `period` that the
 partitioned table was defined with.
+ - The example `comments` table we have been using was configured to always keep `7` future partitions above.
 
 
-#### Listing old tables
+#### Listing droppable partitions
 
 Sometimes you just want to know what's out there and if there are tables ready to be dropped.
 
 To list all eligible tables for dropping you can run:
 ```ruby
-PgDice.partition_manager.list_old_partitions(table_name: 'comments', older_than: Time.now.utc - 90*24*60*60)
+PgDice.partition_manager.list_droppable_partitions('comments')
 ```
 
-If you have `active_support` you could do:
-```ruby
-PgDice.partition_manager.list_old_partitions(table_name: 'comments', older_than: 90.days.ago)
-```
+##### Notes on `list_droppable_partitions`
 
-##### Notes on `list_old_partitions`
-
-- Technically `older_than` is optional and defaults to `90 days` (see the configuration section).
-  - It is recommended that you pass it in to be explicit, but you can rely on the configuration 
-mechanism if you so choose.
+- This method uses the `past` value from the `PgDice::Table` to determine which tables are eligible for dropping.
 
 
 #### Dropping old tables
@@ -203,25 +205,16 @@ _Dropping tables is irreversible! Do this at your own risk!!_
 If you want to drop old tables (after backing them up of course) you can run:
 
 ```ruby
-PgDice.partition_manager.drop_old_partitions(table_name: 'comments', older_than: Time.now.utc - 90*24*60*60)
-```
-
-If you have `active_support` you could do:
-```ruby
-PgDice.partition_manager.drop_old_partitions(table_name: 'comments', older_than: 90.days.ago)
+PgDice.partition_manager.drop_old_partitions(table_name: 'comments')
 ```
 
 ##### Notes on `drop_old_partitions`
 
-- The above example command would drop old partitions that are older than `90` days.
-
-- Technically `older_than` is optional and defaults to `90 days` (see the configuration section).
-  - It is recommended that you pass it in to be explicit, but you can rely on the configuration 
-mechanism if you so choose.
-  - Another good reason to pass in the `older_than` parameter is if you are managing tables that
-are partiioned by different schemes or have different use-cases 
-e.g. daily vs yearly partitioned tables.
-
+- The above example command would drop partitions that exceed the configured `past` table count
+for the `PgDice::Table`. 
+  - The example `comments` table has been configured with `past: 90` tables. 
+  So if there were 100 tables older than `today` it would drop up to `batch_size` tables.
+  
 
 #### Validating everything is still working
 
@@ -230,7 +223,7 @@ ensure they are actually working correctly.
 
 To validate that your expected number of tables exist, you can run:
 ```ruby
-PgDice.validation.assert_tables(table_name: 'comments', future: 30, past: 90)
+PgDice.validation.assert_tables('comments', future: 7, past: 90)
 ```
 
 An [InsufficientTablesError](lib/pgdice.rb) will be raised if any conditions are not met.
@@ -254,6 +247,10 @@ by day.
   "postgres://#{username}:#{password}@#{host}/#{database}"
 end
 ```
+
+1. I'm seeing off-by-one errors for my `validation.assert_tables` calls?
+    - You should make sure your database is configured to use `UTC`.
+    [https://www.postgresql.org/docs/10/datatype-datetime.html](https://www.postgresql.org/docs/10/datatype-datetime.html) 
 
 ## Planned Features
 

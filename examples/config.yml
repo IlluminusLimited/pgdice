@@ -1,0 +1,13 @@
+approved_tables:
+- table_name: comments # Table name for the (un)partitioned table
+  past: 1 # The minimum number of tables to keep before dropping older tables.
+  future: 0 # Number of future tables to always have. I like to set this to 7x the period just to be safe.
+  column_name: created_at # Whatever column you'd like to partition on.
+  period: day # day, month, year
+  schema: public
+- table_name: posts
+  past: 10
+  future: 0
+  column_name: created_at
+  period: day
+  schema: public

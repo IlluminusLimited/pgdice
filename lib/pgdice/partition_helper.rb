@@ -4,49 +4,37 @@
 module PgDice
   # Helps do high-level tasks like getting tables partitioned
   class PartitionHelper
-    include PgDice::Loggable
+    attr_reader :logger, :approved_tables, :validation, :pg_slice_manager
 
-    attr_reader :pg_slice_manager, :validation_helper
-
-    def initialize(configuration = PgDice::Configuration.new, opts = {})
-      @configuration = configuration
-      @logger = opts[:logger]
-      @pg_slice_manager = PgDice::PgSliceManager.new(configuration)
-      @validation_helper = PgDice::Validation.new(configuration)
+    def initialize(logger:, approved_tables:, validation:, pg_slice_manager:)
+      @logger = logger
+      @validation = validation
+      @approved_tables = approved_tables
+      @pg_slice_manager = pg_slice_manager
     end
 
-    def partition_table!(params = {})
-      params[:column_name] ||= 'created_at'
-      params[:period] ||= :day
+    def partition_table(table_name, params = {})
+      table = approved_tables.fetch(table_name)
+      all_params = table.smash(params)
+      validation.validate_parameters(all_params)
 
-      validation_helper.validate_parameters(params)
+      logger.info { "Preparing database for table: #{table}. Using parameters: #{all_params}" }
 
-      logger.info { "Preparing database with params: #{params}" }
-
-      prep_and_fill(params)
-      swap_and_fill(params)
+      prep_and_fill(all_params)
+      swap_and_fill(all_params)
     end
 
-    def undo_partitioning!(params = {})
-      table_name = params.fetch(:table_name)
-
-      validation_helper.validate_parameters(params)
-      logger.info { "Cleaning up database with params: #{table_name}" }
+    def undo_partitioning!(table_name)
+      approved_tables.fetch(table_name)
+      logger.info { "Undoing partitioning for table: #{table_name}" }
 
       pg_slice_manager.analyze(table_name: table_name, swapped: true)
       pg_slice_manager.unswap!(table_name: table_name)
       pg_slice_manager.unprep!(table_name: table_name)
     end
 
-    def partition_table(params = {})
-      partition_table!(params)
-    rescue PgDice::PgSliceError => error
-      logger.error { "Rescued PgSliceError: #{error}" }
-      false
-    end
-
-    def undo_partitioning(params = {})
-      undo_partitioning!(params)
+    def undo_partitioning(table_name)
+      undo_partitioning!(table_name)
     rescue PgDice::PgSliceError => error
       logger.error { "Rescued PgSliceError: #{error}" }
       false

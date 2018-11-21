@@ -5,52 +5,52 @@ module PgDice
   class << self
     attr_accessor :configuration
 
-    def configure
+    def configure(validate_configuration: true)
       self.configuration ||= PgDice::Configuration.new
       yield(configuration)
+      configuration.validate! if validate_configuration
     end
   end
 
   # Configuration class which holds all configurable values
   class Configuration
-    def self.days_ago(days)
-      Time.now.utc - days * 24 * 60 * 60
-    end
-
-    VALUES = { logger: Logger.new(STDOUT),
-               database_url: nil,
-               additional_validators: [],
-               approved_tables: [],
-               older_than: PgDice::Configuration.days_ago(90),
-               dry_run: false,
-               table_drop_batch_size: 7 }.freeze
+    DEFAULT_VALUES ||= { logger_factory: proc { Logger.new(STDOUT) },
+                         database_url: nil,
+                         dry_run: false,
+                         batch_size: 7 }.freeze
 
     attr_writer :logger,
+                :logger_factory,
                 :database_url,
-                :additional_validators,
                 :approved_tables,
-                :older_than,
                 :dry_run,
-                :table_drop_batch_size,
-                :database_connection,
-                :pg_connection
+                :batch_size,
+                :pg_connection,
+                :config_file_loader
 
-    attr_accessor :table_dropper,
-                  :pg_slice_manager,
-                  :partition_manager,
-                  :partition_helper
+    attr_accessor :config_file
 
-    def initialize(existing_configuration = nil)
-      VALUES.each do |key, value|
-        initialize_value(key, value, existing_configuration)
+    def initialize(existing_config = nil)
+      DEFAULT_VALUES.each do |key, value|
+        initialize_value(key, value, existing_config)
       end
+      @approved_tables = PgDice::ApprovedTables.new(existing_config&.approved_tables(eager_load: true)&.tables)
       initialize_objects
     end
 
-    def logger
-      return @logger unless @logger.nil?
+    def validate!
+      logger_factory
+      database_url
+      database_connection
+      pg_connection
+      batch_size
+      approved_tables
+    end
 
-      raise PgDice::InvalidConfigurationError, 'logger must be present!'
+    def logger_factory
+      return @logger_factory if @logger_factory.respond_to?(:call)
+
+      raise PgDice::InvalidConfigurationError, 'logger_factory must be present!'
     end
 
     def database_url
@@ -59,40 +59,18 @@ module PgDice
       raise PgDice::InvalidConfigurationError, 'database_url must be present!'
     end
 
-    def database_connection
-      return @database_connection unless @database_connection.nil?
+    def approved_tables(eager_load: false)
+      return @approved_tables if eager_load
+      unless @approved_tables.respond_to?(:empty?)
+        raise PgDice::InvalidConfigurationError, 'approved_tables must be an instance of PgDice::ApprovedTables!'
+      end
 
-      raise PgDice::InvalidConfigurationError, 'database_connection must be present!'
-    end
+      if !config_file_loader.file_loaded? && config_file.present?
+        config_file_loader.load_file
+        @approved_tables
+      end
 
-    def additional_validators
-      return @additional_validators if @additional_validators.is_a?(Array)
-
-      raise PgDice::InvalidConfigurationError, 'additional_validators must be an Array!'
-    end
-
-    def approved_tables
-      return @approved_tables if @approved_tables.is_a?(Array)
-
-      raise PgDice::InvalidConfigurationError, 'approved_tables must be an Array of strings!'
-    end
-
-    def older_than
-      return @older_than if @older_than.is_a?(Time)
-
-      raise PgDice::InvalidConfigurationError, 'older_than must be a Time!'
-    end
-
-    def dry_run
-      return @dry_run if [true, false].include?(@dry_run)
-
-      raise PgDice::InvalidConfigurationError, 'dry_run must be either true or false!'
-    end
-
-    def table_drop_batch_size
-      return @table_drop_batch_size.to_i if @table_drop_batch_size.to_i >= 0
-
-      raise PgDice::InvalidConfigurationError, 'table_drop_batch_size must be a non-negative Integer!'
+      @approved_tables
     end
 
     # Lazily initialized
@@ -101,6 +79,42 @@ module PgDice
       return @pg_connection if @pg_connection.respond_to?(:exec)
 
       raise PgDice::InvalidConfigurationError, 'pg_connection must be present!'
+    end
+
+    def batch_size
+      return @batch_size.to_i if @batch_size.to_i >= 0
+
+      raise PgDice::InvalidConfigurationError, 'batch_size must be a non-negative Integer!'
+    end
+
+    def dry_run
+      return @dry_run if [true, false].include?(@dry_run)
+
+      raise PgDice::InvalidConfigurationError, 'dry_run must be either true or false!'
+    end
+
+    def config_file_loader
+      @config_file_loader ||= ConfigurationFileLoader.new(self)
+    end
+
+    def logger
+      @logger ||= logger_factory.call
+    end
+
+    def partition_manager
+      @partition_manager_factory.call
+    end
+
+    def partition_helper
+      @partition_helper_factory.call
+    end
+
+    def validation
+      @validation_factory.call
+    end
+
+    def database_connection
+      @database_connection_factory.call
     end
 
     def deep_clone
@@ -114,9 +128,10 @@ module PgDice
     end
 
     def initialize_objects
-      @database_connection = PgDice::DatabaseConnection.new(self)
-      @partition_manager = PgDice::PartitionManager.new(self)
-      @table_dropper = PgDice::TableDropper.new(self)
+      @partition_manager_factory = PgDice::PartitionManagerFactory.new(self)
+      @partition_helper_factory = PgDice::PartitionHelperFactory.new(self)
+      @validation_factory = PgDice::ValidationFactory.new(self)
+      @database_connection_factory = PgDice::DatabaseConnectionFactory.new(self)
     end
   end
 end
