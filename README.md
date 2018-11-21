@@ -75,9 +75,6 @@ end
 - `logger_factory` - Optional: A factory that will return a logger to use.
   - Defaults to `proc { Logger.new(STDOUT) }`
 
-- `logger` - Optional: The logger to use. 
-  - If unspecified will be lazily initialized via `logger_factory`
-
 - `approved_tables` - Optional: (but not really) The tables to allow modification on.
   - If you want to manipulate database tables with this gem you're going to need to provide this data.
     - See the [Approved Tables Configuration](#approved-tables-configuration) section for more.
@@ -107,6 +104,8 @@ In order to maintain the correct number of partitions over time you must configu
 
 An example configuration file has been provided at [config.yml](examples/config.yml) if you would rather
 declare your `approved_tables` in yaml.
+
+#### Alternative Approved Tables Configuration 
 
 If you want to declare your [PgDice::ApprovedTables](lib/pgdice/approved_tables.rb) in your configuration
 block instead, you can build them like so:
