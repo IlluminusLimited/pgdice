@@ -217,7 +217,7 @@ _Dropping tables is irreversible! Do this at your own risk!!_
 If you want to drop old tables (after backing them up of course) you can run:
 
 ```ruby
-PgDice.drop_old_partitions(table_name: 'comments')
+PgDice.drop_old_partitions('comments')
 ```
 
 #### Notes on `drop_old_partitions`
