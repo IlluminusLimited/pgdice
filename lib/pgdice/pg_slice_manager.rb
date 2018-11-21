@@ -89,7 +89,7 @@ module PgDice
     def run_pgslice(argument_string)
       parameters = build_pg_slice_command(argument_string)
 
-      stdout, stderr, status = Open3.capture3(parameters)
+      stdout, stderr, status = run_and_log(parameters)
       log_result(stdout, stderr, status)
 
       if status.exitstatus.to_i.positive?
@@ -114,6 +114,12 @@ module PgDice
       logger.debug { "pgslice STDERR: #{stderr}" } if stderr
       logger.debug { "pgslice STDOUT: #{stdout}" } if stdout
       logger.debug { "pgslice exit status: #{status.exitstatus}" } if status
+    end
+
+    def run_and_log(parameters)
+      PgDice::LogHelper.log_duration('PgSlice', logger) do
+        return Open3.capture3(parameters)
+      end
     end
   end
 end
