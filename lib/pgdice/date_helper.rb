@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module PgDice
+  # Helper used to manipulate date objects
   module DateHelper
     def pad_date(numbers)
       return numbers if numbers.size == 8
