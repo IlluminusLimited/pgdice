@@ -7,8 +7,7 @@ module PgDice
 
     attr_reader :logger, :approved_tables
 
-    def initialize(logger:, partition_lister:, period_fetcher:, approved_tables:,
-                   current_date_provider: proc { Time.now.utc.to_date })
+    def initialize(logger:, partition_lister:, period_fetcher:, approved_tables:, current_date_provider:)
       @logger = logger
       @approved_tables = approved_tables
       @partition_lister = partition_lister
@@ -16,15 +15,15 @@ module PgDice
       @current_date_provider = current_date_provider
     end
 
-    def assert_tables(table_name, params)
-      table, period, all_params = filter_parameters(table_name, params)
+    def assert_tables(table_name, opts = nil)
+      table, period, all_params, params = filter_parameters(approved_tables.fetch(table_name), opts)
       validate_parameters(all_params)
       logger.debug { "Running asserts on table: #{table} with params: #{all_params}" }
 
       partitions = @partition_lister.call(all_params)
 
-      assert_future_tables(table_name, partitions, period, params[:future]) if params[:future]
-      assert_past_tables(table_name, partitions, period, params[:past]) if params[:past]
+      assert_future_tables(table_name, partitions, period, params[:future]) if params && params[:future]
+      assert_past_tables(table_name, partitions, period, params[:past]) if params && params[:past]
       true
     end
 
@@ -37,15 +36,18 @@ module PgDice
 
     private
 
-    def filter_parameters(table_name, params)
-      unless params[:future] || params[:past]
-        raise ArgumentError, 'You must provide either a future or past number of tables to assert on.'
+    def filter_parameters(table, params)
+      if params.nil?
+        params = {}
+        params[:future] = table.future
+        params[:past] = table.past
+        period = table.period
+      else
+        period = resolve_period(schema: table.schema, table_name: table.name, **params)
       end
-
-      table = approved_tables.fetch(table_name)
-      period = resolve_period(schema: table.schema, table_name: table_name, **params)
       all_params = table.smash(params.merge!(period: period))
-      [table, period, all_params]
+
+      [table, period, all_params, params]
     end
 
     def assert_future_tables(table_name, partitions, period, expected)

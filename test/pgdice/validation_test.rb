@@ -29,23 +29,21 @@ class ValidationTest < Minitest::Test
     partition_helper.undo_partitioning(table_name)
   end
 
-  def test_assert_tables_works_with_year_tables
-    table_name = 'posts'
-    PgDice.partition_helper.partition_table(table_name, future: 1, past: 0, period: 'year')
+  def test_assert_tables_throws_on_unpartitioned
+    validation = PgDice::ValidationFactory.new(PgDice.configuration,
+                                               partition_lister_factory: proc { proc { generate_tables } },
+                                               current_date_provider: proc { Date.parse('20181021') }).call
 
-    @validation.assert_tables(table_name, future: 1, past: 0)
-
-    assert_future_tables_error { @validation.assert_tables(table_name, future: 2) }
-
-    assert_past_tables_error { @validation.assert_tables(table_name, past: 1) }
-  ensure
-    partition_helper.undo_partitioning('posts')
+    assert_raises(PgDice::TableNotPartitionedError) do
+      assert validation.assert_tables(table_name, past: 1)
+    end
   end
 
-  def test_assert_tables_requires_past_or_future
-    assert_raises(ArgumentError) do
-      @validation.assert_tables(table_name, {})
-    end
+  def test_assert_tables_uses_table_to_assert
+    validation = PgDice::ValidationFactory.new(PgDice.configuration,
+                                               partition_lister_factory: proc { proc { generate_tables } },
+                                               current_date_provider: proc { Date.parse('20181021') }).call
+    assert validation.assert_tables(table_name)
   end
 
   def test_throws_on_unapproved_table
@@ -53,5 +51,11 @@ class ValidationTest < Minitest::Test
 
     # Check errors can be caught at top level
     assert_raises(PgDice::Error) { @validation.validate_parameters(table_name: 'bob') }
+  end
+
+  private
+
+  def generate_tables
+    %w[comments_20181020 comments_20181021]
   end
 end
