@@ -37,4 +37,10 @@ class TableFinderTest < Minitest::Test
   def test_truncate_date_year
     assert_equal Date.parse('20180101'), truncate_date(Date.parse('20181022'), 'year')
   end
+
+  def test_truncate_date_invalid_date
+    assert_raises(ArgumentError) do
+      truncate_date(nil, 'bad_period')
+    end
+  end
 end
