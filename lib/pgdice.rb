@@ -15,6 +15,9 @@ require 'pgdice/table'
 require 'pgdice/date_helper'
 require 'pgdice/table_finder'
 
+require 'pgdice/period_fetcher'
+require 'pgdice/period_fetcher_factory'
+
 require 'pgdice/validation'
 require 'pgdice/validation_factory'
 

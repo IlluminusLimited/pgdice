@@ -5,13 +5,13 @@ module PgDice
   class Validation
     include PgDice::TableFinder
 
-    attr_reader :logger, :database_connection, :approved_tables
+    attr_reader :logger, :approved_tables
 
-    def initialize(logger:, partition_lister:, database_connection:, approved_tables:, current_date_provider: proc { Time.now.utc.to_date })
+    def initialize(logger:, partition_lister:, period_fetcher:, approved_tables:, current_date_provider: proc { Time.now.utc.to_date })
       @logger = logger
-      @database_connection = database_connection
       @approved_tables = approved_tables
       @partition_lister = partition_lister
+      @period_fetcher = period_fetcher
       @current_date_provider = current_date_provider
     end
 
@@ -21,11 +21,12 @@ module PgDice
       end
 
       table = approved_tables.fetch(table_name)
-      period = resolve_period(table_name: table_name, **params)
+      period = resolve_period(schema: table.schema, table_name: table_name, **params)
 
       all_params = table.smash(params.merge!(period: period))
       validate_parameters(all_params)
       logger.debug { "Running asserts on table: #{table} with params: #{all_params}" }
+
       partitions = @partition_lister.call(all_params)
 
       assert_future_tables(table_name, partitions, period, params[:future]) if params[:future]
@@ -62,7 +63,7 @@ module PgDice
 
     def resolve_period(params)
       validate_period(params) if params[:period]
-      period = fetch_period_from_table_comment(params.fetch(:table_name))
+      period = @period_fetcher.call(params)
 
       # If the user doesn't supply a period and we fail to find one on the table then it's a pretty good bet
       # this table is not partitioned at all.
@@ -92,25 +93,6 @@ module PgDice
       end
 
       params[:period].to_sym
-    end
-
-    def build_table_comment_sql(table_name, schema)
-      "SELECT obj_description('#{schema}.#{table_name}'::REGCLASS) AS comment"
-    end
-
-    def fetch_period_from_table_comment(table_name)
-      sql = build_table_comment_sql(table_name, 'public')
-      values = database_connection.execute(sql).values.flatten.compact
-      convert_comment_to_hash(values.first)[:period]
-    end
-
-    def convert_comment_to_hash(comment)
-      return {} unless comment
-
-      comment.split(',').reduce({}) do |hash, key_value_pair|
-        key, value = key_value_pair.split(':')
-        hash.merge(key.to_sym => value)
-      end
     end
   end
 end

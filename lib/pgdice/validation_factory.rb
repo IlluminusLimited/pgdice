@@ -6,12 +6,13 @@ module PgDice
     def initialize(configuration, opts = {})
       @configuration = configuration
       @partition_lister_factory = opts[:partition_lister_factory] ||= PgDice::PartitionListerFactory.new(@configuration)
+      @period_fetcher_factory = opts[:period_fetcher_factory] ||= PgDice::PeriodFetcherFactory.new(@configuration)
     end
 
     def call
       PgDice::Validation.new(logger: @configuration.logger,
-                             database_connection: @configuration.database_connection,
                              partition_lister: @partition_lister_factory.call,
+                             period_fetcher: @period_fetcher_factory.call,
                              approved_tables: @configuration.approved_tables)
     end
   end
