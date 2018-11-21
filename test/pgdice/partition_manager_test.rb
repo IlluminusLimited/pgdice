@@ -53,6 +53,14 @@ class PartitionManagerTest < Minitest::Test
     end
   end
 
+  def test_list_partitions
+    assert_equal generate_tables, @partition_manager.list_partitions('comments')
+  end
+
+  def test_list_batched_droppable_partitions
+    assert_equal generate_tables.first(4), @partition_manager.list_batched_droppable_partitions('comments')
+  end
+
   private
 
   def generate_tables
