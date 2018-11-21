@@ -26,7 +26,7 @@ module PgDice
         FROM pg_tables
         WHERE schemaname = '#{schema}'
           AND tablename ~ '^#{base_table_name}_\\d+$'
-        ORDER BY tablename
+        ORDER BY tablename;
       SQL
     end
   end

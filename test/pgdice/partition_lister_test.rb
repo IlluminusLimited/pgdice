@@ -3,6 +3,8 @@
 require 'test_helper'
 
 class PartitionListerTest < Minitest::Test
+  include PgDice::LogHelper
+
   def test_generate_list_sql_works
     dropper = PgDice::PartitionLister.new(query_executor: lambda do |sql|
       assert_equal expected_sql, squish(sql)
@@ -19,7 +21,7 @@ class PartitionListerTest < Minitest::Test
       FROM pg_tables
       WHERE schemaname = 'public'
         AND tablename ~ '^comments_\\d+$'
-      ORDER BY tablename
+      ORDER BY tablename;
     SQL
     squish(expected)
   end

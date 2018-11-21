@@ -4,6 +4,8 @@
 module PgDice
   # PgSliceManager is a wrapper around PgSlice
   class PgSliceManager
+    include PgDice::LogHelper
+
     attr_reader :logger, :database_url, :dry_run
 
     def initialize(logger:, database_url:, dry_run: false)
@@ -90,11 +92,10 @@ module PgDice
       parameters = build_pg_slice_command(argument_string)
 
       stdout, stderr, status = run_and_log(parameters)
-      log_result(stdout, stderr, status)
 
-      if status.exitstatus.to_i.positive?
+      if status.to_i.positive?
         raise PgDice::PgSliceError,
-              "pgslice with arguments: '#{argument_string}' failed with status: '#{status.exitstatus}' "\
+              "pgslice with arguments: '#{argument_string}' failed with status: '#{status}' "\
                  "STDOUT: '#{stdout}' STDERR: '#{stderr}'"
       end
       true
@@ -111,14 +112,18 @@ module PgDice
     end
 
     def log_result(stdout, stderr, status)
-      logger.debug { "pgslice STDERR: #{stderr}" } if stderr
-      logger.debug { "pgslice STDOUT: #{stdout}" } if stdout
-      logger.debug { "pgslice exit status: #{status.exitstatus}" } if status
+      logger.debug { "pgslice STDERR: #{stderr}" } unless blank?(stderr)
+      logger.debug { "pgslice STDOUT: #{stdout}" } unless blank?(stdout)
+      logger.debug { "pgslice exit status: #{status}" } unless blank?(status) || status.to_i.zero?
     end
 
     def run_and_log(parameters)
       PgDice::LogHelper.log_duration('PgSlice', logger) do
-        return Open3.capture3(parameters)
+        results = Open3.capture3(parameters)
+        stdout, stderr = results.first(2).map { |output| squish(output.to_s) }
+        status = results[2].exitstatus.to_s
+        log_result(stdout, stderr, status)
+        [stdout, stderr, status]
       end
     end
   end

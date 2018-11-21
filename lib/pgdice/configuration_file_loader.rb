@@ -3,6 +3,7 @@
 module PgDice
   #  ConfigurationFileLoader is a class used to load the PgDice configuration file
   class ConfigurationFileLoader
+    include PgDice::LogHelper
     extend Forwardable
 
     attr_reader :config
@@ -42,7 +43,7 @@ module PgDice
     private
 
     def validate_file(config_file)
-      if config_file.nil?
+      if blank?(config_file)
         raise PgDice::InvalidConfigurationError,
               'Cannot read in nil configuration file! You must set config_file if you leave approved_tables nil!'
       end

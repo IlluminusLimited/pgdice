@@ -4,6 +4,8 @@
 module PgDice
   # Wrapper class around database connection handlers
   class DatabaseConnection
+    include PgDice::LogHelper
+
     attr_reader :logger, :query_executor, :dry_run
 
     def initialize(logger:, query_executor:, dry_run: false)
@@ -13,6 +15,7 @@ module PgDice
     end
 
     def execute(query)
+      query = squish(query)
       if dry_run
         logger.debug { "DatabaseConnection skipping query since dry_run is \"true.\" Query: #{query}" }
         return PgDice::PgResponse.new
@@ -20,7 +23,7 @@ module PgDice
 
       logger.debug { "DatabaseConnection to execute query: #{query}" }
       PgDice::LogHelper.log_duration('Executing query', logger) do
-        return query_executor.call(query)
+        query_executor.call(query)
       end
     end
   end

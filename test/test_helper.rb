@@ -116,9 +116,5 @@ module Minitest
     def yesterday
       today - 1 * 24 * 60 * 60
     end
-
-    def squish(string)
-      string.gsub(/\s+/, ' ')
-    end
   end
 end

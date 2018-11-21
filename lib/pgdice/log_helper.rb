@@ -3,6 +3,14 @@
 module PgDice
   # LogHelper provides a convenient wrapper block to log out the duration of an operation
   module LogHelper
+    def blank?(string)
+      string.nil? || string.empty?
+    end
+
+    def squish(string)
+      string.gsub(/\s+/, ' ')
+    end
+
     class << self
       # If you want to pass the the result of your block into the message you can use '{}' and it will be
       # substituted with the result of your block.
@@ -14,6 +22,7 @@ module PgDice
 
         formatted_message = format_message(time_end, time_start, message, result)
         logger.public_send(options[:log_level] || :debug) { formatted_message }
+        result
       end
 
       private
