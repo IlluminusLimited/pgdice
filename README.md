@@ -259,7 +259,7 @@ per our configuration above.
 end
 ```
 
-1. I'm seeing off-by-one errors for my `validation.assert_tables` calls?
+1. I'm seeing off-by-one errors for my `assert_tables` calls?
     - You should make sure your database is configured to use `UTC`.
     [https://www.postgresql.org/docs/10/datatype-datetime.html](https://www.postgresql.org/docs/10/datatype-datetime.html) 
 
