@@ -80,11 +80,13 @@ end
     - See the [Approved Tables Configuration](#approved-tables-configuration) section for more.
 
 - `dry_run` - Optional: Boolean value to control whether changes are executed on the database.
-  - You can set it to either `true` or `false`. 
+  - Defaults to `false`
     - `true` will make PgDice log out the commands but not execute them.
 
 - `batch_size` - Optional: Maximum number of tables you can drop in one `drop_old_partitions` call. 
   - Defaults to 7.
+  - Keep in mind the size of your tables, drop operations are done in one command. Large tables
+  will take longer to drop per table and could time out if there is activity on the parent table.
 
 
 #### Advanced Configuration Parameters
