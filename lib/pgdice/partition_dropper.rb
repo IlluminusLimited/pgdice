@@ -23,6 +23,8 @@ module PgDice
     private
 
     def generate_drop_sql(old_partitions)
+      return if old_partitions.size.zero?
+
       sql_query = old_partitions.reduce("BEGIN;\n") do |sql, table_name|
         sql + "DROP TABLE IF EXISTS #{table_name} CASCADE;\n"
       end

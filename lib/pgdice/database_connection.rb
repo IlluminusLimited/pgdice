@@ -16,8 +16,9 @@ module PgDice
 
     def execute(query)
       query = squish(query)
-      if dry_run
-        logger.debug { "DatabaseConnection skipping query since dry_run is \"true.\" Query: #{query}" }
+
+      if blank?(query) || dry_run
+        logger.debug { "DatabaseConnection skipping query. Query: '#{query}'. Dry run: #{dry_run}" }
         return PgDice::PgResponse.new
       end
 

@@ -8,6 +8,7 @@ module PgDice
     end
 
     def squish(string)
+      string ||= ''
       string.gsub(/\s+/, ' ')
     end
 
