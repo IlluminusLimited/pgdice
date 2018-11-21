@@ -54,6 +54,9 @@ require 'pgdice'
 PgDice.configure do |config|
   # This defaults to STDOUT if you don't specify a logger
   config.logger_factory = proc { Sidekiq.logger }
+  
+  # database_url *must be set*
+  # Rails users: see FAQ for method on how to generate this from your Rails config. 
   config.database_url = ENV['PGDICE_DATABASE_URL'] # postgresql://[user[:password]@][host][:port][/dbname][?param1=value1&...]
  
   # Set a config file or build the tables manually
@@ -69,8 +72,9 @@ end
 
 ### Configuration Parameters
 
-- `database_url` - Required: The postgres database url to connect to. 
+- `database_url` - **Required**: The postgres database url to connect to. 
   - This is required since `pgslice` requires a postgres `url`.
+  - `PgDice` will throw an error if this value is not a valid postgres url.
 
 - `logger_factory` - Optional: A factory that will return a logger to use.
   - Defaults to `proc { Logger.new(STDOUT) }`
