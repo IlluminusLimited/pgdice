@@ -94,17 +94,8 @@ module PgDice
       params[:period].to_sym
     end
 
-    def build_assert_sql(table_name, table_count, period, direction)
-      add_or_subtract = { future: '+', past: '-' }.fetch(direction, '-')
-      <<~SQL
-        SELECT 1
-        FROM pg_catalog.pg_class pg_class
-        INNER JOIN pg_catalog.pg_namespace pg_namespace ON pg_namespace.oid = pg_class.relnamespace
-        WHERE pg_class.relkind = 'r'
-          AND pg_namespace.nspname = 'public'
-          AND pg_class.relname = '#{table_name}_' || to_char(NOW()
-            #{add_or_subtract} INTERVAL '#{table_count} #{period}', '#{SUPPORTED_PERIODS[period.to_s]}')
-      SQL
+    def build_table_comment_sql(table_name, schema)
+      "SELECT obj_description('#{schema}.#{table_name}'::REGCLASS) AS comment"
     end
 
     def fetch_period_from_table_comment(table_name)
@@ -116,16 +107,10 @@ module PgDice
     def convert_comment_to_hash(comment)
       return {} unless comment
 
-      partition_template = {}
-      comment.split(',').each do |key_value_pair|
+      comment.split(',').reduce({}) do |hash, key_value_pair|
         key, value = key_value_pair.split(':')
-        partition_template[key.to_sym] = value
+        hash.merge(key.to_sym => value)
       end
-      partition_template
-    end
-
-    def build_table_comment_sql(table_name, schema)
-      "SELECT obj_description('#{schema}.#{table_name}'::REGCLASS) AS comment"
     end
   end
 end
