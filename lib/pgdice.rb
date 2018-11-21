@@ -11,6 +11,7 @@ require 'pgdice/version'
 require 'pgdice/error'
 
 require 'pgdice/table'
+require 'pgdice/log_helper'
 
 require 'pgdice/date_helper'
 require 'pgdice/table_finder'

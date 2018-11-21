@@ -19,7 +19,9 @@ module PgDice
       end
 
       logger.debug { "DatabaseConnection to execute query: #{query}" }
-      query_executor.call(query)
+      PgDice::LogHelper.log_duration('Executing query', logger) do
+        return query_executor.call(query)
+      end
     end
   end
 
