@@ -150,7 +150,7 @@ For more information on what's going on in the background see
 
 
 ```ruby
-PgDice.partition_helper.partition_table('comments')
+PgDice.partition_table('comments')
 ```
 
 
@@ -164,7 +164,7 @@ PgDice.partition_helper.partition_table('comments')
 If you mess up, again you shouldn't use this in production, you can call:
  
 ```ruby
-PgDice.partition_helper.undo_partitioning!('comments')
+PgDice.undo_partitioning!('comments')
 ```
 
 This method will revert the changes made by partitioning a table. Don't rely on this 
@@ -178,7 +178,7 @@ in production if you mess up; you need to test everything thoroughly.
 If you have existing tables that need to periodically have more tables added you can run:
 
 ```ruby
-PgDice.partition_manager.add_new_partitions('comments')
+PgDice.add_new_partitions('comments')
 ```
 
 #### Notes on `add_new_partitions`
@@ -194,12 +194,12 @@ Sometimes you just want to know what's out there and if there are tables ready t
 
 To list all eligible tables for dropping you can run:
 ```ruby
-PgDice.partition_manager.list_droppable_partitions('comments')
+PgDice.list_droppable_partitions('comments')
 ```
 
 If you want to know _exactly_ which partitions will be dropped you can call:
 ```ruby
-PgDice.partition_manager.list_droppable_partitions_by_batch_size('comments')
+PgDice.list_droppable_partitions_by_batch_size('comments')
 ```
 
 This method will show partitions that are within the configured `batch_size`.
@@ -217,7 +217,7 @@ _Dropping tables is irreversible! Do this at your own risk!!_
 If you want to drop old tables (after backing them up of course) you can run:
 
 ```ruby
-PgDice.partition_manager.drop_old_partitions(table_name: 'comments')
+PgDice.drop_old_partitions(table_name: 'comments')
 ```
 
 #### Notes on `drop_old_partitions`
@@ -235,7 +235,7 @@ ensure they are actually working correctly.
 
 To validate that your expected number of tables exist, you can run:
 ```ruby
-PgDice.validation.assert_tables('comments')
+PgDice.assert_tables('comments')
 ```
 
 An [InsufficientTablesError](lib/pgdice.rb) will be raised if any conditions are not met.
