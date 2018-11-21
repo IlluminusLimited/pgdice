@@ -4,6 +4,7 @@ require 'test_helper'
 
 class TableFinderTest < Minitest::Test
   include PgDice::TableFinder
+
   def test_find_droppable_partitions
     results = find_droppable_partitions(generate_tables, Date.parse('20181022'), 1)
     assert_equal ['comments_20181020'], results
@@ -37,6 +38,27 @@ class TableFinderTest < Minitest::Test
   def test_batched_tables_large_batch_size
     results = batched_tables(generate_tables, 10)
     assert_equal generate_tables, results
+  end
+
+  def test_safe_date_builder_invalid_date
+    assert_raises(ArgumentError) do
+      safe_date_builder('comments_201')
+    end
+  end
+
+  def test_safe_date_builder_days
+    table_name = 'comments_20181022'
+    assert_equal Date.parse('20181022'), safe_date_builder(table_name)
+  end
+
+  def test_safe_date_builder_months
+    table_name = 'comments_201810'
+    assert_equal Date.parse('20181001'), safe_date_builder(table_name)
+  end
+
+  def test_safe_date_builder_years
+    table_name = 'comments_2018'
+    assert_equal Date.parse('20180101'), safe_date_builder(table_name)
   end
 
   private

@@ -3,13 +3,16 @@
 module PgDice
   # Collection of utilities that provide ways for users to ensure things are working properly
   class Validation
+    include PgDice::TableFinder
+
     attr_reader :logger, :database_connection, :approved_tables
 
-    def initialize(logger:, partition_lister:, database_connection:, approved_tables:)
+    def initialize(logger:, partition_lister:, database_connection:, approved_tables:, current_date_provider: proc { Time.now.utc.to_date })
       @logger = logger
       @database_connection = database_connection
       @approved_tables = approved_tables
       @partition_lister = partition_lister
+      @current_date_provider = current_date_provider
     end
 
     def assert_tables(table_name, params)
@@ -24,7 +27,20 @@ module PgDice
       validate_parameters(all_params)
       logger.debug { "Running asserts on table: #{table} with params: #{all_params}" }
       partitions = @partition_lister.call(all_params)
-      run_asserts(table.name, period, params)
+
+      if params[:future]
+        newer_tables = tables_newer_than(partitions, @current_date_provider.call).size
+        raise PgDice::InsufficientFutureTablesError.new(table_name, params[:future], period) if newer_tables < params[:future]
+      end
+
+      if params[:past]
+        older_tables = tables_older_than(partitions, @current_date_provider.call).size
+        if older_tables < params[:past]
+          raise PgDice::InsufficientPastTablesError.new(table_name, "Expected: #{params[:past]} but found #{older_tables} having period of: #{period}.")
+        end
+      end
+
+      # run_asserts(table.name, period, params)
     end
 
     def validate_parameters(params)

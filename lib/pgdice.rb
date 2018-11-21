@@ -7,27 +7,37 @@ require 'open3'
 require 'logger'
 require 'pgslice'
 require 'forwardable'
-require 'pgdice/error'
-require 'pgdice/table'
 require 'pgdice/version'
-require 'pgdice/loggable'
-require 'pgdice/validation'
+require 'pgdice/error'
+
+require 'pgdice/table'
+
 require 'pgdice/table_finder'
-require 'pgdice/configuration'
-require 'pgdice/approved_tables'
-require 'pgdice/partition_lister'
-require 'pgdice/pg_slice_manager'
-require 'pgdice/partition_helper'
-require 'pgdice/partition_manager'
-require 'pgdice/partition_dropper'
+
+require 'pgdice/validation'
 require 'pgdice/validation_factory'
-require 'pgdice/database_connection'
-require 'pgdice/partition_lister_factory'
-require 'pgdice/pg_slice_manager_factory'
-require 'pgdice/partition_helper_factory'
+
+require 'pgdice/configuration'
 require 'pgdice/configuration_file_loader'
+
+require 'pgdice/approved_tables'
+
+require 'pgdice/partition_lister'
+require 'pgdice/partition_lister_factory'
+
+require 'pgdice/pg_slice_manager'
+require 'pgdice/pg_slice_manager_factory'
+
+require 'pgdice/partition_helper'
+require 'pgdice/partition_helper_factory'
+
+require 'pgdice/partition_manager'
 require 'pgdice/partition_manager_factory'
+
+require 'pgdice/partition_dropper'
 require 'pgdice/partition_dropper_factory'
+
+require 'pgdice/database_connection'
 require 'pgdice/database_connection_factory'
 
 # This is a stupid comment
