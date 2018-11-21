@@ -49,7 +49,7 @@ module PgDice
       droppable_partitions(all_params)
     end
 
-    def list_batched_droppable_partitions(table_name, params = {})
+    def list_droppable_partitions_by_batch_size(table_name, params = {})
       all_params = approved_tables.smash(table_name, params)
       validation.validate_parameters(all_params)
       droppable_tables = batched_droppable_partitions(all_params)

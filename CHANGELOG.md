@@ -2,13 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [v0.2.0] : 2018-09-17
-### Changelog added
 
-### Added
-- Support for overriding configuration parameters. Currently only the `:logger` option is supported.
-    - [DatabaseConnection](lib/pgdice/database_connection.rb) now accepts an opts hash
-    - [PartitionHelper](lib/pgdice/partition_helper.rb) now accepts an opts hash
-    - [PartitionManager](lib/pgdice/partition_manager.rb) now accepts an opts hash
-    - [PgSliceManager](lib/pgdice/pg_slice_manager.rb) now accepts an opts hash
-    - [Validation](lib/pgdice/validation.rb) now accepts an opts hash
+## [v0.2.1] : 2018-10-21
+### Changes
+  - Renamed `PartitionManager.list_batched_droppable_partitions` to
+  `PartitionManager.list_droppable_partitions_by_batch_size`
+  - Readme updated
+  
+## [v0.2.0] : 2018-10-21
+ - Changelog added
