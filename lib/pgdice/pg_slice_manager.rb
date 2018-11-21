@@ -112,9 +112,9 @@ module PgDice
     end
 
     def log_result(stdout, stderr, status)
-      logger.debug { "pgslice STDERR: #{stderr}" } unless blank?(stderr)
-      logger.debug { "pgslice STDOUT: #{stdout}" } unless blank?(stdout)
-      logger.debug { "pgslice exit status: #{status}" } unless blank?(status) || status.to_i.zero?
+      logger.debug "pgslice STDERR: #{stderr}" unless blank?(stderr)
+      logger.debug "pgslice STDOUT: #{stdout}" unless blank?(stdout)
+      logger.debug "pgslice exit status: #{status}" unless blank?(status) || status.to_i.zero?
     end
 
     def run_and_log(parameters)
