@@ -143,13 +143,13 @@ For more information on what's going on in the background see
 
 
 ```ruby
-PgDice.partition_helper.partition_table!('comments')
+PgDice.partition_helper.partition_table('comments')
 ```
 
 If you mess up (again you shouldn't use this in production). These two methods are useful for writing tests
 that work with partitions.
 
-#### Notes on partition_table!
+#### Notes on partition_table
 
 - You can override values configured in the `PgDice::Table` by passing them in as a hash. 
   - For example if you wanted to create `30` future tables instead of the configured `7` for the `comments` table
@@ -159,7 +159,7 @@ that work with partitions.
 PgDice.partition_helper.undo_partitioning!('comments')
 ```
 
-#### Notes on `partition_table!`
+#### Notes on `partition_table`
 
 - In `partition_helper` there are versions of the methods that will throw exceptions (ending in `!`) and others 
 that will return a truthy value or `false` if there is a failure.

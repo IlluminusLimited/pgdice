@@ -13,7 +13,7 @@ module PgDice
       @pg_slice_manager = pg_slice_manager
     end
 
-    def partition_table!(table_name, params = {})
+    def partition_table(table_name, params = {})
       table = approved_tables.fetch(table_name)
       all_params = table.smash(params)
       validation.validate_parameters(all_params)
@@ -31,13 +31,6 @@ module PgDice
       pg_slice_manager.analyze(table_name: table_name, swapped: true)
       pg_slice_manager.unswap!(table_name: table_name)
       pg_slice_manager.unprep!(table_name: table_name)
-    end
-
-    def partition_table(table_name, params = {})
-      partition_table!(table_name, params)
-    rescue PgDice::PgSliceError => error
-      logger.error { "Rescued PgSliceError: #{error}" }
-      false
     end
 
     def undo_partitioning(table_name)

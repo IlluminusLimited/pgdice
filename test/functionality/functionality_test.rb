@@ -20,7 +20,7 @@ class FunctionalityTest < Minitest::Test
   def test_can_be_dry_run
     configuration = PgDice.configuration.deep_clone
     configuration.dry_run = true
-    partition_helper.partition_table!(table_name, past: 2)
+    partition_helper.partition_table(table_name, past: 2)
 
     assert_dry_future(configuration)
     assert_dry_past(configuration)
@@ -28,21 +28,21 @@ class FunctionalityTest < Minitest::Test
 
   def test_drop_old_partitions_uses_batch_size
     batch_size, minimum_tables = batch_size_and_minimum_tables
-    partition_helper.partition_table!(table_name, past: (batch_size + minimum_tables))
+    partition_helper.partition_table(table_name, past: (batch_size + minimum_tables))
 
     assert_equal batch_size, @partition_manager.drop_old_partitions(table_name).size
     assert PgDice.validation.assert_tables(table_name, past: minimum_tables)
   end
 
   def test_will_not_drop_more_than_minimum
-    PgDice.partition_helper.partition_table!(table_name, past: 3)
+    PgDice.partition_helper.partition_table(table_name, past: 3)
     assert_equal 2, PgDice.partition_manager.drop_old_partitions(table_name).size
     assert PgDice.validation.assert_tables(table_name, past: 1)
   end
 
   def test_works_year_tables
     table_name = 'posts'
-    PgDice.partition_helper.partition_table!(table_name, past: 2, future: 2, period: :year)
+    PgDice.partition_helper.partition_table(table_name, past: 2, future: 2, period: :year)
 
     PgDice.validation.assert_tables(table_name, future: 2, past: 2)
 
@@ -54,7 +54,7 @@ class FunctionalityTest < Minitest::Test
 
   def test_works_month_tables
     table_name = 'posts'
-    PgDice.partition_helper.partition_table!(table_name, past: 2, future: 2, period: :month)
+    PgDice.partition_helper.partition_table(table_name, past: 2, future: 2, period: :month)
 
     PgDice.validation.assert_tables(table_name, future: 2, past: 2)
 

@@ -42,9 +42,9 @@ module PgDice
       logger_factory
       database_url
       database_connection
-      approved_tables
       pg_connection
       batch_size
+      approved_tables
     end
 
     def logger_factory

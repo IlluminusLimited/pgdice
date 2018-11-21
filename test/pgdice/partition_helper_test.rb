@@ -8,12 +8,12 @@ class PartitionHelperTest < Minitest::Test
   end
 
   def test_partition_helper_can_fill
-    assert partition_helper.partition_table!(table_name, fill: true)
+    assert partition_helper.partition_table(table_name, fill: true)
   end
 
   def test_partition_table_checks_allowed_tables
     assert_raises(PgDice::IllegalTableError) do
-      partition_helper.partition_table!('bob', fill: true)
+      partition_helper.partition_table('bob', fill: true)
     end
   end
 

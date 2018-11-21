@@ -20,7 +20,7 @@ class ValidationTest < Minitest::Test
   end
 
   def test_assert_tables_throws
-    PgDice.partition_helper.partition_table!(table_name, future: 0, past: 0)
+    PgDice.partition_helper.partition_table(table_name, future: 0, past: 0)
 
     assert_future_tables_error { @validation.assert_tables(table_name, future: 1) }
 
@@ -31,7 +31,7 @@ class ValidationTest < Minitest::Test
 
   def test_assert_tables_works_with_year_tables
     table_name = 'posts'
-    PgDice.partition_helper.partition_table!(table_name, future: 1, past: 0, period: 'year')
+    PgDice.partition_helper.partition_table(table_name, future: 1, past: 0, period: 'year')
 
     @validation.assert_tables(table_name, future: 1, past: 0)
 

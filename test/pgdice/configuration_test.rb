@@ -11,7 +11,7 @@ class ConfigurationTest < Minitest::Test
     configuration = PgDice.configuration
     PgDice.configuration = nil
     assert_not_configured { PgDice.partition_manager.add_new_partitions(table_name: 'bob') }
-    assert_not_configured { PgDice.partition_helper.partition_table!(table_name: 'bob') }
+    assert_not_configured { PgDice.partition_helper.partition_table(table_name: 'bob') }
     assert_not_configured { PgDice.validation.validate_parameters(table_name: 'bob') }
   ensure
     PgDice.configuration = configuration
