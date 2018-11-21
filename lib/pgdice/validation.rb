@@ -7,7 +7,8 @@ module PgDice
 
     attr_reader :logger, :approved_tables
 
-    def initialize(logger:, partition_lister:, period_fetcher:, approved_tables:, current_date_provider: proc { Time.now.utc.to_date })
+    def initialize(logger:, partition_lister:, period_fetcher:, approved_tables:,
+                   current_date_provider: proc { Time.now.utc.to_date })
       @logger = logger
       @approved_tables = approved_tables
       @partition_lister = partition_lister
@@ -16,14 +17,7 @@ module PgDice
     end
 
     def assert_tables(table_name, params)
-      unless params[:future] || params[:past]
-        raise ArgumentError, 'You must provide either a future or past number of tables to assert on.'
-      end
-
-      table = approved_tables.fetch(table_name)
-      period = resolve_period(schema: table.schema, table_name: table_name, **params)
-
-      all_params = table.smash(params.merge!(period: period))
+      table, period, all_params = filter_parameters(table_name, params)
       validate_parameters(all_params)
       logger.debug { "Running asserts on table: #{table} with params: #{all_params}" }
 
@@ -42,6 +36,17 @@ module PgDice
     end
 
     private
+
+    def filter_parameters(table_name, params)
+      unless params[:future] || params[:past]
+        raise ArgumentError, 'You must provide either a future or past number of tables to assert on.'
+      end
+
+      table = approved_tables.fetch(table_name)
+      period = resolve_period(schema: table.schema, table_name: table_name, **params)
+      all_params = table.smash(params.merge!(period: period))
+      [table, period, all_params]
+    end
 
     def assert_future_tables(table_name, partitions, period, expected)
       newer_tables = tables_newer_than(partitions, @current_date_provider.call, period).size
