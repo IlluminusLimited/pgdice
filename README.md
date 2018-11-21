@@ -144,15 +144,17 @@ For more information on what's going on in the background see
 
 
 ```ruby
-PgDice.partition_helper.partition_table!('comments', 
-                                            past: 30, 
-                                            future: 30, 
-                                            column_name: 'created_at', 
-                                            period: :day)
+PgDice.partition_helper.partition_table!('comments')
 ```
 
 If you mess up (again you shouldn't use this in production). These two methods are useful for writing tests
 that work with partitions.
+
+#### Notes on partition_table!
+
+- You can override values configured in the `PgDice::Table` by passing them in as a hash. 
+  - For example if you wanted to create `30` future tables instead of the configured `7` for the `comments` table
+  you could pass in `future: 30`.
 
 ```ruby
 PgDice.partition_helper.undo_partitioning!('comments')
@@ -173,34 +175,28 @@ that will return a truthy value or `false` if there is a failure.
 If you have existing tables that need to periodically have more tables added you can run:
 
 ```ruby
-PgDice.partition_manager.add_new_partitions('comments', future: 30)
+PgDice.partition_manager.add_new_partitions('comments')
 ```
 
 ##### Notes on `add_new_partitions`
 
-- The above command would add 30 new tables and their associated indexes all based on the `period` that the
+- The above command would add `7` new tables and their associated indexes all based on the `period` that the
 partitioned table was defined with.
+ - The example `comments` table we have been using was configured to always keep `7` future partitions above.
 
 
-#### Listing old tables
+#### Listing droppable partitions
 
 Sometimes you just want to know what's out there and if there are tables ready to be dropped.
 
 To list all eligible tables for dropping you can run:
 ```ruby
-PgDice.partition_manager.list_old_partitions('comments', older_than: Time.now.utc - 90*24*60*60)
+PgDice.partition_manager.list_droppable_partitions('comments')
 ```
 
-If you have `active_support` you could do:
-```ruby
-PgDice.partition_manager.list_old_partitions('comments', older_than: 90.days.ago)
-```
+##### Notes on `list_droppable_partitions`
 
-##### Notes on `list_old_partitions`
-
-- Technically `older_than` is optional and defaults to `90 days` (see the configuration section).
-  - It is recommended that you pass it in to be explicit, but you can rely on the configuration 
-mechanism if you so choose.
+- This method uses the `past` value from the `PgDice::Table` to determine which tables are eligible for dropping.
 
 
 #### Dropping old tables
@@ -210,25 +206,16 @@ _Dropping tables is irreversible! Do this at your own risk!!_
 If you want to drop old tables (after backing them up of course) you can run:
 
 ```ruby
-PgDice.partition_manager.drop_old_partitions(table_name: 'comments', older_than: Time.now.utc - 90*24*60*60)
-```
-
-If you have `active_support` you could do:
-```ruby
-PgDice.partition_manager.drop_old_partitions(table_name: 'comments', older_than: 90.days.ago)
+PgDice.partition_manager.drop_old_partitions(table_name: 'comments')
 ```
 
 ##### Notes on `drop_old_partitions`
 
-- The above example command would drop old partitions that are older than `90` days.
-
-- Technically `older_than` is optional and defaults to `90 days` (see the configuration section).
-  - It is recommended that you pass it in to be explicit, but you can rely on the configuration 
-mechanism if you so choose.
-  - Another good reason to pass in the `older_than` parameter is if you are managing tables that
-are partiioned by different schemes or have different use-cases 
-e.g. daily vs yearly partitioned tables.
-
+- The above example command would drop partitions that exceed the configured `past` table count
+for the `PgDice::Table`. 
+  - The example `comments` table has been configured with `past: 90` tables. 
+  So if there were 100 tables older than `today` it would drop up to `batch_size` tables.
+  
 
 #### Validating everything is still working
 
@@ -237,7 +224,7 @@ ensure they are actually working correctly.
 
 To validate that your expected number of tables exist, you can run:
 ```ruby
-PgDice.validation.assert_tables('comments', future: 30, past: 90)
+PgDice.validation.assert_tables('comments', future: 7, past: 90)
 ```
 
 An [InsufficientTablesError](lib/pgdice.rb) will be raised if any conditions are not met.
@@ -261,6 +248,10 @@ by day.
   "postgres://#{username}:#{password}@#{host}/#{database}"
 end
 ```
+
+1. I'm seeing off-by-one errors for my `validation.assert_tables` calls?
+    - You should make sure your database is configured to use `UTC`.
+    [https://www.postgresql.org/docs/10/datatype-datetime.html](https://www.postgresql.org/docs/10/datatype-datetime.html) 
 
 ## Planned Features
 
