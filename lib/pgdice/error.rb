@@ -23,22 +23,23 @@ module PgDice
 
   # Generic error for table counts
   class InsufficientTablesError < Error
-    def initialize(direction, table_name, additional_info = '')
-      super("Insufficient #{direction} tables exist for table: #{table_name}. #{additional_info}")
+    def initialize(direction, table_name, expected, period, found_count)
+      super("Insufficient #{direction} tables exist for table: #{table_name}. "\
+      "Expected: #{expected} having period of: #{period} but found: #{found_count}")
     end
   end
 
   # Error thrown when the count of future tables is less than the expected amount
   class InsufficientFutureTablesError < InsufficientTablesError
-    def initialize(table_name, table_count, period)
-      super('future', table_name, "Expected: #{table_count} having period of: #{period}.")
+    def initialize(table_name, expected, period, found_count)
+      super('future', table_name, expected, period, found_count)
     end
   end
 
   # Error thrown when the count of past tables is less than the expected amount
   class InsufficientPastTablesError < InsufficientTablesError
-    def initialize(table_name, additional_info = '')
-      super('past', table_name, additional_info)
+    def initialize(table_name, expected, period, found_count)
+      super('past', table_name, expected, period, found_count)
     end
   end
 

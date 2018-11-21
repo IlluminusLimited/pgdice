@@ -67,10 +67,11 @@ module PgDice
     def droppable_partitions(all_params)
       older_than = current_date_provider.call
       minimum_tables = all_params.fetch(:past)
+      period = all_params.fetch(:period)
 
       eligible_partitions = partitions(all_params)
 
-      droppable_tables = find_droppable_partitions(eligible_partitions, older_than, minimum_tables)
+      droppable_tables = find_droppable_partitions(eligible_partitions, older_than, minimum_tables, period)
       logger.debug { "Partitions eligible for dropping older than: #{older_than} are: #{droppable_tables}" }
       droppable_tables
     end

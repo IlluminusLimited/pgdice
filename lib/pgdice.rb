@@ -12,6 +12,7 @@ require 'pgdice/error'
 
 require 'pgdice/table'
 
+require 'pgdice/date_helper'
 require 'pgdice/table_finder'
 
 require 'pgdice/validation'

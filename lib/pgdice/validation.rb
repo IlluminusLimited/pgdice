@@ -28,19 +28,9 @@ module PgDice
       logger.debug { "Running asserts on table: #{table} with params: #{all_params}" }
       partitions = @partition_lister.call(all_params)
 
-      if params[:future]
-        newer_tables = tables_newer_than(partitions, @current_date_provider.call).size
-        raise PgDice::InsufficientFutureTablesError.new(table_name, params[:future], period) if newer_tables < params[:future]
-      end
-
-      if params[:past]
-        older_tables = tables_older_than(partitions, @current_date_provider.call).size
-        if older_tables < params[:past]
-          raise PgDice::InsufficientPastTablesError.new(table_name, "Expected: #{params[:past]} but found #{older_tables} having period of: #{period}.")
-        end
-      end
-
-      # run_asserts(table.name, period, params)
+      assert_future_tables(table_name, partitions, period, params[:future]) if params[:future]
+      assert_past_tables(table_name, partitions, period, params[:past]) if params[:past]
+      true
     end
 
     def validate_parameters(params)
@@ -50,19 +40,23 @@ module PgDice
       true
     end
 
-    def validate_dates(current_date, older_than)
-      if older_than > current_date
-        raise ArgumentError, "Cannot list tables that are not older than the current date: #{current_date}"
+    private
+
+    def assert_future_tables(table_name, partitions, period, expected)
+      newer_tables = tables_newer_than(partitions, @current_date_provider.call, period).size
+      if newer_tables < expected
+        raise PgDice::InsufficientFutureTablesError.new(table_name, expected, period, newer_tables)
       end
 
       true
     end
 
-    private
+    def assert_past_tables(table_name, partitions, period, expected)
+      older_tables = tables_older_than(partitions, @current_date_provider.call, period).size
+      if older_tables < expected
+        raise PgDice::InsufficientPastTablesError.new(table_name, expected, period, older_tables)
+      end
 
-    def run_asserts(table_name, period, params)
-      assert_future_tables(table_name, params[:future], period) if params[:future]
-      assert_past_tables(table_name, params[:past], period) if params[:past]
       true
     end
 
@@ -98,26 +92,6 @@ module PgDice
       end
 
       params[:period].to_sym
-    end
-
-    def assert_future_tables(table_name, future, period)
-      sql = build_assert_sql(table_name, future, period, :future)
-
-      response = database_connection.execute(sql)
-
-      return true if response.values.size == 1
-
-      raise PgDice::InsufficientFutureTablesError.new(table_name, future, period)
-    end
-
-    def assert_past_tables(table_name, past, period)
-      sql = build_assert_sql(table_name, past, period, :past)
-
-      response = database_connection.execute(sql)
-
-      return true if response.values.size == 1
-
-      raise PgDice::InsufficientPastTablesError.new(table_name, "Expected: #{past} having period of: #{period}.")
     end
 
     def build_assert_sql(table_name, table_count, period, direction)
