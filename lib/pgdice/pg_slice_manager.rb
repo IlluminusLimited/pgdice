@@ -111,9 +111,12 @@ module PgDice
       command + "--url #{database_url}"
     end
 
-    def log_result(stdout, stderr, status)
+    def log_result(stdout, stderr)
       logger.debug "pgslice STDERR: #{stderr}" unless blank?(stderr)
       logger.debug "pgslice STDOUT: #{stdout}" unless blank?(stdout)
+    end
+
+    def log_status(status)
       logger.debug "pgslice exit status: #{status}" unless blank?(status) || status.to_i.zero?
     end
 
@@ -122,7 +125,8 @@ module PgDice
         results = Open3.capture3(parameters)
         stdout, stderr = results.first(2).map { |output| squish(output.to_s) }
         status = results[2].exitstatus.to_s
-        log_result(stdout, stderr, status)
+        log_result(stdout, stderr)
+        log_status(status)
         [stdout, stderr, status]
       end
     end
