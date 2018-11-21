@@ -24,6 +24,7 @@ module Minitest
   class Test
     @sql = <<~SQL
       SET client_min_messages = warning;
+      SET TIME ZONE 'UTC';
       DROP TABLE IF EXISTS "posts_intermediate" CASCADE;
       DROP TABLE IF EXISTS "posts" CASCADE;
       DROP TABLE IF EXISTS "posts_retired" CASCADE;
