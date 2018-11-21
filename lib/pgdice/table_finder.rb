@@ -28,8 +28,7 @@ module PgDice
 
     def table_tester(tables, predicate)
       tables.select do |partition_name|
-        partition_created_at_time = safe_date_builder(partition_name)
-        predicate.call(partition_created_at_time)
+        predicate.call(safe_date_builder(partition_name))
       end
     end
 
@@ -37,17 +36,20 @@ module PgDice
       matches = table_name.match(/\d+/)
       raise ArgumentError, "Invalid date. Cannot parse date from #{table_name}" unless matches
 
-      numbers = matches[0]
+      Date.parse(pad_date(matches[0]))
+    end
+
+    def pad_date(numbers)
+      return numbers if numbers.size == 8
+
       case numbers.size
-      when 8
       when 6
-        numbers += '01'
+        return numbers + '01'
       when 4
-        numbers += '0101'
+        return numbers + '0101'
       else
-        raise ArgumentError, "Invalid date. Cannot parse date from #{table_name}"
+        raise ArgumentError, "Invalid date. Cannot parse date from #{numbers}"
       end
-      Date.parse(numbers)
     end
   end
 end
