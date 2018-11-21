@@ -104,12 +104,13 @@ module PgDice
 
     def build_pg_slice_command(argument_string, dry_run)
       argument_string = argument_string.strip
-      logger.info { "Running pgslice command: '#{argument_string}'" }
       $stdout.flush
       $stderr.flush
-      command = "pgslice #{argument_string} "
-      command += '--dry-run true ' if @dry_run || dry_run
-      command + "--url #{database_url}"
+      command = "pgslice #{argument_string}"
+      command += ' --dry-run true' if @dry_run || dry_run
+      command = squish(command)
+      logger.info { "Running pgslice command: '#{command}'" }
+      command + " --url #{database_url}"
     end
 
     def log_result(stdout, stderr)

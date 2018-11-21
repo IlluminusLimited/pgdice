@@ -7,7 +7,7 @@ class PgSliceManagerTest < Minitest::Test
     call_count = 0
     executor = proc do |command|
       call_count += 1
-      assert_includes command, '--dry-run true'
+      assert_includes command, 'pgslice add_partitions comments --future 10 --past 60 --dry-run true'
       %w[bob lob 0]
     end
 
