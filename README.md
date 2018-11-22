@@ -243,6 +243,16 @@ An [InsufficientTablesError](lib/pgdice.rb) will be raised if any conditions are
 This will check that there are 7 future tables from now and that there are 90 past tables
 per our configuration above.
 
+## Listing approved tables
+
+Sometimes you might need to know the tables configured for `PgDice`. To list the configured tables 
+you can run:
+```ruby
+PgDice.approved_tables
+```
+
+The [ApprovedTables](lib/pgdice/approved_tables.rb) object responds to the most common enumerable methods.
+
 
 # FAQ
 
