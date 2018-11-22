@@ -55,6 +55,7 @@ module PgDice
                    :list_droppable_partitions, :list_droppable_partitions_by_batch_size
     def_delegators :partition_helper, :partition_table, :undo_partitioning, :undo_partitioning!
     def_delegators :validation, :assert_tables
+    def_delegators :configuration, :approved_tables
 
     def partition_manager
       raise PgDice::NotConfiguredError, 'partition_manager' unless configuration

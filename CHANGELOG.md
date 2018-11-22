@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [v0.3.1] : 2018-10-22
+### Changes
+  - Bump up `approved_tables` to `PgDice` module.
+
 ## [v0.3.0] : 2018-10-21
 ### Changes
   - Delegate methods from the management classes onto the `PgDice` module itself.
