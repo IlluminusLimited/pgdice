@@ -36,4 +36,9 @@ class ApprovedTablesTest < Minitest::Test
 
     refute approved_tables == other_tables
   end
+
+  def test_all_tables_is_enumerable
+    approved_tables = PgDice.configuration.approved_tables
+    assert_equal approved_tables.tables.map(&:name), PgDice.approved_tables.map(&:name)
+  end
 end

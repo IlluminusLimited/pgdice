@@ -6,7 +6,7 @@ module PgDice
     attr_reader :tables
     extend Forwardable
 
-    def_delegators :@tables, :size, :empty?
+    def_delegators :@tables, :size, :empty?, :map, :each, :each_with_index, :to_a
 
     def initialize(*args)
       @tables = args.flatten.compact
