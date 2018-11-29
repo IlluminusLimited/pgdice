@@ -29,8 +29,13 @@ module PgDice
       logger.info { "Undoing partitioning for table: #{table_name}" }
 
       pg_slice_manager.analyze(table_name: table_name, swapped: true)
-      pg_slice_manager.unswap!(table_name: table_name)
-      pg_slice_manager.unprep!(table_name: table_name)
+      unswap_results = unswap(table_name)
+      unprep_results = unprep(table_name)
+      if !unswap_results && !unprep_results
+        raise PgDice::PgSliceError, "Unswapping and unprepping failed for table: #{table_name}"
+      end
+
+      true
     end
 
     def undo_partitioning(table_name)
@@ -41,6 +46,18 @@ module PgDice
     end
 
     private
+
+    def unswap(table_name)
+      unswap_results = pg_slice_manager.unswap(table_name: table_name)
+      logger.warn { "Unswapping #{table_name} was not successful. " } unless unswap_results
+      unswap_results
+    end
+
+    def unprep(table_name)
+      unprep_results = pg_slice_manager.unprep(table_name: table_name)
+      logger.warn { "Unprepping #{table_name} was not successful." } unless unprep_results
+      unprep_results
+    end
 
     def prep_and_fill(params)
       pg_slice_manager.prep(params)
