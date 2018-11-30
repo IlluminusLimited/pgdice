@@ -41,8 +41,6 @@ module PgDice
     def validate!
       logger_factory
       database_url
-      database_connection
-      pg_connection
       batch_size
       approved_tables
     end
