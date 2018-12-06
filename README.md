@@ -243,6 +243,12 @@ An [InsufficientTablesError](lib/pgdice.rb) will be raised if any conditions are
 This will check that there are 7 future tables from now and that there are 90 past tables
 per our configuration above.
 
+
+If you want to only assert on `past` tables you could use the example below. The same goes for `future`
+```ruby
+PgDice.assert_tables('comments', only: :past)
+```
+
 ## Listing approved tables
 
 Sometimes you might need to know the tables configured for `PgDice`. To list the configured tables 
@@ -252,6 +258,17 @@ PgDice.approved_tables
 ```
 
 The [ApprovedTables](lib/pgdice/approved_tables.rb) object responds to the most common enumerable methods.
+
+
+# Miscellaneous Notes
+
+All methods for `PgDice` take a hash which will override whatever values would have been automatically supplied.
+
+An example of this would be like so: 
+```ruby
+PgDice.list_droppable_partitions('comments', past: 60)
+```
+This example would use `60` instead of the configured value of `90` from the `comments` table we configured above.
 
 
 # FAQ
