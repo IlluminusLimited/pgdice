@@ -153,6 +153,15 @@ For more information on what's going on in the background see
 PgDice.partition_table('comments')
 ```
 
+### Copying existing data into new partitions
+
+If you have a table with existing data and you want that data to be split up and copied to your new partitions
+you can use:
+```ruby
+PgDice.partition_table('comments', fill: true)
+```
+
+This will create the partitions and then insert data from the old table into the newly partitioned tables.
 
 ### Notes on partition_table
 
