@@ -5,6 +5,10 @@ require 'test_helper'
 class ValidationTest < Minitest::Test
   def setup
     @validation = PgDice::ValidationFactory.new(PgDice.configuration).call
+    @fake_validation = PgDice::ValidationFactory.new(PgDice.configuration,
+                                                     period_fetcher_factory: proc { proc { 'day' } },
+                                                     partition_lister_factory: proc { proc { generate_tables } },
+                                                     current_date_provider: proc { Date.parse('20181021') }).call
   end
 
   def test_not_partitioned_throws
@@ -17,6 +21,23 @@ class ValidationTest < Minitest::Test
     assert_raises(ArgumentError) do
       @validation.assert_tables(table_name, past: 30, period: :fish)
     end
+  end
+
+  def test_nil_is_ignored
+    assert_past_tables_error { @fake_validation.assert_tables(table_name, past: 2, future: nil) }
+    assert_future_tables_error { @fake_validation.assert_tables(table_name, past: nil, future: 2) }
+  end
+
+  def test_only_past_works
+    assert_past_tables_error { @fake_validation.assert_tables(table_name, past: 2, future: 2, only: :past) }
+    assert @fake_validation.assert_tables(table_name, future: 2, only: :past)
+    assert @fake_validation.assert_tables(table_name, only: :past)
+  end
+
+  def test_only_future_works
+    assert_future_tables_error { @fake_validation.assert_tables(table_name, past: 2, future: 2, only: :future) }
+    assert @fake_validation.assert_tables(table_name, past: 2, only: :future)
+    assert @fake_validation.assert_tables(table_name, only: :future)
   end
 
   def test_assert_tables_throws
