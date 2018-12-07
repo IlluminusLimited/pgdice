@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v0.4.0] : 2018-12-06
+### Changes
+  - Add `only:` option to `assert_tables` so users can assert on only `past`
+  or `future` tables if they wish.
+  - Fix #21 by adding documentation on how to migrate existing data from 
+  unpartitioned tables
+
+
 ## [v0.3.3] : 2018-11-30
 ### Changes
   - Do not eagerly initialize the `pg_connection` as this can cause some normal
