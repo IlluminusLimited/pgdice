@@ -38,16 +38,27 @@ module PgDice
 
     def filter_parameters(table, params)
       if params.nil?
-        params = {}
-        params[:future] = table.future
-        params[:past] = table.past
-        period = table.period
+        params, period = handle_nil_params(table)
       else
+        handle_only_param(table, params) if params[:only]
         period = resolve_period(schema: table.schema, table_name: table.name, **params)
       end
+
       all_params = table.smash(params.merge!(period: period))
 
       [table, period, all_params, params]
+    end
+
+    def handle_nil_params(table)
+      params = {}
+      params[:future] = table.future
+      params[:past] = table.past
+      [params, table.period]
+    end
+
+    def handle_only_param(table, params)
+      params[:future] = params[:only] == :future ? params[:future] || table.future : nil
+      params[:past] = params[:only] == :past ? params[:past] || table.past : nil
     end
 
     def assert_future_tables(table_name, partitions, period, expected)
