@@ -21,7 +21,7 @@ module PgDice
       when 'year'
         Date.parse("#{date.year}0101")
       when 'month'
-        Date.parse("#{date.year}#{date.month}01")
+        Date.parse("#{date.strftime('%Y%m')}01")
       when 'day'
         date
       else
