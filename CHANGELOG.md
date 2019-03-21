@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v0.4.1] : 2019-03-21
+### Changes
+  - Fix bug where partitioning by months would break when the month was < 10
+
+
 ## [v0.4.0] : 2018-12-06
 ### Changes
   - Add `only:` option to `assert_tables` so users can assert on only `past`
