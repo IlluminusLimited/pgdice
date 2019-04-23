@@ -42,6 +42,8 @@ require 'pgdice/partition_manager_factory'
 require 'pgdice/partition_dropper'
 require 'pgdice/partition_dropper_factory'
 
+require 'pgdice/query_executor'
+
 require 'pgdice/database_connection'
 require 'pgdice/database_connection_factory'
 

@@ -10,7 +10,8 @@ module PgDice
 
     def initialize(configuration, opts = {})
       @configuration = configuration
-      @query_executor = opts[:query_executor] ||= ->(query) { pg_connection.exec(query) }
+      @query_executor = opts[:query_executor] ||= PgDice::QueryExecutor.new(logger: logger,
+                                                                            connection_supplier: -> { pg_connection })
     end
 
     def call
