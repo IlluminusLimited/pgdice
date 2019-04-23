@@ -247,7 +247,7 @@ To validate that your expected number of tables exist, you can run:
 PgDice.assert_tables('comments')
 ```
 
-An [InsufficientTablesError](lib/pgdice.rb) will be raised if any conditions are not met.
+An [InsufficientTablesError](lib/pgdice/error.rb) will be raised if any conditions are not met.
 
 This will check that there are 7 future tables from now and that there are 90 past tables
 per our configuration above.
