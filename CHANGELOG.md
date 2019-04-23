@@ -2,10 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v0.4.3] : 2019-04-23
+### Changes
+  - Fix #31 where the new connection retry code was eagerly initializing the logger
+
+
 ## [v0.4.2] : 2019-04-22
 ### Changes
   - Fix #19 where PgDice wouldn't recover from a broken PG::Connection 
   by adding new retry behavior
+
 
 ## [v0.4.1] : 2019-03-21
 ### Changes
