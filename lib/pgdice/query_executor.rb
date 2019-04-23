@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Entry point for DatabaseConnection
+# Entry point
 module PgDice
   # Wrapper class around pg_connection to reset connection on PG errors
   class QueryExecutor

@@ -1,21 +1,20 @@
 # frozen_string_literal: true
 
-# Entry point for PartitionManager
+# Entry point
 module PgDice
-  #  PartitionListerFactory is a class used to build PartitionListers
+  #  DatabaseConnectionFactory is a class used to build DatabaseConnections
   class DatabaseConnectionFactory
     extend Forwardable
 
-    def_delegators :@configuration, :logger, :pg_connection, :dry_run
+    def_delegators :@configuration, :logger, :dry_run
 
     def initialize(configuration, opts = {})
       @configuration = configuration
-      @query_executor = opts[:query_executor] ||= PgDice::QueryExecutor.new(logger: logger,
-                                                                            connection_supplier: -> { pg_connection })
+      @query_executor_factory = opts[:query_executor_factory] ||= PgDice::QueryExecutorFactory.new(configuration, opts)
     end
 
     def call
-      PgDice::DatabaseConnection.new(logger: logger, query_executor: @query_executor, dry_run: dry_run)
+      PgDice::DatabaseConnection.new(logger: logger, query_executor: @query_executor_factory.call, dry_run: dry_run)
     end
   end
 end
