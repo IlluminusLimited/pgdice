@@ -73,8 +73,8 @@ module PgDice
       table_name = params.fetch(:table_name)
 
       run_pgslice("unprep #{table_name}", params[:dry_run])
-    rescue PgSliceError => error
-      logger.error { "Rescued PgSliceError: #{error}" }
+    rescue PgSliceError => e
+      logger.error { "Rescued PgSliceError: #{e}" }
       false
     end
 
@@ -82,8 +82,8 @@ module PgDice
       table_name = params.fetch(:table_name)
 
       run_pgslice("unswap #{table_name}", params[:dry_run])
-    rescue PgSliceError => error
-      logger.error { "Rescued PgSliceError: #{error}" }
+    rescue PgSliceError => e
+      logger.error { "Rescued PgSliceError: #{e}" }
       false
     end
 

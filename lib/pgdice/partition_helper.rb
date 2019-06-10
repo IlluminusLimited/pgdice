@@ -40,8 +40,8 @@ module PgDice
 
     def undo_partitioning(table_name)
       undo_partitioning!(table_name)
-    rescue PgDice::PgSliceError => error
-      logger.error { "Rescued PgSliceError: #{error}" }
+    rescue PgDice::PgSliceError => e
+      logger.error { "Rescued PgSliceError: #{e}" }
       false
     end
 
