@@ -44,8 +44,7 @@ class FunctionalityTest < Minitest::Test
     table_name = 'posts'
     stupid_codeclimate(:year)
 
-    assert_future_tables_error { PgDice.validation.assert_tables(table_name, future: 3) }
-    assert_past_tables_error { PgDice.validation.assert_tables(table_name, past: 3) }
+
   ensure
     partition_helper.undo_partitioning('posts')
   end
@@ -53,9 +52,6 @@ class FunctionalityTest < Minitest::Test
   def test_works_month_tables
     table_name = 'posts'
     stupid_codeclimate(:month)
-
-    assert_future_tables_error { PgDice.validation.assert_tables(table_name, future: 3) }
-    assert_past_tables_error { PgDice.validation.assert_tables(table_name, past: 3) }
   ensure
     partition_helper.undo_partitioning('posts')
   end
@@ -80,7 +76,8 @@ class FunctionalityTest < Minitest::Test
 
   def stupid_codeclimate(period)
     PgDice.partition_helper.partition_table(table_name, past: 2, future: 2, period: period)
-
     PgDice.validation.assert_tables(table_name, future: 2, past: 2)
+    assert_future_tables_error { PgDice.validation.assert_tables(table_name, future: 3) }
+    assert_past_tables_error { PgDice.validation.assert_tables(table_name, past: 3) }
   end
 end
