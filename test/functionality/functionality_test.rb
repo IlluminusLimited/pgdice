@@ -42,9 +42,7 @@ class FunctionalityTest < Minitest::Test
 
   def test_works_year_tables
     table_name = 'posts'
-    PgDice.partition_helper.partition_table(table_name, past: 2, future: 2, period: :year)
-
-    PgDice.validation.assert_tables(table_name, future: 2, past: 2)
+    stupid_coveralls(:year)
 
     assert_future_tables_error { PgDice.validation.assert_tables(table_name, future: 3) }
     assert_past_tables_error { PgDice.validation.assert_tables(table_name, past: 3) }
@@ -54,9 +52,7 @@ class FunctionalityTest < Minitest::Test
 
   def test_works_month_tables
     table_name = 'posts'
-    PgDice.partition_helper.partition_table(table_name, past: 2, future: 2, period: :month)
-
-    PgDice.validation.assert_tables(table_name, future: 2, past: 2)
+    stupid_coveralls(:month)
 
     assert_future_tables_error { PgDice.validation.assert_tables(table_name, future: 3) }
     assert_past_tables_error { PgDice.validation.assert_tables(table_name, past: 3) }
@@ -80,5 +76,11 @@ class FunctionalityTest < Minitest::Test
     batch_size = PgDice.configuration.batch_size
     minimum_tables = PgDice.configuration.approved_tables[table_name].past
     [batch_size, minimum_tables]
+  end
+
+  def stupid_codeclimate(period)
+    PgDice.partition_helper.partition_table(table_name, past: 2, future: 2, period: period)
+
+    PgDice.validation.assert_tables(table_name, future: 2, past: 2)
   end
 end

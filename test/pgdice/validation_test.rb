@@ -30,14 +30,14 @@ class ValidationTest < Minitest::Test
 
   def test_only_past_works
     assert_past_tables_error { @fake_validation.assert_tables(table_name, past: 2, future: 2, only: :past) }
-    assert @fake_validation.assert_tables(table_name, future: 2, only: :past)
-    assert @fake_validation.assert_tables(table_name, only: :past)
+    stupid_codeclimate(future: 2, only: :past)
+    stupid_codeclimate(only: :past)
   end
 
   def test_only_future_works
     assert_future_tables_error { @fake_validation.assert_tables(table_name, past: 2, future: 2, only: :future) }
-    assert @fake_validation.assert_tables(table_name, past: 2, only: :future)
-    assert @fake_validation.assert_tables(table_name, only: :future)
+    stupid_codeclimate(past: 2, only: :future)
+    stupid_codeclimate(only: :future)
   end
 
   def test_assert_tables_throws
@@ -75,6 +75,10 @@ class ValidationTest < Minitest::Test
   end
 
   private
+
+  def stupid_codeclimate(args)
+    assert @fake_validation.assert_tables(table_name, args)
+  end
 
   def generate_tables
     %w[comments_20181020 comments_20181021]
