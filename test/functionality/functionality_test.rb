@@ -42,7 +42,7 @@ class FunctionalityTest < Minitest::Test
 
   def test_works_year_tables
     table_name = 'posts'
-    stupid_coveralls(:year)
+    stupid_codeclimate(:year)
 
     assert_future_tables_error { PgDice.validation.assert_tables(table_name, future: 3) }
     assert_past_tables_error { PgDice.validation.assert_tables(table_name, past: 3) }
@@ -52,7 +52,7 @@ class FunctionalityTest < Minitest::Test
 
   def test_works_month_tables
     table_name = 'posts'
-    stupid_coveralls(:month)
+    stupid_codeclimate(:month)
 
     assert_future_tables_error { PgDice.validation.assert_tables(table_name, future: 3) }
     assert_past_tables_error { PgDice.validation.assert_tables(table_name, past: 3) }
