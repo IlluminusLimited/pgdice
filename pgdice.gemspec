@@ -38,6 +38,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'minitest-ci', '~> 3.4.0', '>= 3.4.0'
   spec.add_development_dependency 'minitest-reporters', '~> 1.3.4', '>= 1.3.4'
   spec.add_development_dependency 'rake', '~> 10.0', '>= 10.0'
-  spec.add_development_dependency 'rubocop', '0.59'
+  spec.add_development_dependency 'rubocop', '0.71'
   spec.add_development_dependency 'simplecov', '~> 0.16.1', '>= 0.16.1'
 end

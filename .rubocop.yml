@@ -9,3 +9,7 @@ Metrics/BlockLength:
 Metrics/ParameterLists:
   Exclude:
     - lib/pgdice/table.rb
+
+AllCops:
+  Exclude:
+    - 'examples/**/*'

@@ -13,8 +13,8 @@ module PgDice
 
     def call(query)
       @connection_supplier.call.exec(query)
-    rescue PG::Error => error
-      logger.error { "Caught error: #{error}. Going to reset connection and try again" }
+    rescue PG::Error => e
+      logger.error { "Caught error: #{e}. Going to reset connection and try again" }
       @connection_supplier.call.reset
       @connection_supplier.call.exec(query)
     end

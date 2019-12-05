@@ -13,18 +13,6 @@ PgDice is intended to be used by scheduled background jobs in frameworks like [S
 where logging and clear exception messages are crucial.
 
 
-## Disclaimer
-
-There are some features in this gem which allow you to drop database tables. 
-
-If you choose to use this software without a __tested and working__ backup and restore strategy in place then you 
-are a fool and will pay the price for your negligence. THIS SOFTWARE IS PROVIDED "AS IS",
-WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. By using this software you agree that the creator, 
-maintainers and any affiliated parties CANNOT BE HELD LIABLE FOR DATA LOSS OR LOSSES OF ANY KIND.
-
-See the [LICENSE](LICENSE) for more information.
-
-
 # Installation
 
 Add this line to your application's Gemfile:
@@ -279,6 +267,12 @@ PgDice.list_droppable_partitions('comments', past: 60)
 ```
 This example would use `60` instead of the configured value of `90` from the `comments` table we configured above.
 
+# Examples
+
+1. [Here's an example on how to use PgDice in AWS](examples/aws) and the [README](examples/aws/README.md) which will guide
+you through what is going on.
+
+1. [Here's an example on how to write a config.yml for PgDice](examples/config.yml)
 
 # FAQ
 
@@ -292,7 +286,7 @@ This example would use `60` instead of the configured value of `90` from the `co
   password = config[Rails.env]["password"]
 
   "postgres://#{username}:#{password}@#{host}/#{database}"
-end
+ end
 ```
 
 1. I'm seeing off-by-one errors for my `assert_tables` calls?
@@ -303,6 +297,8 @@ end
 
 1. Full `PG::Connection` support (no more database URLs).
 1. Non time-range based partitioning. [PgParty](https://github.com/rkrage/pg_party) might be a good option!
+
+
 
 
 # Development
@@ -336,6 +332,16 @@ to be a safe, welcoming space for collaboration, and contributors are expected t
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
 
+# Disclaimer
+
+There are some features in this gem which allow you to drop database tables. 
+
+If you choose to use this software without a __tested and working__ backup and restore strategy in place then you 
+are a fool and will pay the price for your negligence. THIS SOFTWARE IS PROVIDED "AS IS",
+WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. By using this software you agree that the creator, 
+maintainers and any affiliated parties CANNOT BE HELD LIABLE FOR DATA LOSS OR LOSSES OF ANY KIND.
+
+See the [LICENSE](LICENSE) for more information.
 
 # Code of Conduct
 

@@ -1,0 +1,59 @@
+{
+  "Description": "Deployment stack",
+  "Parameters": {
+    "PgDiceEnabled": {
+      "Type": "String",
+      "Description": "The ENABLED/DISABLED state of the cloudwatch scheduled events for PgDice."
+    }
+  },
+  "Resources": {
+    "PgDiceDailyAddPartitions": {
+      "DependsOn": "IncomingSQS",
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "State":{
+          "Ref": "PgDiceEnabled"
+        },
+        "Description": " PgDice daily add partitions",
+        "Name": "PgDiceDailyAddPartitions",
+        "ScheduleExpression": "rate(1 day)",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "IncomingSQS",
+                "Arn"
+              ]
+            },
+            "Id": "PgDiceDailyAddPartitionsId",
+            "Input": "{\"event_type\":\"task\",\"task\":\"add_new_partitions\"}"
+          }
+        ]
+      }
+    },
+    "PgDiceDailyDropPartitions": {
+      "DependsOn": "IncomingSQS",
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "State":{
+          "Ref": "PgDiceEnabled"
+        },
+        "Description": " PgDice daily drop partitions",
+        "Name": "PgDiceDailyDropPartitions",
+        "ScheduleExpression": "rate(1 day)",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "IncomingSQS",
+                "Arn"
+              ]
+            },
+            "Id": "PgDiceDailyDropPartitionsId",
+            "Input": "{\"event_type\":\"task\",\"task\":\"drop_old_partitions\"}"
+          }
+        ]
+      }
+    }
+  }
+}
