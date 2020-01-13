@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   # Locked because we depend on internal behavior for table commenting
-  spec.add_runtime_dependency 'pg', '~> 1.1.0', '>= 1.1.0'
+  spec.add_runtime_dependency 'pg', '~> 1.2.2', '>= 1.1.0'
   spec.add_runtime_dependency 'pgslice', '0.4.5'
 
   spec.add_development_dependency 'bundler', '~> 1.16', '>= 1.16'
