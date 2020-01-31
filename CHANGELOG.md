@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v1.0.1] : 2020-01-31
+### Changes
+  - Added better examples/docs.
+  - Bump `pg` to `~> 1.2.2`
+
 ## [v0.4.3] : 2019-04-23
 ### Changes
   - Fix #31 where the new connection retry code was eagerly initializing the logger
