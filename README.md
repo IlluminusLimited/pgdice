@@ -297,7 +297,7 @@ you through what is going on.
 
 1. Full `PG::Connection` support (no more database URLs).
 1. Non time-range based partitioning. [PgParty](https://github.com/rkrage/pg_party) might be a good option!
-
+1. Hourly partitioning
 
 
 
