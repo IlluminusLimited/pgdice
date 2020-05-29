@@ -6,13 +6,13 @@ version: 2
 defaults: &defaults
   working_directory: ~/repo
   docker:
-  - image: circleci/ruby:2.5.1
+  - image: circleci/ruby:2.6.6
     environment:
       DATABASE_HOST: 127.0.0.1
       DATABASE_USERNAME: pgdice
       PGDICE_LOG_TARGET: STDOUT
 
-  - image: circleci/postgres:10.6-alpine-ram
+  - image: circleci/postgres:12.3-alpine-ram
     environment:
       POSTGRES_USER: pgdice
       POSTGRES_DB: pgdice_test
