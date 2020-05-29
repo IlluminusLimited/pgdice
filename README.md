@@ -12,6 +12,9 @@ PgDice is a utility for creating and maintaining partitioned database tables tha
 PgDice is intended to be used by scheduled background jobs in frameworks like [Sidekiq](https://github.com/mperham/sidekiq)
 where logging and clear exception messages are crucial.
 
+# Maintenance status
+
+This project is stable and used daily in production.
 
 # Installation
 
@@ -49,6 +52,7 @@ PgDice.configure do |config|
  
   # Set a config file or build the tables manually
   config.config_file = Rails.root.join('config', 'pgdice.yml') # If you are using rails, else provide the absolute path.
+  config.config_file = Rails.root.join('config', 'pgdice.yml') # If you are using rails, else provide the absolute path.
   # and/or
   config.approved_tables = PgDice::ApprovedTables.new(
     PgDice::Table.new(table_name: 'comments', past: 90, future: 7, period: 'day'),
@@ -56,7 +60,6 @@ PgDice.configure do |config|
   )
 end
 ```
-
 
 ### Configuration Parameters
 
@@ -167,7 +170,6 @@ PgDice.undo_partitioning!('comments')
 This method will revert the changes made by partitioning a table. Don't rely on this 
 in production if you mess up; you need to test everything thoroughly.
 
-
 ## Maintaining partitioned tables
 
 ### Adding more tables
@@ -184,7 +186,6 @@ PgDice.add_new_partitions('comments')
 that the partitioned table was defined with.
   - The example `comments` table we have been using was configured to always keep `7` future partitions above.
 
-
 ### Listing droppable partitions
 
 Sometimes you just want to know what's out there and if there are tables ready to be dropped.
@@ -200,7 +201,6 @@ PgDice.list_droppable_partitions_by_batch_size('comments')
 ```
 
 This method will show partitions that are within the configured `batch_size`.
-
 
 #### Notes on `list_droppable_partitions`
 
@@ -223,7 +223,6 @@ PgDice.drop_old_partitions('comments')
 for the `PgDice::Table`. 
   - The example `comments` table has been configured with `past: 90` tables. 
   So if there were 100 tables older than `today` it would drop up to `batch_size` tables.
-  
 
 # Validation
 
@@ -255,7 +254,6 @@ PgDice.approved_tables
 ```
 
 The [ApprovedTables](lib/pgdice/approved_tables.rb) object responds to the most common enumerable methods.
-
 
 # Miscellaneous Notes
 
@@ -299,15 +297,12 @@ you through what is going on.
 1. Non time-range based partitioning. [PgParty](https://github.com/rkrage/pg_party) might be a good option!
 1. Hourly partitioning
 
-
-
 # Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. 
 You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
 To install this gem onto your local machine, run `bundle exec rake install`.
-
 
 ## Running tests
 
@@ -319,7 +314,6 @@ Run the following commands from your terminal. Don't run these on anything but a
 1. `createdb pgdice_test`
 1. Now you can run the tests via `guard` or `rake test`
 
-
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at 
@@ -327,19 +321,18 @@ Bug reports and pull requests are welcome on GitHub at
 to be a safe, welcoming space for collaboration, and contributors are expected to adhere to
  the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
-
 # License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
 
 # Disclaimer
 
-There are some features in this gem which allow you to drop database tables. 
+There are some features in this gem which allow you to drop database tables, due to the dangerous nature of 
+dropping database tables, please ensure you have a tested and working backup and restore strategy. 
 
-If you choose to use this software without a __tested and working__ backup and restore strategy in place then you 
-are a fool and will pay the price for your negligence. THIS SOFTWARE IS PROVIDED "AS IS",
-WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. By using this software you agree that the creator, 
-maintainers and any affiliated parties CANNOT BE HELD LIABLE FOR DATA LOSS OR LOSSES OF ANY KIND.
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. 
+By using this software you agree that the creator, maintainers, and any affiliated parties 
+CANNOT BE HELD LIABLE FOR DATA LOSS OR LOSSES OF ANY KIND.
 
 See the [LICENSE](LICENSE) for more information.
 
