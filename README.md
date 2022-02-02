@@ -52,7 +52,6 @@ PgDice.configure do |config|
  
   # Set a config file or build the tables manually
   config.config_file = Rails.root.join('config', 'pgdice.yml') # If you are using rails, else provide the absolute path.
-  config.config_file = Rails.root.join('config', 'pgdice.yml') # If you are using rails, else provide the absolute path.
   # and/or
   config.approved_tables = PgDice::ApprovedTables.new(
     PgDice::Table.new(table_name: 'comments', past: 90, future: 7, period: 'day'),
