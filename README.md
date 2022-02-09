@@ -1,5 +1,4 @@
-[![CircleCI](https://circleci.com/gh/IlluminusLimited/pgdice.svg?style=shield)](https://circleci.com/gh/IlluminusLimited/pgdice)
-[![Maintainability](https://api.codeclimate.com/v1/badges/311e005a14749bf2f826/maintainability)](https://codeclimate.com/github/IlluminusLimited/pgdice/maintainability)
+[![Ruby](https://github.com/IlluminusLimited/pgdice/actions/workflows/ruby.yml/badge.svg)](https://github.com/IlluminusLimited/pgdice/actions/workflows/ruby.yml)[![Maintainability](https://api.codeclimate.com/v1/badges/311e005a14749bf2f826/maintainability)](https://codeclimate.com/github/IlluminusLimited/pgdice/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/311e005a14749bf2f826/test_coverage)](https://codeclimate.com/github/IlluminusLimited/pgdice/test_coverage)
 [![Gem Version](https://badge.fury.io/rb/pgdice.svg)](https://badge.fury.io/rb/pgdice)
 
