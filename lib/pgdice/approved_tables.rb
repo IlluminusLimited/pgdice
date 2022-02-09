@@ -4,6 +4,7 @@ module PgDice
   # Hash-like object to contain approved tables. Adds some convenience validation and a simpleish interface.
   class ApprovedTables
     attr_reader :tables
+
     extend Forwardable
 
     def_delegators :@tables, :size, :empty?, :map, :each, :each_with_index, :to_a
@@ -11,12 +12,12 @@ module PgDice
     def initialize(*args)
       @tables = args.flatten.compact
 
-      raise ArgumentError, 'Objects must be a PgDice::Table!' unless tables.all? { |item| item.is_a?(PgDice::Table) }
+      raise ArgumentError, 'Objects must be a PgDice::Table!' unless tables.all?(PgDice::Table)
     end
 
     def [](arg)
       key = check_string_args(arg)
-      tables.select { |table| table.name == key }.first
+      tables.find { |table| table.name == key }
     end
 
     def include?(arg)

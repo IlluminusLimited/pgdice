@@ -70,7 +70,7 @@ module PgDice
     end
 
     def self.from_hash(hash)
-      Table.new(**hash.each_with_object({}) { |(k, v), memo| memo[k.to_sym] = v; })
+      Table.new(**hash.transform_keys(&:to_sym))
     end
 
     private
@@ -79,7 +79,7 @@ module PgDice
       unless send(field).is_a?(expected_type)
         raise ArgumentError,
               "PgDice::Table: #{name} failed validation on field: #{field}. "\
-                "Expected type of: #{expected_type} but found #{send(field).class}"
+              "Expected type of: #{expected_type} but found #{send(field).class}"
       end
       true
     end

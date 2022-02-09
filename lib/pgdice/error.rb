@@ -25,7 +25,7 @@ module PgDice
   class InsufficientTablesError < Error
     def initialize(direction, table_name, expected, period, found_count)
       super("Insufficient #{direction} tables exist for table: #{table_name}. "\
-      "Expected: #{expected} having period of: #{period} but found: #{found_count}")
+            "Expected: #{expected} having period of: #{period} but found: #{found_count}")
     end
   end
 
@@ -51,7 +51,7 @@ module PgDice
   class NotConfiguredError < ConfigurationError
     def initialize(method_name)
       super("Cannot use #{method_name} before PgDice has been configured! "\
-          'See README.md for configuration help.')
+            'See README.md for configuration help.')
     end
   end
 

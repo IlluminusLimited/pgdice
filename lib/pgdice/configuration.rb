@@ -14,10 +14,10 @@ module PgDice
 
   # Configuration class which holds all configurable values
   class Configuration
-    DEFAULT_VALUES ||= { logger_factory: proc { Logger.new(STDOUT) },
-                         database_url: nil,
-                         dry_run: false,
-                         batch_size: 7 }.freeze
+    DEFAULT_VALUES = { logger_factory: proc { Logger.new($stdout) },
+                       database_url: nil,
+                       dry_run: false,
+                       batch_size: 7 }.freeze
 
     attr_writer :logger,
                 :logger_factory,

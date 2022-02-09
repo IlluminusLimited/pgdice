@@ -97,7 +97,7 @@ module PgDice
       if status.to_i.positive?
         raise PgDice::PgSliceError,
               "pgslice with arguments: '#{argument_string}' failed with status: '#{status}' "\
-                 "STDOUT: '#{stdout}' STDERR: '#{stderr}'"
+              "STDOUT: '#{stdout}' STDERR: '#{stderr}'"
       end
       true
     end

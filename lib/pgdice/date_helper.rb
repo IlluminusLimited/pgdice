@@ -8,9 +8,9 @@ module PgDice
 
       case numbers.size
       when 6
-        return numbers + '01'
+        "#{numbers}01"
       when 4
-        return numbers + '0101'
+        "#{numbers}0101"
       else
         raise ArgumentError, "Invalid date. Cannot parse date from #{numbers}"
       end

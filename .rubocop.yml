@@ -1,3 +1,7 @@
+require:
+  - rubocop-performance
+  - rubocop-rake
+
 Metrics/LineLength:
   Max: 120
 
@@ -11,5 +15,6 @@ Metrics/ParameterLists:
     - lib/pgdice/table.rb
 
 AllCops:
+  NewCops: enable
   Exclude:
     - 'examples/**/*'

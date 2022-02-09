@@ -17,7 +17,7 @@ module PgDice
       end
       @config_loader = opts[:config_loader] ||= lambda do |file|
         logger.debug { "Loading PgDice configuration file: '#{config_file}'" }
-        YAML.safe_load(ERB.new(IO.read(file)).result)
+        YAML.safe_load(ERB.new(File.read(file)).result)
       end
       @file_loaded = opts[:file_loaded]
     end
