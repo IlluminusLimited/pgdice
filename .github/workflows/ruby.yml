@@ -30,7 +30,7 @@ jobs:
         env:
           POSTGRES_USER: pgdice
           POSTGRES_DB: pgdice_test
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: password
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -58,5 +58,5 @@ jobs:
       env:
         DATABASE_HOST: localhost
         DATABASE_USERNAME: pgdice
-        DATABASE_PASSWORD: postgres
+        DATABASE_PASSWORD: password
         PGDICE_LOG_TARGET: STDOUT
