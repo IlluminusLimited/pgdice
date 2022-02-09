@@ -5,28 +5,29 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'pgdice/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'pgdice'
-  spec.version       = PgDice::VERSION
-  spec.authors       = ['Andrew Newell']
-  spec.email         = ['andrew@illuminusltd.com']
-  spec.summary       = 'Postgres table partitioning with a Ruby API!'
-  spec.description   = 'Postgres table partitioning with a Ruby API built on top of https://github.com/ankane/pgslice'
-  spec.homepage      = 'https://github.com/IlluminusLimited/pgdice'
-  spec.license       = 'MIT'
+  spec.name = 'pgdice'
+  spec.version = PgDice::VERSION
+  spec.authors = ['Andrew Newell']
+  spec.email = ['andrew@illuminusltd.com']
+  spec.summary = 'Postgres table partitioning with a Ruby API!'
+  spec.description = 'Postgres table partitioning with a Ruby API built on top of https://github.com/ankane/pgslice'
+  spec.homepage = 'https://github.com/IlluminusLimited/pgdice'
+  spec.license = 'MIT'
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
-  spec.files         = Dir.chdir(File.expand_path(__dir__)) do
+  spec.files = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   end
-  spec.bindir        = 'exe'
-  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
+  spec.bindir = 'exe'
+  spec.executables = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
   spec.required_ruby_version = '>= 3.0.0'
 
+  # It looks like there's a bug in pg 1.3+ that I don't have time to fix
+  spec.add_runtime_dependency 'pg', '~> 1.2.3', '>= 1.1.0'
   # Locked because we depend on internal behavior for table commenting
-  spec.add_runtime_dependency 'pg', '~> 1.3.1', '>= 1.1.0'
   spec.add_runtime_dependency 'pgslice', '0.4.7'
 
   spec.add_development_dependency 'bundler', '~> 2.3.6', '>= 1.16'

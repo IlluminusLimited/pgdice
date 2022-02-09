@@ -19,7 +19,26 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby-version: ['2.6', '2.7', '3.0', '3.1']
+        ruby-version: ['3.0']
+
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: pgdice
+          POSTGRES_DB: pgdice_test
+          POSTGRES_PASSWORD: password
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
 
     steps:
     - uses: actions/checkout@v2
@@ -31,5 +50,13 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby-version }}
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+#    - name: Rubocop # This is blowing up with some stupid panolint gem missing - I have no mention of this anywhere.
+#      run: bundle exec rubocop
+
     - name: Run tests
       run: bundle exec rake
+      env:
+        DATABASE_HOST: localhost
+        DATABASE_USERNAME: pgdice
+        DATABASE_PASSWORD: password
+        PGDICE_LOG_TARGET: STDOUT
