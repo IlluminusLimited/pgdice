@@ -2,10 +2,8 @@
 
 $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 require 'simplecov'
-require 'coveralls'
 require 'minitest/autorun'
 require 'minitest/ci'
-Coveralls.wear!
 
 root_dir = Pathname.new('..').expand_path(File.dirname(__FILE__))
 
