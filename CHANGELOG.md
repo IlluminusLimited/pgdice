@@ -2,10 +2,20 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v2.0.0] : 2022-02-09
+### Changes
+- Bump `pg` to `~> 1.3.1`
+- Bump `pgslice` to `0.4.7`
+- Bump various development dependencies
+- Rubocop project
+- Add `required_ruby_version >= 3.0.0`
+
+
 ## [v1.0.1] : 2020-01-31
 ### Changes
   - Added better examples/docs.
   - Bump `pg` to `~> 1.2.2`
+
 
 ## [v0.4.3] : 2019-04-23
 ### Changes

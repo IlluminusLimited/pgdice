@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.name          = 'pgdice'
   spec.version       = PgDice::VERSION
   spec.authors       = ['Andrew Newell']
-  spec.email         = ['andrew@andrewcn.com illuminuslimited@gmail.com']
+  spec.email         = ['andrew@illuminusltd.com']
   spec.summary       = 'Postgres table partitioning with a Ruby API!'
   spec.description   = 'Postgres table partitioning with a Ruby API built on top of https://github.com/ankane/pgslice'
   spec.homepage      = 'https://github.com/IlluminusLimited/pgdice'
