@@ -2,7 +2,7 @@ require:
   - rubocop-performance
   - rubocop-rake
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 120
 
 Metrics/BlockLength:
@@ -16,5 +16,6 @@ Metrics/ParameterLists:
 
 AllCops:
   NewCops: enable
+  SuggestExtensions: false
   Exclude:
     - 'examples/**/*'
