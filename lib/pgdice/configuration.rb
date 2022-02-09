@@ -63,7 +63,7 @@ module PgDice
         raise PgDice::InvalidConfigurationError, 'approved_tables must be an instance of PgDice::ApprovedTables!'
       end
 
-      if !config_file_loader.file_loaded? && config_file.present?
+      if !config_file_loader.file_loaded? && !config_file.nil?
         config_file_loader.load_file
         @approved_tables
       end
