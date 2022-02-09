@@ -28,6 +28,8 @@ jobs:
         image: postgres
         # Provide the password for postgres
         env:
+          POSTGRES_USER: pgdice
+          POSTGRES_DB: pgdice_test
           POSTGRES_PASSWORD: postgres
         # Set health checks to wait until postgres has started
         options: >-
@@ -46,5 +48,12 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby-version }}
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - name: Rubocop
+      run: bundle exec rubocop
     - name: Run tests
       run: bundle exec rake
+      env:
+        DATABASE_HOST: 127.0.0.1
+        DATABASE_USERNAME: pgdice
+        DATABASE_PASSWORD: postgres
+        PGDICE_LOG_TARGET: STDOUT
