@@ -54,7 +54,7 @@ jobs:
     - name: Run tests
       run: bundle exec rake
       env:
-        DATABASE_HOST: 127.0.0.1
+        DATABASE_HOST: postgres
         DATABASE_USERNAME: pgdice
         DATABASE_PASSWORD: postgres
         PGDICE_LOG_TARGET: STDOUT
