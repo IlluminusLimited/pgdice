@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'pg'
+require 'uri'
 require 'yaml'
 require 'json'
 require 'open3'
