@@ -30,6 +30,10 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'pgslice', '0.4.7'
   # Added to attempt to fix behavior of pgslice in newer Ruby versions
   spec.add_runtime_dependency 'uri'
+  # Stdlib extraction
+  spec.add_runtime_dependency 'logger'
+  # Stdlib extraction
+  spec.add_runtime_dependency 'ostruct'
 
   spec.add_development_dependency 'minitest', '~> 5.0', '>= 5.0'
   spec.add_development_dependency 'minitest-ci', '~> 3.4.0', '>= 3.4.0'
