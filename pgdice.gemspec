@@ -25,8 +25,7 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 3.0.0'
 
-  # It looks like there's a bug in pg 1.3+ that I don't have time to fix
-  spec.add_runtime_dependency 'pg', '~> 1.2.3', '>= 1.1.0'
+  spec.add_runtime_dependency 'pg', '~> 1.5.9', '>= 1.1.0'
   # Locked because we depend on internal behavior for table commenting
   spec.add_runtime_dependency 'pgslice', '0.4.7'
 
