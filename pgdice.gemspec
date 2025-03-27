@@ -30,11 +30,6 @@ Gem::Specification.new do |spec|
   # Locked because we depend on internal behavior for table commenting
   spec.add_runtime_dependency 'pgslice', '0.4.7'
 
-  spec.add_development_dependency 'bundler', '~> 2.3.6', '>= 1.16'
-  spec.add_development_dependency 'guard', '~> 2.18.0', '>= 2.14.2'
-  spec.add_development_dependency 'guard-minitest', '~> 2.4.6', '>= 2.4.6'
-  spec.add_development_dependency 'guard-rubocop', '~> 1.5.0', '>= 1.3.0'
-  spec.add_development_dependency 'guard-shell', '~> 0.7.1', '>= 0.7.1'
   spec.add_development_dependency 'minitest', '~> 5.0', '>= 5.0'
   spec.add_development_dependency 'minitest-ci', '~> 3.4.0', '>= 3.4.0'
   spec.add_development_dependency 'minitest-reporters', '~> 1.5.0', '>= 1.3.4'
