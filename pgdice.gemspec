@@ -25,16 +25,16 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 3.0.0'
 
-  # It looks like there's a bug in pg 1.3+ that I don't have time to fix
-  spec.add_runtime_dependency 'pg', '~> 1.2.3', '>= 1.1.0'
+  spec.add_runtime_dependency 'pg', '~> 1.5.9', '>= 1.1.0'
   # Locked because we depend on internal behavior for table commenting
   spec.add_runtime_dependency 'pgslice', '0.4.7'
+  # Added to attempt to fix behavior of pgslice in newer Ruby versions
+  spec.add_runtime_dependency 'uri'
+  # Stdlib extraction
+  spec.add_runtime_dependency 'logger'
+  # Stdlib extraction
+  spec.add_runtime_dependency 'ostruct'
 
-  spec.add_development_dependency 'bundler', '~> 2.3.6', '>= 1.16'
-  spec.add_development_dependency 'guard', '~> 2.18.0', '>= 2.14.2'
-  spec.add_development_dependency 'guard-minitest', '~> 2.4.6', '>= 2.4.6'
-  spec.add_development_dependency 'guard-rubocop', '~> 1.5.0', '>= 1.3.0'
-  spec.add_development_dependency 'guard-shell', '~> 0.7.1', '>= 0.7.1'
   spec.add_development_dependency 'minitest', '~> 5.0', '>= 5.0'
   spec.add_development_dependency 'minitest-ci', '~> 3.4.0', '>= 3.4.0'
   spec.add_development_dependency 'minitest-reporters', '~> 1.5.0', '>= 1.3.4'

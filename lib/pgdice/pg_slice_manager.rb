@@ -106,7 +106,7 @@ module PgDice
       argument_string = argument_string.strip
       $stdout.flush
       $stderr.flush
-      command = "pgslice #{argument_string}"
+      command = "RUBYOPT=\"-ruri\" pgslice #{argument_string}"
       command += ' --dry-run true' if @dry_run || dry_run
       command = squish(command)
       logger.info { "Running pgslice command: '#{command}'" }
